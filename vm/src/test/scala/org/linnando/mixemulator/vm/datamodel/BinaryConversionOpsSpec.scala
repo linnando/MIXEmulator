@@ -1,9 +1,10 @@
-package org.linnando.mixemulator.vm
+package org.linnando.mixemulator.vm.datamodel
 
-import org.specs2.mutable.Specification
+import org.linnando.mixemulator.vm.BinaryVirtualMachine
 import org.linnando.mixemulator.vm.BinaryVirtualMachine.{BinaryMixByte, BinaryMixDWord, BinaryMixIndex, BinaryMixWord}
 import org.linnando.mixemulator.vm.exceptions.OverflowException
 import org.linnando.mixemulator.vm.io.data.IOWord
+import org.specs2.mutable.Specification
 
 class BinaryConversionOpsSpec extends Specification {
   "binary zero" should {
@@ -19,6 +20,14 @@ class BinaryConversionOpsSpec extends Specification {
 
     "convert a MIX byte to an Int" in {
       BinaryMixByte(0x1).toInt must be equalTo 1
+    }
+
+    "define zero as zero" in {
+      BinaryMixByte(0x0).isZero must beTrue
+    }
+
+    "define one as non-zero" in {
+      BinaryMixByte(0x1).isZero must beFalse
     }
   }
 
@@ -42,7 +51,7 @@ class BinaryConversionOpsSpec extends Specification {
     }
 
     "throw an exception if the value is too big for an index" in {
-      BinaryMixWord(0x1000).toIndex must throwA[OverflowException]
+      BinaryMixWord(0x1000).toIndex must throwAn[OverflowException]
     }
 
     "convert a positive word to a Long" in {

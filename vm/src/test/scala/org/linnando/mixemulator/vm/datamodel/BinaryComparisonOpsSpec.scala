@@ -1,8 +1,8 @@
-package org.linnando.mixemulator.vm
+package org.linnando.mixemulator.vm.datamodel
 
-import org.specs2.mutable.Specification
 import org.linnando.mixemulator.vm.BinaryVirtualMachine.{BinaryMixIndex, BinaryMixWord}
-import org.linnando.mixemulator.vm.exceptions.OverflowException
+import org.linnando.mixemulator.vm.Comparison
+import org.specs2.mutable.Specification
 
 class BinaryComparisonOpsSpec extends Specification {
 

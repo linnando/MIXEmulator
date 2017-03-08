@@ -1,8 +1,9 @@
-package org.linnando.mixemulator.vm
+package org.linnando.mixemulator.vm.datamodel
 
-import org.specs2.mutable.Specification
 import org.linnando.mixemulator.vm.BinaryVirtualMachine._
+import org.linnando.mixemulator.vm.Comparison
 import org.linnando.mixemulator.vm.exceptions.WrongIndexSpecException
+import org.specs2.mutable.Specification
 
 class BinaryRegisterStateSpec extends Specification {
   val initialState: BinaryRegisterState = BinaryRegisterState.initialState
@@ -26,13 +27,13 @@ class BinaryRegisterStateSpec extends Specification {
     "get Ix contents by byte index" in {
       val indices = Vector[Short](0x1, 0x2, 0x3, 0x4, 0x5, 0x6)
       val state = initialState.copy(i = indices)
-      state.getI(BinaryMixByte(1)) must be equalTo BinaryMixIndex(indices(1))
+      state.getI(BinaryMixByte(1)) must be equalTo BinaryMixIndex(indices(0))
     }
 
     "get Ix contents by Int index" in {
       val indices = Vector[Short](0x1, 0x2, 0x3, 0x4, 0x5, 0x6)
       val state = initialState.copy(i = indices)
-      state.getI(2) must be equalTo BinaryMixIndex(indices(2))
+      state.getI(2) must be equalTo BinaryMixIndex(indices(1))
     }
 
     "get J contents" in {
@@ -61,19 +62,19 @@ class BinaryRegisterStateSpec extends Specification {
     }
 
     "update A and X contents" in {
-      val state = initialState.copy(x = 0x40000000).updatedAX(BinaryMixDWord(0xc0000001L))
+      val state = initialState.updatedAX(BinaryMixDWord(0xc0000001L), true)
       state.a must be equalTo 0x3
       state.x must be equalTo 0x40000001
     }
 
     "update Ix contents by byte index" in {
       val state = initialState.updatedI(BinaryMixByte(1), BinaryMixIndex(0x3))
-      state.i must be equalTo Vector(0, 3, 0, 0, 0, 0)
+      state.i must be equalTo Vector(3, 0, 0, 0, 0, 0)
     }
 
     "update Ix contents by Int index" in {
       val state = initialState.updatedI(1, BinaryMixIndex(0x3))
-      state.i must be equalTo Vector(0, 3, 0, 0, 0, 0)
+      state.i must be equalTo Vector(3, 0, 0, 0, 0, 0)
     }
 
     "update J contents" in {
@@ -97,13 +98,13 @@ class BinaryRegisterStateSpec extends Specification {
     }
 
     "throw an exception if byte index spec is too big" in {
-      initialState.getI(BinaryMixByte(6)) must throwA[WrongIndexSpecException]
-      initialState.updatedI(BinaryMixByte(6), BinaryMixIndex(0x1)) must throwA[WrongIndexSpecException]
+      initialState.getI(BinaryMixByte(7)) must throwA[WrongIndexSpecException]
+      initialState.updatedI(BinaryMixByte(7), BinaryMixIndex(0x1)) must throwA[WrongIndexSpecException]
     }
 
     "throw an exception if index spec is too big" in {
-      initialState.getI(6) must throwA[WrongIndexSpecException]
-      initialState.updatedI(6, BinaryMixIndex(0x1)) must throwA[WrongIndexSpecException]
+      initialState.getI(7) must throwA[WrongIndexSpecException]
+      initialState.updatedI(7, BinaryMixIndex(0x1)) must throwA[WrongIndexSpecException]
     }
   }
 }

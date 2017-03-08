@@ -45,7 +45,7 @@ trait DataModel {
 
     def updatedX(value: W): RS
 
-    def updatedAX(value: DW): RS
+    def updatedAX(value: DW, xIsNegative: Boolean): RS
 
     def updatedI(index: B, value: I): RS
 
@@ -76,9 +76,15 @@ trait DataModel {
     def toInt: Int
 
     def toByte: Byte
+
+    def isZero: Boolean
   }
 
   trait MixIndex {
+    def isPositive: Boolean
+
+    def isNegative: Boolean
+
     def unary_-(): I
 
     def +(other: I): I
@@ -95,6 +101,10 @@ trait DataModel {
   }
 
   trait MixWord {
+    def isPositive: Boolean
+
+    def isNegative: Boolean
+
     def getAddress: I
 
     def getIndexSpec: B
@@ -129,6 +139,10 @@ trait DataModel {
   }
 
   trait MixDWord {
+    def isPositive: Boolean
+
+    def isNegative: Boolean
+
     def /(divisor: W): (W, W)
 
     def <<(n: I): DW

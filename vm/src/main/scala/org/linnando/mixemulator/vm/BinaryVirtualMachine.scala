@@ -11,6 +11,14 @@ object BinaryVirtualMachine extends VirtualMachine {
   override type W = BinaryMixWord
   override type DW = BinaryMixDWord
 
+  lazy val initialState = State(
+    registers = BinaryRegisterState.initialState,
+    memory = BinaryMemoryState.initialState,
+    programCounter = BinaryMixIndex(0),
+    timeCounter = 0,
+    devices = IndexedSeq.empty
+  )
+
   override def getZero: W = BinaryMixWord(0)
 
   override def getWord(ioWord: IOWord): W = {
@@ -28,8 +36,8 @@ object BinaryVirtualMachine extends VirtualMachine {
     override def getI(indexSpec: B): I = getI(indexSpec.contents)
 
     override def getI(indexSpec: Int): I = {
-      if (indexSpec < 0 || indexSpec >= i.length) throw new WrongIndexSpecException(indexSpec.toByte)
-      BinaryMixIndex(i(indexSpec))
+      if (indexSpec < 1 || indexSpec > i.length) throw new WrongIndexSpecException(indexSpec.toByte)
+      BinaryMixIndex(i(indexSpec - 1))
     }
 
     override def getJ: I = BinaryMixIndex(j)
@@ -42,16 +50,16 @@ object BinaryVirtualMachine extends VirtualMachine {
 
     override def updatedX(value: W): RS = copy(x = value.contents)
 
-    override def updatedAX(value: DW): RS = copy(
-      a = (value.contents >> 30).toInt,
-      x = x & 0x40000000 | (value.contents & 0x3fffffff).toInt
-    )
+    override def updatedAX(value: DW, xIsNegative: Boolean): RS = {
+      val xSign = if (xIsNegative) 0x40000000 else 0
+      copy(a = (value.contents >> 30).toInt, x = xSign | (value.contents & 0x3fffffff).toInt)
+    }
 
     override def updatedI(indexSpec: B, value: I): RS = updatedI(indexSpec.contents, value)
 
     override def updatedI(indexSpec: Int, value: I): RS = {
-      if (indexSpec < 0 || indexSpec >= i.length) throw new WrongIndexSpecException(indexSpec.toByte)
-      copy(i = i.updated(indexSpec, value.contents))
+      if (indexSpec < 1 || indexSpec > i.length) throw new WrongIndexSpecException(indexSpec.toByte)
+      copy(i = i.updated(indexSpec - 1, value.contents))
     }
 
     override def updatedJ(value: I): RS = copy(j = value.contents)
@@ -140,9 +148,15 @@ object BinaryVirtualMachine extends VirtualMachine {
     override def toInt: Int = contents.toInt
 
     override def toByte: Byte = contents
+
+    override def isZero: Boolean = contents == 0
   }
 
   case class BinaryMixIndex(contents: Short) extends MixIndex {
+    override def isPositive: Boolean = (contents & 0x1000) == 0
+
+    override def isNegative: Boolean = (contents & 0x1000) > 0
+
     override def unary_-(): I = BinaryMixIndex((contents ^ 0x1000).toShort)
 
     override def +(other: I): I =
@@ -162,7 +176,7 @@ object BinaryVirtualMachine extends VirtualMachine {
 
     override def +(other: Int): I = {
       if (other < 0) throw new Error
-      if ((contents & 0x1000) == 0) {
+      if (isPositive) {
         val abs = (contents & 0xfff) + other
         if ((abs & 0x1000) > 0) throw new OverflowException
         BinaryMixIndex(abs.toShort)
@@ -196,16 +210,16 @@ object BinaryVirtualMachine extends VirtualMachine {
     override def <=>(other: W): Comparison =
       if (((contents & 0x1000) << 18) == (other.contents & 0x40000000))
         if ((contents & 0xfff) == (other.contents & 0x3fffffff)) Comparison.EQUAL
-        else if ((contents & 0x1000) == 0 && (contents & 0xfff) > (other.contents & 0x3fffffff)) Comparison.GREATER
-        else if ((contents & 0x1000) > 0 && (contents & 0xfff) < (other.contents & 0x3fffffff)) Comparison.GREATER
+        else if (isPositive && (contents & 0xfff) > (other.contents & 0x3fffffff)) Comparison.GREATER
+        else if (isNegative && (contents & 0xfff) < (other.contents & 0x3fffffff)) Comparison.GREATER
         else Comparison.LESS
       else if ((contents & 0xfff) == 0 && (other.contents & 0x3fffffff) == 0) Comparison.EQUAL
-      else if ((contents & 0x1000) == 0) Comparison.GREATER
+      else if (isPositive) Comparison.GREATER
       else Comparison.LESS
 
 
     override def next: I = {
-      if ((contents & 0x1000) > 0) throw new Error
+      if (isNegative) throw new Error
       val nextIndex = contents + 1
       if ((nextIndex & 0x1000) > 0) throw new OverflowException
       BinaryMixIndex(nextIndex.toShort)
@@ -215,6 +229,10 @@ object BinaryVirtualMachine extends VirtualMachine {
   }
 
   case class BinaryMixWord(contents: Int) extends MixWord {
+    override def isPositive: Boolean = (contents & 0x40000000) == 0
+
+    override def isNegative: Boolean = (contents & 0x40000000) > 0
+
     override def getAddress: I = BinaryMixIndex(((contents & 0x7ffc0000) >> 18).toShort)
 
     override def getIndexSpec: B = BinaryMixByte(((contents & 0x3f000) >> 12).toByte)
@@ -273,11 +291,11 @@ object BinaryVirtualMachine extends VirtualMachine {
     override def <=>(other: W): Comparison = {
       if ((contents & 0x40000000) == (other.contents & 0x40000000))
         if ((contents & 0x3fffffff) == (other.contents & 0x3fffffff)) Comparison.EQUAL
-        else if ((contents & 0x40000000) == 0 && (contents & 0x3fffffff) > (other.contents & 0x3fffffff)) Comparison.GREATER
-        else if ((contents & 0x40000000) > 0 && (contents & 0x3fffffff) < (other.contents & 0x3fffffff)) Comparison.GREATER
+        else if (isPositive && (contents & 0x3fffffff) > (other.contents & 0x3fffffff)) Comparison.GREATER
+        else if (isNegative && (contents & 0x3fffffff) < (other.contents & 0x3fffffff)) Comparison.GREATER
         else Comparison.LESS
       else if ((contents & 0x3fffffff) == 0 && (other.contents & 0x3fffffff) == 0) Comparison.EQUAL
-      else if ((contents & 0x40000000) == 0) Comparison.GREATER
+      else if (isPositive) Comparison.GREATER
       else Comparison.LESS
     }
 
@@ -297,8 +315,8 @@ object BinaryVirtualMachine extends VirtualMachine {
     }
 
     override def toLong: Long = {
-      if ((contents & 0x40000000) > 0) -(contents ^ 0x40000000)
-      else contents
+      if (isPositive) contents
+      else -(contents ^ 0x40000000)
     }
 
     override def toIOWord: IOWord = IOWord(
@@ -325,6 +343,10 @@ object BinaryVirtualMachine extends VirtualMachine {
   }
 
   case class BinaryMixDWord(contents: Long) extends MixDWord {
+    override def isPositive: Boolean = (contents & 0x1000000000000000L) == 0
+
+    override def isNegative: Boolean = (contents & 0x1000000000000000L) > 0
+
     override def /(divisor: W): (W, W) = {
       if ((divisor.contents & 0x3fffffff) == 0)
         throw new DivisionByZeroException

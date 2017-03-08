@@ -1,11 +1,61 @@
-package org.linnando.mixemulator.vm
+package org.linnando.mixemulator.vm.datamodel
 
-import org.specs2.mutable.Specification
-import org.linnando.mixemulator.vm.BinaryVirtualMachine.{BinaryMixByte, BinaryMixIndex, BinaryMixWord}
+import org.linnando.mixemulator.vm.BinaryVirtualMachine.{BinaryMixByte, BinaryMixDWord, BinaryMixIndex, BinaryMixWord}
 import org.linnando.mixemulator.vm.exceptions.WrongFieldSpecException
+import org.specs2.mutable.Specification
 
 class BinaryFieldOpsSpec extends Specification {
-  "field selection" should {
+  "index field selection" should {
+    "consider a positive number to be positive and not negative" in {
+      // + 1 2
+      BinaryMixIndex(0x0042).isPositive must beTrue
+      BinaryMixIndex(0x0042).isNegative must beFalse
+    }
+
+    "consider a negative number to be negative and not positive" in {
+      // - 1 2
+      BinaryMixIndex(0x1042).isPositive must beFalse
+      BinaryMixIndex(0x1042).isNegative must beTrue
+    }
+
+    "consider a positive zero to be positive and not negative" in {
+      // + 0 0
+      BinaryMixIndex(0x0000).isPositive must beTrue
+      BinaryMixIndex(0x0000).isNegative must beFalse
+    }
+
+    "consider a negative zero to be negative and not positive" in {
+      // - 0 0
+      BinaryMixIndex(0x1000).isPositive must beFalse
+      BinaryMixIndex(0x1000).isNegative must beTrue
+    }
+  }
+
+    "word field selection" should {
+    "consider a positive number to be positive and not negative" in {
+      // + 1 2 3 4 5
+      BinaryMixWord(0x01083105).isPositive must beTrue
+      BinaryMixWord(0x01083105).isNegative must beFalse
+    }
+
+    "consider a negative number to be negative and not positive" in {
+      // - 1 2 3 4 5
+      BinaryMixWord(0x41083105).isPositive must beFalse
+      BinaryMixWord(0x41083105).isNegative must beTrue
+    }
+
+    "consider a positive zero to be positive and not negative" in {
+      // + 0 0 0 0 0
+      BinaryMixWord(0x00000000).isPositive must beTrue
+      BinaryMixWord(0x00000000).isNegative must beFalse
+    }
+
+    "consider a negative zero to be negative and not positive" in {
+      // - 0 0 0 0 0
+      BinaryMixWord(0x40000000).isPositive must beFalse
+      BinaryMixWord(0x40000000).isNegative must beTrue
+    }
+
     "select address from a positive word" in {
       // + 1 2 3 4 5 -> + 1 2
       BinaryMixWord(0x01083105).getAddress must be equalTo BinaryMixIndex(0x0042)
@@ -89,6 +139,32 @@ class BinaryFieldOpsSpec extends Specification {
 
     "throw an exception if l > r in a field spec" in {
       BinaryMixWord(0x0).getField(BinaryMixByte(0x08)) must throwA[WrongFieldSpecException]
+    }
+  }
+
+  "double word field selection" should {
+    "consider a positive number to be positive and not negative" in {
+      // + 1 2 3 4 5 6 7 8 9 0
+      BinaryMixDWord(0x00420c41461c8240L).isPositive must beTrue
+      BinaryMixDWord(0x00420c41461c8240L).isNegative must beFalse
+    }
+
+    "consider a negative number to be negative and not positive" in {
+      // - 1 2 3 4 5 6 7 8 9 0
+      BinaryMixDWord(0x10420c41461c8240L).isPositive must beFalse
+      BinaryMixDWord(0x10420c41461c8240L).isNegative must beTrue
+    }
+
+    "consider a positive zero to be positive and not negative" in {
+      // + 0 0 0 0 0 0 0 0 0 0
+      BinaryMixDWord(0x0000000000000000L).isPositive must beTrue
+      BinaryMixDWord(0x0000000000000000L).isNegative must beFalse
+    }
+
+    "consider a negative zero to be negative and not positive" in {
+      // - 0 0 0 0 0 0 0 0 0 0
+      BinaryMixDWord(0x1000000000000000L).isPositive must beFalse
+      BinaryMixDWord(0x1000000000000000L).isNegative must beTrue
     }
   }
 }

@@ -1,11 +1,11 @@
-package org.linnando.mixemulator.vm
+package org.linnando.mixemulator.vm.datamodel
 
-import org.specs2.mutable.Specification
 import org.linnando.mixemulator.vm.BinaryVirtualMachine.{BinaryMemoryState, BinaryMixByte, BinaryMixIndex, BinaryMixWord}
 import org.linnando.mixemulator.vm.exceptions.{InconsistentReadException, WriteConflictException, WrongFieldSpecException, WrongMemoryAddressException}
+import org.specs2.mutable.Specification
 
 class BinaryMemoryStateSpec extends Specification {
-  val initialState: BinaryMemoryState = BinaryMemoryState.initialState
+  import BinaryMemoryState.initialState
 
   "binary memory state" should {
     "get memory contents" in {
@@ -95,8 +95,8 @@ class BinaryMemoryStateSpec extends Specification {
   "binary memory locking" should {
     "not allow changing a memory cell under a shared lock" in {
       val state = initialState.withSharedLock(BinaryMixIndex(0), 100, 0)
-      state.updated(BinaryMixIndex(99), BinaryMixWord(0x0)) must throwA[InconsistentReadException]
-      state.updated(BinaryMixIndex(99), BinaryMixByte(5), BinaryMixWord(0x0)) must throwA[InconsistentReadException]
+      state.updated(BinaryMixIndex(99), BinaryMixWord(0x0)) must throwAn[InconsistentReadException]
+      state.updated(BinaryMixIndex(99), BinaryMixByte(5), BinaryMixWord(0x0)) must throwAn[InconsistentReadException]
     }
 
     "allow reading a memory cell under a shared lock" in {
@@ -112,7 +112,7 @@ class BinaryMemoryStateSpec extends Specification {
 
     "not allow reading a memory cell under an exclusive lock" in {
       val state = initialState.withExclusiveLock(BinaryMixIndex(0), 100, 0)
-      state.get(BinaryMixIndex(99)) must throwA[InconsistentReadException]
+      state.get(BinaryMixIndex(99)) must throwAn[InconsistentReadException]
     }
 
     "not allow acquiring an exclusive lock intersecting an earlier exclusive lock" in {
@@ -122,27 +122,27 @@ class BinaryMemoryStateSpec extends Specification {
 
     "not allow acquiring an exclusive lock intersecting an earlier shared lock" in {
       val state = initialState.withSharedLock(BinaryMixIndex(0), 100, 0)
-      state.withExclusiveLock(BinaryMixIndex(99), 100, 1) must throwA[InconsistentReadException]
+      state.withExclusiveLock(BinaryMixIndex(99), 100, 1) must throwAn[InconsistentReadException]
     }
 
     "not allow acquiring a shared lock intersecting an earlier exclusive lock" in {
       val state = initialState.withSharedLock(BinaryMixIndex(0), 100, 0)
-      state.withExclusiveLock(BinaryMixIndex(99), 100, 1) must throwA[InconsistentReadException]
+      state.withExclusiveLock(BinaryMixIndex(99), 100, 1) must throwAn[InconsistentReadException]
     }
 
     "allow acquiring a shared lock intersecting an earlier shared lock" in {
       val state = initialState.withSharedLock(BinaryMixIndex(0), 100, 0)
-      state.withSharedLock(BinaryMixIndex(99), 100, 1) must not throwA
+      state.withSharedLock(BinaryMixIndex(99), 100, 1) must not(throwA[Exception])
     }
 
     "allow changing a memory cell after lock release" in {
       val state = initialState.withExclusiveLock(BinaryMixIndex(0), 100, 0).withoutLocks(0)
-      state.updated(BinaryMixIndex(0), BinaryMixWord(0x0)) must not throwA
+      state.updated(BinaryMixIndex(0), BinaryMixWord(0x0)) must not(throwA[Exception])
     }
 
     "allow changing a memory cell not covered by a lock" in {
       val state = initialState.withExclusiveLock(BinaryMixIndex(0), 100, 0)
-      state.updated(BinaryMixIndex(100), BinaryMixWord(0x0)) must not throwA
+      state.updated(BinaryMixIndex(100), BinaryMixWord(0x0)) must not(throwA[Exception])
     }
 
     "throw an exception if memory address is too big" in {

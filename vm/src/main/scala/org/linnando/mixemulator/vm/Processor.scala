@@ -41,6 +41,10 @@ trait Processor {
 
   def forward(state: State): State = {
     val command = state.memory.get(state.programCounter)
+    execute(state, command)
+  }
+
+  def execute(state: State, command: W): State = {
     val opCode = command.getOpCode
     commands(opCode.toInt)(state, command)
   }
@@ -77,7 +81,7 @@ trait Processor {
   def getIndexedAddress(state: State, command: W): I = {
     val address = command.getAddress
     val indexSpec = command.getIndexSpec
-    address + state.registers.getI(indexSpec)
+    if (indexSpec.isZero) address else address + state.registers.getI(indexSpec)
   }
 
   // C = 02
@@ -100,7 +104,7 @@ trait Processor {
     val contents = getMemoryWord(state, command)
     val product = state.registers.getA * contents
     state.copy(
-      registers = state.registers.updatedAX(product),
+      registers = state.registers.updatedAX(product, product.isNegative),
       programCounter = state.programCounter.next,
       timeCounter = state.timeCounter + 10
     )
@@ -137,7 +141,7 @@ trait Processor {
   def char(state: State, command: W): State = {
     val number = state.registers.getA
     state.copy(
-      registers = state.registers.updatedAX(number.toCharCode),
+      registers = state.registers.updatedAX(number.toCharCode, state.registers.getX.isNegative),
       programCounter = state.programCounter.next,
       timeCounter = state.timeCounter + 10
     )
@@ -181,7 +185,7 @@ trait Processor {
     val value = getIndexedAddress(state, command)
     val shifted = state.registers.getAX << value
     state.copy(
-      registers = state.registers.updatedAX(shifted),
+      registers = state.registers.updatedAX(shifted, state.registers.getX.isNegative),
       programCounter = state.programCounter.next,
       timeCounter = state.timeCounter + 2
     )
@@ -192,7 +196,7 @@ trait Processor {
     val value = getIndexedAddress(state, command)
     val shifted = state.registers.getAX >> value
     state.copy(
-      registers = state.registers.updatedAX(shifted),
+      registers = state.registers.updatedAX(shifted, state.registers.getX.isNegative),
       programCounter = state.programCounter.next,
       timeCounter = state.timeCounter + 2
     )
@@ -203,7 +207,7 @@ trait Processor {
     val value = getIndexedAddress(state, command)
     val shifted = state.registers.getAX <<| value
     state.copy(
-      registers = state.registers.updatedAX(shifted),
+      registers = state.registers.updatedAX(shifted, state.registers.getX.isNegative),
       programCounter = state.programCounter.next,
       timeCounter = state.timeCounter + 2
     )
@@ -214,7 +218,7 @@ trait Processor {
     val value = getIndexedAddress(state, command)
     val shifted = state.registers.getAX >>| value
     state.copy(
-      registers = state.registers.updatedAX(shifted),
+      registers = state.registers.updatedAX(shifted, state.registers.getX.isNegative),
       programCounter = state.programCounter.next,
       timeCounter = state.timeCounter + 2
     )
@@ -256,10 +260,7 @@ trait Processor {
     )
   }
 
-  def getMemoryIndex(state: State, command: W): I = {
-    val word = getMemoryWord(state, command)
-    word.toIndex
-  }
+  def getMemoryIndex(state: State, command: W): I = getMemoryWord(state, command).toIndex
 
   // C = 10
   def ld2(state: State, command: W): State = {

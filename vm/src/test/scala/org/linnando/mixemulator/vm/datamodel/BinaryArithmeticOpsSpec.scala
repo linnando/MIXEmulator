@@ -1,8 +1,8 @@
-package org.linnando.mixemulator.vm
+package org.linnando.mixemulator.vm.datamodel
 
-import org.specs2.mutable.Specification
 import org.linnando.mixemulator.vm.BinaryVirtualMachine._
 import org.linnando.mixemulator.vm.exceptions.{DivisionByZeroException, OverflowException}
+import org.specs2.mutable.Specification
 
 class BinaryArithmeticOpsSpec extends Specification {
 
@@ -156,7 +156,7 @@ class BinaryArithmeticOpsSpec extends Specification {
     }
 
     "throw an exception if the dividend is too big" in {
-      BinaryMixDWord(0x40000000L) / BinaryMixWord(0x1) must throwA[OverflowException]
+      BinaryMixDWord(0x40000000L) / BinaryMixWord(0x1) must throwAn[OverflowException]
     }
   }
 
@@ -188,7 +188,7 @@ class BinaryArithmeticOpsSpec extends Specification {
     }
 
     "throw an exception if the sum is too big" in {
-      BinaryMixIndex(0x800) + BinaryMixIndex(0x800) must throwA[OverflowException]
+      BinaryMixIndex(0x800) + BinaryMixIndex(0x800) must throwAn[OverflowException]
     }
 
     "sum a positive number and a negative number smaller in absolute value" in {
@@ -226,7 +226,7 @@ class BinaryArithmeticOpsSpec extends Specification {
     }
 
     "throw an exception if the sum is too big" in {
-      BinaryMixIndex(0x800) + 0x800 must throwA[OverflowException]
+      BinaryMixIndex(0x800) + 0x800 must throwAn[OverflowException]
     }
 
     "calculate the next index of a positive index" in {
@@ -238,7 +238,7 @@ class BinaryArithmeticOpsSpec extends Specification {
     }
 
     "throw an exception if the next index is too big" in {
-      BinaryMixIndex(0xfff).next must throwA[OverflowException]
+      BinaryMixIndex(0xfff).next must throwAn[OverflowException]
     }
   }
 
@@ -268,7 +268,7 @@ class BinaryArithmeticOpsSpec extends Specification {
     }
 
     "subtract a negative number from a positive number with an overflow" in {
-      BinaryMixIndex(0x800) - BinaryMixIndex(0x1800) must throwA[OverflowException]
+      BinaryMixIndex(0x800) - BinaryMixIndex(0x1800) must throwAn[OverflowException]
     }
   }
 
