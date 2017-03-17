@@ -1,6 +1,6 @@
 package org.linnando.mixemulator.vm.processor
 
-import org.linnando.mixemulator.vm.BinaryVirtualMachine.{BinaryMixIndex, BinaryMixWord, execute, initialState}
+import org.linnando.mixemulator.vm.BinaryVirtualMachine._
 import org.linnando.mixemulator.vm.Comparison
 import org.specs2.mutable.Specification
 
