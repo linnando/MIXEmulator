@@ -10,14 +10,14 @@ lazy val androidapp = project
   .settings(
     sharedSettings,
     android.useSupportVectors,
-    platformTarget in Android := "android-25",
-    buildToolsVersion in Android := Some("25.0.2"),
+    platformTarget in Android := "android-26",
+    buildToolsVersion in Android := Some("26.0.0"),
     minSdkVersion in Android := "15",
     versionCode := Some(1),
     version := "0.1-SNAPSHOT",
     instrumentTestRunner := "android.support.test.runner.AndroidJUnitRunner",
     libraryDependencies ++= Seq(
-      "com.android.support" % "appcompat-v7" % "25.2.0",
+      "com.android.support" % "appcompat-v7" % "25.3.1",
       "com.android.support.test" % "runner" % "0.5" % "androidTest",
       "com.android.support.test.espresso" % "espresso-core" % "2.2.2" % "androidTest"
     )

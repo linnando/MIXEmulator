@@ -225,7 +225,7 @@
 # view res/layout/abc_screen_simple_overlay_action_mode.xml #generated:32
 -keep class android.support.v7.widget.ViewStubCompat { <init>(...); }
 
-# view AndroidManifest.xml #generated:14
+# view AndroidManifest.xml #generated:18
 -keep class org.linnando.mixemulator.androidapp.MainActivity { <init>(...); }
 
 # Copyright (C) 2016 The Android Open Source Project
