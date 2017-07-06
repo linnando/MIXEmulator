@@ -395,5 +395,67 @@ class BinaryMemorySpec extends Specification {
       // A = 2001, I = 0, F = 0:1, C = 33 STZ
       execute(state, BinaryMixWord(0x1F440061)).memory.get(BinaryMixIndex(2001)) must be equalTo BinaryMixWord(0x00083105)
     }
+
+    "move memory words" in {
+      val prevState = initialState.copy(
+        registers = initialState.registers.updatedI(1, BinaryMixIndex(3000)),
+        memory = initialState.memory
+          .updated(BinaryMixIndex(2000), BinaryMixWord(0x00000001))
+          .updated(BinaryMixIndex(2001), BinaryMixWord(0x00000002))
+          .updated(BinaryMixIndex(2002), BinaryMixWord(0x00000003))
+      )
+      // A = 2000, I = 0, F = 3, C = 7 MOVE
+      val nextState = execute(prevState, BinaryMixWord(0x1f4000c7))
+      nextState.memory.get(BinaryMixIndex(3000)) must be equalTo BinaryMixWord(0x00000001)
+      nextState.memory.get(BinaryMixIndex(3001)) must be equalTo BinaryMixWord(0x00000002)
+      nextState.memory.get(BinaryMixIndex(3002)) must be equalTo BinaryMixWord(0x00000003)
+    }
+
+    "do nothing when the number of words to move is zero" in {
+      val prevState = initialState.copy(
+        registers = initialState.registers.updatedI(1, BinaryMixIndex(3000)),
+        memory = initialState.memory
+          .updated(BinaryMixIndex(2000), BinaryMixWord(0x00000001))
+          .updated(BinaryMixIndex(2001), BinaryMixWord(0x00000002))
+          .updated(BinaryMixIndex(2002), BinaryMixWord(0x00000003))
+      )
+      // A = 2000, I = 0, F = 0, C = 7 MOVE
+      val nextState = execute(prevState, BinaryMixWord(0x1f400007))
+      nextState.memory.get(BinaryMixIndex(3000)) must be equalTo BinaryMixWord(0x00000000)
+      nextState.memory.get(BinaryMixIndex(3001)) must be equalTo BinaryMixWord(0x00000000)
+      nextState.memory.get(BinaryMixIndex(3002)) must be equalTo BinaryMixWord(0x00000000)
+    }
+
+    "move overlapping ranges in the downward direction" in {
+      val prevState = initialState.copy(
+        registers = initialState.registers.updatedI(1, BinaryMixIndex(1999)),
+        memory = initialState.memory
+          .updated(BinaryMixIndex(2000), BinaryMixWord(0x00000001))
+          .updated(BinaryMixIndex(2001), BinaryMixWord(0x00000002))
+          .updated(BinaryMixIndex(2002), BinaryMixWord(0x00000003))
+      )
+      // A = 2000, I = 0, F = 3, C = 7 MOVE
+      val nextState = execute(prevState, BinaryMixWord(0x1f4000c7))
+      nextState.memory.get(BinaryMixIndex(1999)) must be equalTo BinaryMixWord(0x00000001)
+      nextState.memory.get(BinaryMixIndex(2000)) must be equalTo BinaryMixWord(0x00000002)
+      nextState.memory.get(BinaryMixIndex(2001)) must be equalTo BinaryMixWord(0x00000003)
+      nextState.memory.get(BinaryMixIndex(2002)) must be equalTo BinaryMixWord(0x00000003)
+    }
+
+    "move overlapping ranges in the upward direction" in {
+      val prevState = initialState.copy(
+        registers = initialState.registers.updatedI(1, BinaryMixIndex(2001)),
+        memory = initialState.memory
+          .updated(BinaryMixIndex(2000), BinaryMixWord(0x00000001))
+          .updated(BinaryMixIndex(2001), BinaryMixWord(0x00000002))
+          .updated(BinaryMixIndex(2002), BinaryMixWord(0x00000003))
+      )
+      // A = 2000, I = 0, F = 3, C = 7 MOVE
+      val nextState = execute(prevState, BinaryMixWord(0x1f4000c7))
+      nextState.memory.get(BinaryMixIndex(2000)) must be equalTo BinaryMixWord(0x00000001)
+      nextState.memory.get(BinaryMixIndex(2001)) must be equalTo BinaryMixWord(0x00000001)
+      nextState.memory.get(BinaryMixIndex(2002)) must be equalTo BinaryMixWord(0x00000001)
+      nextState.memory.get(BinaryMixIndex(2003)) must be equalTo BinaryMixWord(0x00000001)
+    }
   }
 }

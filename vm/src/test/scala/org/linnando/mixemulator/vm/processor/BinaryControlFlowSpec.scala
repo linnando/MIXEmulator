@@ -2,14 +2,29 @@ package org.linnando.mixemulator.vm.processor
 
 import org.linnando.mixemulator.vm.BinaryVirtualMachine._
 import org.linnando.mixemulator.vm.Comparison
+import org.linnando.mixemulator.vm.exceptions.HaltException
 import org.specs2.mutable.Specification
 
-class BinaryJumpSpec extends Specification {
+class BinaryControlFlowSpec extends Specification {
   private val state = initialState.copy(
     programCounter = BinaryMixIndex(3000)
   )
 
   "control flow" should {
+    "do nothing on NOP" in {
+      val state = initialState
+      // A = 0, I = 0, F = 0, C = 0 NOP
+      val nextState = execute(state, BinaryMixWord(0x00000000))
+      nextState.registers must be equalTo initialState.registers
+      nextState.memory must be equalTo initialState.memory
+    }
+
+    "stop execution on HLT" in {
+      val state = initialState
+      // A = 0, I = 0, F = 2, C = 5 HLT
+      execute(state, BinaryMixWord(0x00000085)) must throwA[HaltException]
+    }
+
     "perform unconditional jump" in {
       // A = 1000, I = 0, F = 0, C = 39 JMP
       val nextState = execute(state, BinaryMixWord(0x0fa00027))
