@@ -39,6 +39,14 @@ class BinaryConversionOpsSpec extends Specification {
     "convert a negative index to a word" in {
       BinaryMixIndex(0x1001).toWord must be equalTo BinaryMixWord(0x40000001)
     }
+
+    "convert a positive index to a Short" in {
+      BinaryMixIndex(0x1).toShort must be equalTo 1
+    }
+
+    "convert a negative index to a Short" in {
+      BinaryMixIndex(0x1001).toShort must be equalTo -1
+    }
   }
 
   "binary word conversion" should {

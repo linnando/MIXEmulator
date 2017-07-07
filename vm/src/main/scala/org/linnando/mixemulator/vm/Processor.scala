@@ -1,6 +1,6 @@
 package org.linnando.mixemulator.vm
 
-import org.linnando.mixemulator.vm.exceptions.{HaltException, UnpredictableExecutionFlowException}
+import org.linnando.mixemulator.vm.exceptions.{HaltException, UnpredictableExecutionFlowException, WrongMemoryAddressException}
 import org.linnando.mixemulator.vm.io._
 
 import scala.collection.immutable.Queue
@@ -521,12 +521,12 @@ trait Processor {
       if (address == state.programCounter) {
         val flushedDevice = device._1.flush()
         val readBlocks = flushedDevice._2 zip device._2
-        val updatedMemory = readBlocks.foldLeft(state.memory) { (ms, block) =>
+        val updatedMemory = readBlocks.foldLeft(state.memory.withoutLocks(deviceNum)) { (ms, block) =>
           block._1.indices.foldLeft(ms) { (s, i) => s.updated(block._2 + i, getWord(block._1(i))) }
         }
         val updatedDevice = (flushedDevice._1, Queue.empty)
         state.copy(
-          memory = updatedMemory.withoutLocks(deviceNum),
+          memory = updatedMemory,
           programCounter = state.programCounter.next,
           timeCounter = state.timeCounter + 1,
           devices = state.devices.updated(deviceNum, updatedDevice)
@@ -539,14 +539,21 @@ trait Processor {
 
   // C = 35
   def ioc(state: State, command: W): State = {
+    val indexedAddress = getIndexedAddress(state, command)
     val deviceNum = command.getFieldSpec.toInt
     val device = state.devices(deviceNum)
     val updatedDevice = (
       device._1 match {
-        case d: TapeUnit => d.positioned(getIndexedAddress(state, command).toWord.toLong)
-        case d: DiskUnit => d.positioned(state.registers.getX.toLong)
-        case d: LinePrinter => d.newPage()
-        case d: PaperTape => d.reset()
+        case d: TapeUnit => d.positioned(indexedAddress.toWord.toLong)
+        case d: DiskUnit =>
+          if (indexedAddress.toShort == 0) d.positioned(state.registers.getX.toLong)
+          else throw new WrongMemoryAddressException(indexedAddress.toShort)
+        case d: LinePrinter =>
+          if (indexedAddress.toShort == 0) d.newPage()
+          else throw new WrongMemoryAddressException(indexedAddress.toShort)
+        case d: PaperTape =>
+          if (indexedAddress.toShort == 0) d.reset()
+          else throw new WrongMemoryAddressException(indexedAddress.toShort)
         case _ => throw new UnsupportedOperationException
       },
       device._2

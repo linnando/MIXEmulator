@@ -217,13 +217,16 @@ object BinaryVirtualMachine extends VirtualMachine {
       else if (isPositive) Comparison.GREATER
       else Comparison.LESS
 
-
     override def next: I = {
       if (isNegative) throw new Error
       val nextIndex = contents + 1
       if ((nextIndex & 0x1000) > 0) throw new OverflowException
       BinaryMixIndex(nextIndex.toShort)
     }
+
+    override def toShort: Short =
+      if (isPositive) contents
+      else (-(contents ^ 0x1000)).toShort
 
     override def toWord: W = BinaryMixWord((contents & 0x1000) << 18 | (contents & 0xfff))
   }

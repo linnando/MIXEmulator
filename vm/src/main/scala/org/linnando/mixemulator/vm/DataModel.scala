@@ -97,6 +97,8 @@ trait DataModel {
 
     def next: I
 
+    def toShort: Short
+
     def toWord: W
   }
 
