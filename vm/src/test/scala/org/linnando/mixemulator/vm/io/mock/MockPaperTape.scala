@@ -1,5 +1,7 @@
-package org.linnando.mixemulator.vm.io
+package org.linnando.mixemulator.vm.io.mock
+
 import org.linnando.mixemulator.vm.io.data.IOWord
+import org.linnando.mixemulator.vm.io.{Device, PaperTape, PositionalInputDevice}
 
 case class MockPaperTape(counter: Int = 0) extends PaperTape {
   override def reset(): PaperTape = copy(counter = counter + 1)

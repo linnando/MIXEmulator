@@ -1,7 +1,15 @@
 package org.linnando.mixemulator.vm.io.data
 
+import java.util.NoSuchElementException
+
+import org.linnando.mixemulator.vm.exceptions.{UnsupportedCharacterException, WrongCharacterCodeException}
+
 case class IOWord(negative: Boolean, bytes: Seq[Byte]) {
-  def toChars: Seq[Char] = bytes.map(IOWord.CHARACTERS(_))
+  def toChars: Seq[Char] =
+    try bytes.map(IOWord.CHARACTERS(_))
+    catch {
+      case e: ArrayIndexOutOfBoundsException => throw WrongCharacterCodeException(e.getMessage.toByte)
+    }
 }
 
 object IOWord {
@@ -22,7 +30,13 @@ object IOWord {
     '2' -> 32, '3' -> 33, '4' -> 34, '5' -> 35, '6' -> 36, '7' -> 37, '8' -> 38, '9' -> 39,
     '.' -> 40, ',' -> 41, '(' -> 42, ')' -> 43, '+' -> 44, '-' -> 45, '*' -> 46, '/' -> 47,
     '=' -> 48, '$' -> 49, '<' -> 50, '>' -> 51, '@' -> 52, ';' -> 53, ':' -> 54, '\'' -> 55)
+  private val exceptionMatcher = raw"key not found: (.)".r
 
   def apply(chars: Seq[Char]): IOWord =
-    IOWord(negative = false, chars.map(CODES))
+    try IOWord(negative = false, chars.map(CODES))
+    catch {
+      case e: NoSuchElementException => e.getMessage match {
+        case exceptionMatcher(char) => throw UnsupportedCharacterException(char.charAt(0))
+      }
+    }
 }

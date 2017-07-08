@@ -1,5 +1,7 @@
-package org.linnando.mixemulator.vm.io
+package org.linnando.mixemulator.vm.io.mock
+
 import org.linnando.mixemulator.vm.io.data.IOWord
+import org.linnando.mixemulator.vm.io.{Device, DiskUnit, RandomAccessIODevice}
 
 case class MockDiskUnit(position: Long = 0) extends DiskUnit {
   override def positioned(pos: Long): DiskUnit = copy(position = pos)

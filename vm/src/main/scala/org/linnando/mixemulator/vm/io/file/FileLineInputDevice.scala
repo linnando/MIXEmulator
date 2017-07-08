@@ -2,6 +2,7 @@ package org.linnando.mixemulator.vm.io.file
 
 import java.io.{BufferedReader, FileReader}
 
+import org.linnando.mixemulator.vm.exceptions.EndOfFileException
 import org.linnando.mixemulator.vm.io.PositionalInputDevice
 import org.linnando.mixemulator.vm.io.data.IOWord
 
@@ -26,8 +27,11 @@ trait FileLineInputDevice extends PositionalInputDevice {
   private def readLine(): IndexedSeq[IOWord] = {
     val file = new BufferedReader(new FileReader(filename))
     try {
-      file.skip((5 * blockSize + 1) * pos)
-      val chars = file.readLine().toCharArray
+      file.skip(pos * (5 * blockSize + 1))
+      val line = file.readLine()
+      if (line == null)
+        throw new EndOfFileException
+      val chars = line.toCharArray
       IndexedSeq.range(0, 5 * blockSize, 5) map { i => IOWord((i until i + 5).map(chars)) }
     }
     finally {

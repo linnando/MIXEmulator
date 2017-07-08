@@ -1,5 +1,7 @@
-package org.linnando.mixemulator.vm.io
+package org.linnando.mixemulator.vm.io.mock
+
 import org.linnando.mixemulator.vm.io.data.IOWord
+import org.linnando.mixemulator.vm.io.{Device, PositionalInputDevice, PositionalOutputDevice, TapeUnit}
 
 case class MockTapeUnit(position: Long = 0) extends TapeUnit {
   override def positioned(pos: Long): TapeUnit = copy(position = if (pos == 0) pos else position + pos)

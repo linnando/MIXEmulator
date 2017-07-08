@@ -1,7 +1,6 @@
 package org.linnando.mixemulator.vm.io.file
 
-import java.io.{BufferedReader, BufferedWriter, FileReader, FileWriter}
-import java.util.function.Consumer
+import java.io._
 
 import org.linnando.mixemulator.vm.io.LinePrinter
 
@@ -9,7 +8,10 @@ import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Success
 
-case class FileLinePrinter(filename: String, version: Int, tasks: Future[Unit], isBusy: Boolean)
+case class FileLinePrinter(filename: String,
+                           version: Int = 0,
+                           tasks: Future[Unit] = Future.successful {},
+                           isBusy: Boolean = false)
   extends LinePrinter with FileLineOutputDevice {
 
   override def blockSize: Int = LinePrinter.BLOCK_SIZE
@@ -24,16 +26,15 @@ case class FileLinePrinter(filename: String, version: Int, tasks: Future[Unit], 
     newVersion(tasks andThen { case Success(_) => writeNewPage() })
 
   def writeNewPage(): Unit = {
-    val oldFile = new BufferedReader(new FileReader(s"$filename.$version"))
-    val file = new BufferedWriter(new FileWriter(s"$filename.${version + 1}", true))
+    val oldFile = new File(s"$filename.$version")
+    val writer = new BufferedWriter(new FileWriter(s"$filename.${version + 1}"))
     try {
-      oldFile.lines().forEach(new Consumer[String] {
-        override def accept(s: String): Unit = file.write(s)
-      })
-      file.write("\f")
+      if (oldFile.exists)
+        copyFileContent(oldFile, writer)
+      writer.write("\f")
     }
     finally {
-      file.close()
+      writer.close()
     }
   }
 

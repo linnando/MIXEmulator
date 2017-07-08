@@ -1,6 +1,6 @@
 package org.linnando.mixemulator.vm.io.file
 
-import java.io.{BufferedReader, BufferedWriter, FileReader, FileWriter}
+import java.io._
 import java.util.function.Consumer
 
 import org.linnando.mixemulator.vm.io.PositionalOutputDevice
@@ -27,19 +27,29 @@ trait FileLineOutputDevice extends PositionalOutputDevice {
     val chars = new Array[Char](5 * blockSize)
     val buffer = mutable.ArrayBuffer.empty[Char]
     buffer ++= words.flatMap(_.toChars)
-    buffer.copyToArray(chars, 5 * blockSize)
-    val oldFile = new BufferedReader(new FileReader(s"$filename.$version"))
-    val file = new BufferedWriter(new FileWriter(s"$filename.${version + 1}", true))
+    buffer.copyToArray(chars)
+    val oldFile = new File(s"$filename.$version")
+    val writer = new BufferedWriter(new FileWriter(s"$filename.${version + 1}"))
     try {
-      oldFile.lines().forEach(new Consumer[String] {
-        override def accept(s: String): Unit = file.write(s)
-      })
-      file.write(chars)
-      file.newLine()
+      if (oldFile.exists())
+        copyFileContent(oldFile, writer)
+      writer.write(chars)
+      writer.newLine()
     }
     finally {
-      file.close()
+      writer.close()
     }
+  }
+
+  protected def copyFileContent(source: File, destWriter: BufferedWriter): Unit = {
+    val srcReader = new BufferedReader(new FileReader(source))
+    srcReader.lines().forEach(new Consumer[String] {
+      override def accept(s: String): Unit = {
+        destWriter.write(s)
+        destWriter.newLine()
+      }
+    })
+    srcReader.close()
   }
 
   override def flush(): (FileLineOutputDevice, Seq[IndexedSeq[IOWord]]) =

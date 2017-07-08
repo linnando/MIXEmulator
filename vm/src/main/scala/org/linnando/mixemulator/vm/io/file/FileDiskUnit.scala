@@ -6,7 +6,10 @@ import org.linnando.mixemulator.vm.io.data.IOWord
 import scala.collection.immutable.Queue
 import scala.concurrent.Future
 
-case class FileDiskUnit(filename: String, version: Int, tasks: Future[Queue[IndexedSeq[IOWord]]], isBusy: Boolean)
+case class FileDiskUnit(filename: String,
+                        version: Int = 0,
+                        tasks: Future[Queue[IndexedSeq[IOWord]]] = Future.successful(Queue.empty),
+                        isBusy: Boolean = false)
   extends DiskUnit with FileRandomAccessBlockIODevice {
 
   override def blockSize = DiskUnit.BLOCK_SIZE

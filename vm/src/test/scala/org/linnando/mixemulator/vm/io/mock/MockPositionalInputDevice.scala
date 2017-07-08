@@ -1,5 +1,7 @@
-package org.linnando.mixemulator.vm.io
+package org.linnando.mixemulator.vm.io.mock
+
 import org.linnando.mixemulator.vm.io.data.IOWord
+import org.linnando.mixemulator.vm.io.{Device, PositionalInputDevice}
 
 case class MockPositionalInputDevice(counter: Int = 0, busy: Boolean = false) extends PositionalInputDevice {
   override def read(): PositionalInputDevice = copy(counter = counter + 1, busy = true)

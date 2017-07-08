@@ -1,6 +1,7 @@
-package org.linnando.mixemulator.vm.io
+package org.linnando.mixemulator.vm.io.mock
 
 import org.linnando.mixemulator.vm.io.data.IOWord
+import org.linnando.mixemulator.vm.io.{Device, PositionalOutputDevice}
 
 case class MockPositionalOutputDevice(counter: Int = 0,
                                       block: IndexedSeq[IOWord] = IndexedSeq.empty,

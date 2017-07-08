@@ -4,7 +4,10 @@ import org.linnando.mixemulator.vm.io.CardPunch
 
 import scala.concurrent.Future
 
-case class FileCardPunch(filename: String, version: Int, tasks: Future[Unit], isBusy: Boolean)
+case class FileCardPunch(filename: String,
+                         version: Int = 0,
+                         tasks: Future[Unit] = Future.successful {},
+                         isBusy: Boolean = false)
   extends FileLineOutputDevice with CardPunch {
 
   override def blockSize: Int = CardPunch.BLOCK_SIZE

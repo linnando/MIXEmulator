@@ -28,7 +28,8 @@ lazy val vm = project
     sharedSettings,
     exportJars := true,
     libraryDependencies ++= Seq(
-      "org.specs2" %% "specs2-core" % "3.8.8" % "test"
+      "org.specs2" %% "specs2-core" % "3.9.2" % "test",
+      "org.specs2" %% "specs2-matcher-extra" % "3.9.2" % "test"
     ),
     scalacOptions in Test ++= Seq("-Yrangepos")
   )

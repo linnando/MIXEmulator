@@ -1,5 +1,7 @@
-package org.linnando.mixemulator.vm.io
+package org.linnando.mixemulator.vm.io.mock
+
 import org.linnando.mixemulator.vm.io.data.IOWord
+import org.linnando.mixemulator.vm.io.{Device, RandomAccessIODevice}
 
 case class MockRandomAccessIODevice(position: Long = 0L,
                                     block: IndexedSeq[IOWord] = IndexedSeq.empty,
@@ -15,6 +17,6 @@ case class MockRandomAccessIODevice(position: Long = 0L,
 
   override def flush(): (Device, Seq[IndexedSeq[IOWord]]) = (
     copy(busy = false),
-    Seq(IndexedSeq.fill(blockSize)(IOWord(negative = false, Seq(0, 0, 0, 0, 0))))
+    Seq(IndexedSeq.fill(blockSize)(IOWord(negative = false, Seq(1, 1, 1, 1, 1))))
   )
 }
