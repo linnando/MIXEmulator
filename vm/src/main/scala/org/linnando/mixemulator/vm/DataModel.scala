@@ -7,12 +7,12 @@ import org.linnando.mixemulator.vm.io.data.IOWord
 import scala.collection.immutable.Queue
 
 trait DataModel {
-  type RS <: RegisterState
-  type MS <: MemoryState
-  type B <: MixByte
-  type I <: MixIndex
-  type W <: MixWord
-  type DW <: MixDWord
+  type RS <: AbstractRegisterState
+  type MS <: AbstractMemoryState
+  type B <: AbstractMixByte
+  type I <: AbstractMixIndex
+  type W <: AbstractMixWord
+  type DW <: AbstractMixDWord
 
   case class State(registers: RS,
                    memory: MS,
@@ -25,7 +25,7 @@ trait DataModel {
 
   def getWord(ioWord: IOWord): W
 
-  trait RegisterState {
+  trait AbstractRegisterState {
     def getA: W
 
     def getX: W
@@ -59,7 +59,7 @@ trait DataModel {
     def updatedCMP(value: Comparison): RS
   }
 
-  trait MemoryState {
+  trait AbstractMemoryState {
     def get(address: I): W
 
     def updated(address: I, value: W): MS
@@ -73,7 +73,7 @@ trait DataModel {
     def withoutLocks(deviceNum: Int): MS
   }
 
-  trait MixByte {
+  trait AbstractMixByte {
     def toInt: Int
 
     def toByte: Byte
@@ -81,7 +81,7 @@ trait DataModel {
     def isZero: Boolean
   }
 
-  trait MixIndex {
+  trait AbstractMixIndex {
     def isPositive: Boolean
 
     def isNegative: Boolean
@@ -103,7 +103,7 @@ trait DataModel {
     def toWord: W
   }
 
-  trait MixWord {
+  trait AbstractMixWord {
     def isPositive: Boolean
 
     def isNegative: Boolean
@@ -141,7 +141,7 @@ trait DataModel {
     def toCharCode: DW
   }
 
-  trait MixDWord {
+  trait AbstractMixDWord {
     def isPositive: Boolean
 
     def isNegative: Boolean
