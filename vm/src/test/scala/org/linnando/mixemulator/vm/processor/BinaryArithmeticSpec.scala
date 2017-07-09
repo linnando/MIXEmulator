@@ -1,6 +1,6 @@
 package org.linnando.mixemulator.vm.processor
 
-import org.linnando.mixemulator.vm.BinaryVirtualMachine._
+import org.linnando.mixemulator.vm.BinaryProcessingModel._
 import org.linnando.mixemulator.vm.exceptions.{DivisionByZeroException, OverflowException}
 import org.specs2.mutable.Specification
 

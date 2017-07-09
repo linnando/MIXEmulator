@@ -1,6 +1,6 @@
 package org.linnando.mixemulator.vm.datamodel
 
-import org.linnando.mixemulator.vm.BinaryVirtualMachine.{BinaryMemoryState, BinaryMixByte, BinaryMixIndex, BinaryMixWord}
+import org.linnando.mixemulator.vm.BinaryProcessingModel.{BinaryMemoryState, BinaryMixByte, BinaryMixIndex, BinaryMixWord}
 import org.linnando.mixemulator.vm.exceptions.{InconsistentReadException, WriteConflictException, WrongFieldSpecException, WrongMemoryAddressException}
 import org.specs2.mutable.Specification
 

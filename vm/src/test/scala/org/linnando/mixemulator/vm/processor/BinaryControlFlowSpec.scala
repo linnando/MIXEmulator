@@ -1,8 +1,8 @@
 package org.linnando.mixemulator.vm.processor
 
-import org.linnando.mixemulator.vm.BinaryVirtualMachine._
+import org.linnando.mixemulator.vm.BinaryProcessingModel._
 import org.linnando.mixemulator.vm.Comparison
-import org.linnando.mixemulator.vm.exceptions.HaltException
+import org.linnando.mixemulator.vm.exceptions.ForwardFromTerminalStateException
 import org.specs2.mutable.Specification
 
 class BinaryControlFlowSpec extends Specification {
@@ -12,17 +12,17 @@ class BinaryControlFlowSpec extends Specification {
 
   "control flow" should {
     "do nothing on NOP" in {
-      val state = initialState
       // A = 0, I = 0, F = 0, C = 0 NOP
       val nextState = execute(state, BinaryMixWord(0x00000000))
-      nextState.registers must be equalTo initialState.registers
-      nextState.memory must be equalTo initialState.memory
+      nextState.registers must be equalTo state.registers
+      nextState.memory must be equalTo state.memory
     }
 
     "stop execution on HLT" in {
-      val state = initialState
       // A = 0, I = 0, F = 2, C = 5 HLT
-      execute(state, BinaryMixWord(0x00000085)) must throwA[HaltException]
+      val nextState = execute(state, BinaryMixWord(0x00000085))
+      nextState.programCounter must be equalTo state.programCounter
+      nextState.isHalted must beTrue
     }
 
     "perform unconditional jump" in {
@@ -37,6 +37,21 @@ class BinaryControlFlowSpec extends Specification {
       val nextState = execute(state, BinaryMixWord(0x0fa00067))
       nextState.programCounter must be equalTo BinaryMixIndex(1000)
       nextState.registers.getJ must be equalTo BinaryMixIndex(0)
+    }
+
+    "advance according to the command in memory" in {
+      val prevState = state.copy(
+        memory = state.memory
+          .updated(BinaryMixIndex(2000), BinaryMixWord(0x41403144)) // - 1 16 3 5 4
+          .updated(BinaryMixIndex(3000), BinaryMixWord(0x1f400148)) // A = 2000, I = 0, F = 0:5, C = 8 LDA
+      )
+      val nextState = forward(prevState)
+      nextState.registers.getA must be equalTo BinaryMixWord(0x41403144)
+    }
+
+    "throw an exception on attempt to advance a halted machine" in {
+      val prevState = state.copy(isHalted = true)
+      forward(prevState) must throwA[ForwardFromTerminalStateException]
     }
   }
 

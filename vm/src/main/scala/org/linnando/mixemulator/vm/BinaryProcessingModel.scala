@@ -1,9 +1,10 @@
 package org.linnando.mixemulator.vm
+
 import org.linnando.mixemulator.vm.Comparison.Comparison
 import org.linnando.mixemulator.vm.exceptions._
 import org.linnando.mixemulator.vm.io.data.IOWord
 
-object BinaryVirtualMachine extends VirtualMachine {
+object BinaryProcessingModel extends ProcessingModel {
   override type RS = BinaryRegisterState
   override type MS = BinaryMemoryState
   override type B = BinaryMixByte
@@ -11,11 +12,32 @@ object BinaryVirtualMachine extends VirtualMachine {
   override type W = BinaryMixWord
   override type DW = BinaryMixDWord
 
+  override def createVirtualMachineBuilder(): VirtualMachineBuilder = BinaryVirtualMachineBuilder()
+
+  case class BinaryVirtualMachineBuilder(state: State = initialState) extends VirtualMachineBuilder {
+    override def update(address: Short, uniWord: UniWord): VirtualMachineBuilder = copy(
+      state = state.copy(
+        memory = state.memory.updated(BinaryMixIndex(address), BinaryMixWord(uniWord))
+      )
+    )
+
+    override def updateProgramCounter(programCounter: Short): VirtualMachineBuilder = copy(
+      state = state.copy(
+        programCounter = BinaryMixIndex(programCounter)
+      )
+    )
+
+    override def build: VirtualMachine = new VirtualMachineImpl(state)
+
+    override def buildTracking: TrackingVirtualMachine = new TrackingVirtualMachineImpl(state)
+  }
+
   lazy val initialState = State(
     registers = BinaryRegisterState.initialState,
     memory = BinaryMemoryState.initialState,
     programCounter = BinaryMixIndex(0),
     timeCounter = 0,
+    isHalted = false,
     devices = IndexedSeq.empty
   )
 
@@ -338,6 +360,22 @@ object BinaryVirtualMachine extends VirtualMachine {
 
   object BinaryMixWord {
     val masks: Array[Int] = Array(0x40000000, 0x3f000000, 0xfc0000, 0x3f000, 0xfc0, 0x3f)
+
+    def apply(uniWord: UniWord): BinaryMixWord = {
+      val signed = if (uniWord.negative) 0x40000000 else 0x00000000
+      val word = uniWord.fields.foldLeft(signed) { (word, field) =>
+        val l = field._1 >> 3
+        val r = field._1 & 0x07
+        if (l > r) throw new WrongFieldSpecException(field._1)
+        if (l == 0) throw new WrongFieldSpecException(field._1)
+        if (field._2 < 0L || field._2 >= (1L << 6 * (r - l + 1)))
+          throw new WrongFieldValueException(field._2)
+        val mask = BinaryMixWord.bitMask(l, r)
+        val shiftedValue = field._2.toInt << (6 * (5 - r))
+        shiftedValue | word & ~mask & 0x7fffffff
+      }
+      BinaryMixWord(word)
+    }
 
     def bitMask(l: Int, r: Int): Int = {
       if (l > 5 || r > 5) throw new WrongFieldSpecException((8 * l + r).toByte)

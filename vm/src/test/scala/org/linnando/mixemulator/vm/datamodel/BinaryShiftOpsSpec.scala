@@ -1,6 +1,6 @@
 package org.linnando.mixemulator.vm.datamodel
 
-import org.linnando.mixemulator.vm.BinaryVirtualMachine.{BinaryMixDWord, BinaryMixIndex, BinaryMixWord}
+import org.linnando.mixemulator.vm.BinaryProcessingModel.{BinaryMixDWord, BinaryMixIndex, BinaryMixWord}
 import org.specs2.mutable.Specification
 
 class BinaryShiftOpsSpec extends Specification {

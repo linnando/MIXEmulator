@@ -1,6 +1,6 @@
 package org.linnando.mixemulator.vm
 
-import org.linnando.mixemulator.vm.exceptions.{HaltException, UnpredictableExecutionFlowException, WrongMemoryAddressException}
+import org.linnando.mixemulator.vm.exceptions.{ForwardFromTerminalStateException, UnpredictableExecutionFlowException, WrongMemoryAddressException}
 import org.linnando.mixemulator.vm.io._
 
 import scala.collection.immutable.Queue
@@ -39,10 +39,12 @@ trait Processor {
   val commands54: Array[(State, W) => State] = Array(inc6, dec6, ent6, enn6)
   val commands55: Array[(State, W) => State] = Array(incx, decx, entx, ennx)
 
-  def forward(state: State): State = {
-    val command = state.memory.get(state.programCounter)
-    execute(state, command)
-  }
+  def forward(state: State): State =
+    if (state.isHalted) throw new ForwardFromTerminalStateException
+    else {
+      val command = state.memory.get(state.programCounter)
+      execute(state, command)
+    }
 
   def execute(state: State, command: W): State = {
     val opCode = command.getOpCode
@@ -148,9 +150,7 @@ trait Processor {
   }
 
   // C = 05, F = 2
-  def hlt(state: State, command: W): State = {
-    throw new HaltException
-  }
+  def hlt(state: State, command: W): State = state.copy(isHalted = true)
 
   // C = 06
   def c6(state: State, command: W): State = {

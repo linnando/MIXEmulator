@@ -1,6 +1,6 @@
 package org.linnando.mixemulator.vm.datamodel
 
-import org.linnando.mixemulator.vm.BinaryVirtualMachine.{BinaryMixIndex, BinaryMixWord}
+import org.linnando.mixemulator.vm.BinaryProcessingModel.{BinaryMixIndex, BinaryMixWord}
 import org.linnando.mixemulator.vm.Comparison
 import org.specs2.mutable.Specification
 

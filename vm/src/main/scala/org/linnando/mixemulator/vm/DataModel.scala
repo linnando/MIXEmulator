@@ -18,6 +18,7 @@ trait DataModel {
                    memory: MS,
                    programCounter: I,
                    timeCounter: Int,
+                   isHalted: Boolean,
                    devices: IndexedSeq[(Device, Queue[I])])
 
   def getZero: W

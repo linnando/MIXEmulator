@@ -1,6 +1,6 @@
 package org.linnando.mixemulator.vm.processor
 
-import org.linnando.mixemulator.vm.BinaryVirtualMachine._
+import org.linnando.mixemulator.vm.BinaryProcessingModel._
 import org.linnando.mixemulator.vm.exceptions.{UnpredictableExecutionFlowException, WrongMemoryAddressException}
 import org.linnando.mixemulator.vm.io.mock._
 import org.specs2.mutable.Specification
