@@ -1,5 +1,6 @@
 package org.linnando.mixemulator.vm.binaryvm.datamodel
 
+import org.linnando.mixemulator.vm.VirtualMachine
 import org.linnando.mixemulator.vm.binary._
 import org.linnando.mixemulator.vm.exceptions.{InconsistentReadException, WriteConflictException, WrongFieldSpecException, WrongMemoryAddressException}
 import org.specs2.mutable.Specification
@@ -8,9 +9,14 @@ class MemoryStateSpec extends Specification {
   private val initialState = MemoryState.initialState
 
   "binary memory state" should {
-    "get memory contents" in {
+    "get memory contents by MixIndex" in {
       val state = initialState.copy(contents = initialState.contents.updated(1, 0x2))
-      state.get(MixIndex(0x1)) must be equalTo MixWord(0x2)
+      state.get(MixIndex(1)) must be equalTo MixWord(0x2)
+    }
+
+    "get memory contents by Short" in {
+      val state = initialState.copy(contents = initialState.contents.updated(1, 0x2))
+      state.get(1.toShort) must be equalTo MixWord(0x2)
     }
 
     "update memory contents" in {
@@ -19,14 +25,14 @@ class MemoryStateSpec extends Specification {
     }
 
     "throw an exception if memory address is negative" in {
-      initialState.get(MixIndex(0x1001)) must throwA[WrongMemoryAddressException]
+      initialState.get(0x1001.toShort) must throwA[WrongMemoryAddressException]
       initialState.updated(MixIndex(0x1001), MixWord(0x1)) must throwA[WrongMemoryAddressException]
     }
 
     "throw an exception if memory address is too big" in {
-      initialState.get(MixIndex(MemoryState.MEMORY_SIZE)) must throwA[WrongMemoryAddressException]
-      initialState.updated(MixIndex(MemoryState.MEMORY_SIZE), MixWord(0x1)) must throwA[WrongMemoryAddressException]
-      initialState.updated(MixIndex(MemoryState.MEMORY_SIZE), MixByte(0x5), MixWord(0x1)) must throwA[WrongMemoryAddressException]
+      initialState.get(VirtualMachine.MEMORY_SIZE) must throwA[WrongMemoryAddressException]
+      initialState.updated(MixIndex(VirtualMachine.MEMORY_SIZE), MixWord(0x1)) must throwA[WrongMemoryAddressException]
+      initialState.updated(MixIndex(VirtualMachine.MEMORY_SIZE), MixByte(0x5), MixWord(0x1)) must throwA[WrongMemoryAddressException]
     }
   }
 
@@ -101,7 +107,7 @@ class MemoryStateSpec extends Specification {
 
     "allow reading a memory cell under a shared lock" in {
       val state = initialState.withSharedLock(MixIndex(0), 100, 0)
-      state.get(MixIndex(99)) must be equalTo MixWord(0x0)
+      state.get(99.toShort) must be equalTo MixWord(0x0)
     }
 
     "not allow changing a memory cell under an exclusive lock" in {
@@ -112,7 +118,7 @@ class MemoryStateSpec extends Specification {
 
     "not allow reading a memory cell under an exclusive lock" in {
       val state = initialState.withExclusiveLock(MixIndex(0), 100, 0)
-      state.get(MixIndex(99)) must throwAn[InconsistentReadException]
+      state.get(99.toShort) must throwAn[InconsistentReadException]
     }
 
     "not allow acquiring an exclusive lock intersecting an earlier exclusive lock" in {
@@ -146,7 +152,7 @@ class MemoryStateSpec extends Specification {
     }
 
     "throw an exception if memory address is too big" in {
-      val startAddress = MixIndex((MemoryState.MEMORY_SIZE - 99).toShort)
+      val startAddress = MixIndex((VirtualMachine.MEMORY_SIZE - 99).toShort)
       initialState.withSharedLock(startAddress, 100, 0) must throwA[WrongMemoryAddressException]
       initialState.withExclusiveLock(startAddress, 100, 0) must throwA[WrongMemoryAddressException]
     }

@@ -7,28 +7,6 @@ import org.linnando.mixemulator.vm.exceptions.BackFromInitialStateException
 abstract class ProcessingModel extends DataModel with Processor {
   def createVirtualMachineBuilder(): VirtualMachineBuilder
 
-  trait VirtualMachine {
-    def currentState: State
-
-    def breakpoints: Set[Short]
-
-    def canMoveForward: Boolean
-
-    def stepForward(): Unit
-
-    def runForward(): Unit
-
-    def toggleBreakpoint(address: Short): Unit
-  }
-
-  trait TrackingVirtualMachine extends VirtualMachine {
-    def canMoveBack: Boolean
-
-    def stepBack(): Unit
-
-    def runBack(): Unit
-  }
-
   class VirtualMachineImpl(initialState: State) extends VirtualMachine {
     private var _currentState: State = initialState
     private var _breakpoints: Set[Short] = Set.empty
@@ -47,7 +25,7 @@ abstract class ProcessingModel extends DataModel with Processor {
 
     override def toggleBreakpoint(address: Short): Unit =
       if (_breakpoints(address)) _breakpoints -= address
-      else _breakpoints += address
+      else _breakpoints += address.toShort
   }
 
   class TrackingVirtualMachineImpl(initialState: State) extends TrackingVirtualMachine {
@@ -89,13 +67,6 @@ abstract class ProcessingModel extends DataModel with Processor {
 
     override def toggleBreakpoint(address: Short): Unit =
       if (_breakpoints(address)) _breakpoints -= address
-      else _breakpoints += address
-  }
-
-  trait VirtualMachineBuilder {
-    def update(address: Short, uniWord: UniWord): VirtualMachineBuilder
-    def updateProgramCounter(address: Short): VirtualMachineBuilder
-    def build: VirtualMachine
-    def buildTracking: TrackingVirtualMachine
+      else _breakpoints += address.toShort
   }
 }

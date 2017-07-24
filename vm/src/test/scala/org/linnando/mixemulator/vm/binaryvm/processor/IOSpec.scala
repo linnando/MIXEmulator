@@ -192,7 +192,7 @@ class IOSpec extends Specification {
       val nextState = execute(prevState, MixWord(0x00040022))
       val device = nextState.devices(0)
       (0 until device._1.blockSize) forall { i =>
-        nextState.memory.get(MixIndex((1000 + i).toShort)) must be equalTo MixWord(0x01041041)
+        nextState.memory.get((1000 + i).toShort) must be equalTo MixWord(0x01041041)
       }
       nextState.memory.exclusiveLocks must not contain((MixIndex(1000), device._1.blockSize, 0))
       nextState.programCounter must be equalTo MixIndex(2)

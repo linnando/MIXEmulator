@@ -1,6 +1,6 @@
 package org.linnando.mixemulator.vm
 
-import Comparison.Comparison
+import org.linnando.mixemulator.vm.Comparison.Comparison
 import org.linnando.mixemulator.vm.io.Device
 import org.linnando.mixemulator.vm.io.data.IOWord
 
@@ -19,7 +19,33 @@ trait DataModel {
                    programCounter: I,
                    timeCounter: Int,
                    isHalted: Boolean,
-                   devices: IndexedSeq[(Device, Queue[I])])
+                   devices: IndexedSeq[(Device, Queue[I])]) extends VirtualMachineState {
+    override def get(address: Short): IOWord = memory.get(address).toIOWord
+
+    override def getA: IOWord = registers.getA.toIOWord
+
+    override def getX: IOWord = registers.getX.toIOWord
+
+    override def getI1: IOWord = registers.getI(1).toIOWord
+
+    override def getI2: IOWord = registers.getI(2).toIOWord
+
+    override def getI3: IOWord = registers.getI(3).toIOWord
+
+    override def getI4: IOWord = registers.getI(4).toIOWord
+
+    override def getI5: IOWord = registers.getI(5).toIOWord
+
+    override def getI6: IOWord = registers.getI(6).toIOWord
+
+    override def getJ: IOWord = registers.getJ.toIOWord
+
+    override def getOV: Boolean = registers.getOV
+
+    override def getCMP: Comparison = registers.getCMP
+
+    override def getProgramCounter: Short = programCounter.toShort
+  }
 
   def getZero: W
 
@@ -62,6 +88,8 @@ trait DataModel {
   trait AbstractMemoryState {
     def get(address: I): W
 
+    def get(address: Short): W
+
     def updated(address: I, value: W): MS
 
     def updated(address: I, fieldSpec: B, value: W): MS
@@ -101,6 +129,8 @@ trait DataModel {
     def toShort: Short
 
     def toWord: W
+
+    def toIOWord: IOWord
   }
 
   trait AbstractMixWord {
@@ -134,7 +164,13 @@ trait DataModel {
 
     def toIndex: I
 
+    def toByte: B
+
     def toLong: Long
+
+    def toDWordLeft: DW
+
+    def toDWordRight: DW
 
     def toIOWord: IOWord
 
@@ -157,6 +193,8 @@ trait DataModel {
     def >>|(n: I): DW
 
     def charToNumber: W
+
+    def toWord: W
   }
 
 }

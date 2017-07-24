@@ -250,152 +250,152 @@ class MemorySpec extends Specification {
 
     "store register A to memory" in {
       // A = 2001, I = 0, F = 0:5, C = 24 STA
-      execute(state, MixWord(0x1f440158)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x061c8240)
+      execute(state, MixWord(0x1f440158)).memory.get(2001.toShort) must be equalTo MixWord(0x061c8240)
       // A = 2001, I = 0, F = 1:5, C = 24 STA
-      execute(state, MixWord(0x1f440358)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x461c8240)
+      execute(state, MixWord(0x1f440358)).memory.get(2001.toShort) must be equalTo MixWord(0x461c8240)
       // A = 2001, I = 0, F = 5:5, C = 24 STA
-      execute(state, MixWord(0x1f440b58)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x41083100)
+      execute(state, MixWord(0x1f440b58)).memory.get(2001.toShort) must be equalTo MixWord(0x41083100)
       // A = 2001, I = 0, F = 2:2, C = 24 STA
-      execute(state, MixWord(0x1f440498)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x41003105)
+      execute(state, MixWord(0x1f440498)).memory.get(2001.toShort) must be equalTo MixWord(0x41003105)
       // A = 2001, I = 0, F = 2:3, C = 24 STA
-      execute(state, MixWord(0x1f4404d8)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x41240105)
+      execute(state, MixWord(0x1f4404d8)).memory.get(2001.toShort) must be equalTo MixWord(0x41240105)
       // A = 2001, I = 0, F = 0:1, C = 24 STA
-      execute(state, MixWord(0x1f440058)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x00083105)
+      execute(state, MixWord(0x1f440058)).memory.get(2001.toShort) must be equalTo MixWord(0x00083105)
     }
 
     "store register I1 to memory" in {
       // A = 2001, I = 0, F = 0:5, C = 25 ST1
-      execute(state, MixWord(0x1f440159)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x00000240)
+      execute(state, MixWord(0x1f440159)).memory.get(2001.toShort) must be equalTo MixWord(0x00000240)
       // A = 2001, I = 0, F = 1:5, C = 25 ST1
-      execute(state, MixWord(0x1f440359)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x40000240)
+      execute(state, MixWord(0x1f440359)).memory.get(2001.toShort) must be equalTo MixWord(0x40000240)
       // A = 2001, I = 0, F = 5:5, C = 25 ST1
-      execute(state, MixWord(0x1f440b59)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x41083100)
+      execute(state, MixWord(0x1f440b59)).memory.get(2001.toShort) must be equalTo MixWord(0x41083100)
       // A = 2001, I = 0, F = 2:2, C = 25 ST1
-      execute(state, MixWord(0x1f440499)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x41003105)
+      execute(state, MixWord(0x1f440499)).memory.get(2001.toShort) must be equalTo MixWord(0x41003105)
       // A = 2001, I = 0, F = 2:3, C = 25 ST1
-      execute(state, MixWord(0x1f4404d9)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x41240105)
+      execute(state, MixWord(0x1f4404d9)).memory.get(2001.toShort) must be equalTo MixWord(0x41240105)
       // A = 2001, I = 0, F = 0:1, C = 25 ST1
-      execute(state, MixWord(0x1f440059)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x00083105)
+      execute(state, MixWord(0x1f440059)).memory.get(2001.toShort) must be equalTo MixWord(0x00083105)
     }
 
     "store register I2 to memory" in {
       // A = 2001, I = 0, F = 0:5, C = 26 ST2
-      execute(state, MixWord(0x1f44015a)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x40000240)
+      execute(state, MixWord(0x1f44015a)).memory.get(2001.toShort) must be equalTo MixWord(0x40000240)
       // A = 2001, I = 0, F = 1:5, C = 26 ST2
-      execute(state, MixWord(0x1f44035a)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x40000240)
+      execute(state, MixWord(0x1f44035a)).memory.get(2001.toShort) must be equalTo MixWord(0x40000240)
       // A = 2001, I = 0, F = 5:5, C = 26 ST2
-      execute(state, MixWord(0x1f440b5a)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x41083100)
+      execute(state, MixWord(0x1f440b5a)).memory.get(2001.toShort) must be equalTo MixWord(0x41083100)
       // A = 2001, I = 0, F = 2:2, C = 26 ST2
-      execute(state, MixWord(0x1f44049a)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x41003105)
+      execute(state, MixWord(0x1f44049a)).memory.get(2001.toShort) must be equalTo MixWord(0x41003105)
       // A = 2001, I = 0, F = 2:3, C = 26 ST2
-      execute(state, MixWord(0x1f4404da)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x41240105)
+      execute(state, MixWord(0x1f4404da)).memory.get(2001.toShort) must be equalTo MixWord(0x41240105)
       // A = 2001, I = 0, F = 0:1, C = 26 ST2
-      execute(state, MixWord(0x1f44005a)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x40083105)
+      execute(state, MixWord(0x1f44005a)).memory.get(2001.toShort) must be equalTo MixWord(0x40083105)
     }
 
     "store register I3 to memory" in {
       // A = 2001, I = 0, F = 0:5, C = 27 ST3
-      execute(state, MixWord(0x1f44015b)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x00000240)
+      execute(state, MixWord(0x1f44015b)).memory.get(2001.toShort) must be equalTo MixWord(0x00000240)
       // A = 2001, I = 0, F = 1:5, C = 27 ST3
-      execute(state, MixWord(0x1f44035b)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x40000240)
+      execute(state, MixWord(0x1f44035b)).memory.get(2001.toShort) must be equalTo MixWord(0x40000240)
       // A = 2001, I = 0, F = 5:5, C = 27 ST3
-      execute(state, MixWord(0x1f440b5b)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x41083100)
+      execute(state, MixWord(0x1f440b5b)).memory.get(2001.toShort) must be equalTo MixWord(0x41083100)
       // A = 2001, I = 0, F = 2:2, C = 27 ST3
-      execute(state, MixWord(0x1f44049b)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x41003105)
+      execute(state, MixWord(0x1f44049b)).memory.get(2001.toShort) must be equalTo MixWord(0x41003105)
       // A = 2001, I = 0, F = 2:3, C = 27 ST3
-      execute(state, MixWord(0x1f4404db)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x41240105)
+      execute(state, MixWord(0x1f4404db)).memory.get(2001.toShort) must be equalTo MixWord(0x41240105)
       // A = 2001, I = 0, F = 0:1, C = 27 ST3
-      execute(state, MixWord(0x1f44005b)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x00083105)
+      execute(state, MixWord(0x1f44005b)).memory.get(2001.toShort) must be equalTo MixWord(0x00083105)
     }
 
     "store register I4 to memory" in {
       // A = 2001, I = 0, F = 0:5, C = 28 ST4
-      execute(state, MixWord(0x1f44015c)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x00000240)
+      execute(state, MixWord(0x1f44015c)).memory.get(2001.toShort) must be equalTo MixWord(0x00000240)
       // A = 2001, I = 0, F = 1:5, C = 28 ST4
-      execute(state, MixWord(0x1f44035c)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x40000240)
+      execute(state, MixWord(0x1f44035c)).memory.get(2001.toShort) must be equalTo MixWord(0x40000240)
       // A = 2001, I = 0, F = 5:5, C = 28 ST4
-      execute(state, MixWord(0x1f440b5c)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x41083100)
+      execute(state, MixWord(0x1f440b5c)).memory.get(2001.toShort) must be equalTo MixWord(0x41083100)
       // A = 2001, I = 0, F = 2:2, C = 28 ST4
-      execute(state, MixWord(0x1f44049c)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x41003105)
+      execute(state, MixWord(0x1f44049c)).memory.get(2001.toShort) must be equalTo MixWord(0x41003105)
       // A = 2001, I = 0, F = 2:3, C = 28 ST4
-      execute(state, MixWord(0x1f4404dc)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x41240105)
+      execute(state, MixWord(0x1f4404dc)).memory.get(2001.toShort) must be equalTo MixWord(0x41240105)
       // A = 2001, I = 0, F = 0:1, C = 28 ST4
-      execute(state, MixWord(0x1f44005c)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x00083105)
+      execute(state, MixWord(0x1f44005c)).memory.get(2001.toShort) must be equalTo MixWord(0x00083105)
     }
 
     "store register I5 to memory" in {
       // A = 2001, I = 0, F = 0:5, C = 29 ST5
-      execute(state, MixWord(0x1f44015d)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x00000240)
+      execute(state, MixWord(0x1f44015d)).memory.get(2001.toShort) must be equalTo MixWord(0x00000240)
       // A = 2001, I = 0, F = 1:5, C = 29 ST5
-      execute(state, MixWord(0x1f44035d)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x40000240)
+      execute(state, MixWord(0x1f44035d)).memory.get(2001.toShort) must be equalTo MixWord(0x40000240)
       // A = 2001, I = 0, F = 5:5, C = 29 ST5
-      execute(state, MixWord(0x1f440b5d)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x41083100)
+      execute(state, MixWord(0x1f440b5d)).memory.get(2001.toShort) must be equalTo MixWord(0x41083100)
       // A = 2001, I = 0, F = 2:2, C = 29 ST5
-      execute(state, MixWord(0x1f44049d)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x41003105)
+      execute(state, MixWord(0x1f44049d)).memory.get(2001.toShort) must be equalTo MixWord(0x41003105)
       // A = 2001, I = 0, F = 2:3, C = 29 ST5
-      execute(state, MixWord(0x1f4404dd)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x41240105)
+      execute(state, MixWord(0x1f4404dd)).memory.get(2001.toShort) must be equalTo MixWord(0x41240105)
       // A = 2001, I = 0, F = 0:1, C = 29 ST5
-      execute(state, MixWord(0x1f44005d)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x00083105)
+      execute(state, MixWord(0x1f44005d)).memory.get(2001.toShort) must be equalTo MixWord(0x00083105)
     }
 
     "store register I6 to memory" in {
       // A = 2001, I = 0, F = 0:5, C = 30 ST6
-      execute(state, MixWord(0x1f44015e)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x00000240)
+      execute(state, MixWord(0x1f44015e)).memory.get(2001.toShort) must be equalTo MixWord(0x00000240)
       // A = 2001, I = 0, F = 1:5, C = 30 ST6
-      execute(state, MixWord(0x1f44035e)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x40000240)
+      execute(state, MixWord(0x1f44035e)).memory.get(2001.toShort) must be equalTo MixWord(0x40000240)
       // A = 2001, I = 0, F = 5:5, C = 30 ST6
-      execute(state, MixWord(0x1f440b5e)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x41083100)
+      execute(state, MixWord(0x1f440b5e)).memory.get(2001.toShort) must be equalTo MixWord(0x41083100)
       // A = 2001, I = 0, F = 2:2, C = 30 ST6
-      execute(state, MixWord(0x1f44049e)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x41003105)
+      execute(state, MixWord(0x1f44049e)).memory.get(2001.toShort) must be equalTo MixWord(0x41003105)
       // A = 2001, I = 0, F = 2:3, C = 30 ST6
-      execute(state, MixWord(0x1f4404de)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x41240105)
+      execute(state, MixWord(0x1f4404de)).memory.get(2001.toShort) must be equalTo MixWord(0x41240105)
       // A = 2001, I = 0, F = 0:1, C = 30 ST6
-      execute(state, MixWord(0x1f44005e)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x00083105)
+      execute(state, MixWord(0x1f44005e)).memory.get(2001.toShort) must be equalTo MixWord(0x00083105)
     }
 
     "store register X to memory" in {
       // A = 2001, I = 0, F = 0:5, C = 31 STX
-      execute(state, MixWord(0x1f44015f)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x461c8240)
+      execute(state, MixWord(0x1f44015f)).memory.get(2001.toShort) must be equalTo MixWord(0x461c8240)
       // A = 2001, I = 0, F = 1:5, C = 31 STX
-      execute(state, MixWord(0x1f44035f)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x461c8240)
+      execute(state, MixWord(0x1f44035f)).memory.get(2001.toShort) must be equalTo MixWord(0x461c8240)
       // A = 2001, I = 0, F = 5:5, C = 31 STX
-      execute(state, MixWord(0x1f440b5f)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x41083100)
+      execute(state, MixWord(0x1f440b5f)).memory.get(2001.toShort) must be equalTo MixWord(0x41083100)
       // A = 2001, I = 0, F = 2:2, C = 31 STX
-      execute(state, MixWord(0x1f44049f)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x41003105)
+      execute(state, MixWord(0x1f44049f)).memory.get(2001.toShort) must be equalTo MixWord(0x41003105)
       // A = 2001, I = 0, F = 2:3, C = 31 STX
-      execute(state, MixWord(0x1f4404df)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x41240105)
+      execute(state, MixWord(0x1f4404df)).memory.get(2001.toShort) must be equalTo MixWord(0x41240105)
       // A = 2001, I = 0, F = 0:1, C = 31 STX
-      execute(state, MixWord(0x1f44005f)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x40083105)
+      execute(state, MixWord(0x1f44005f)).memory.get(2001.toShort) must be equalTo MixWord(0x40083105)
     }
 
     "store register J to memory" in {
       // A = 2001, I = 0, F = 0:5, C = 32 STJ
-      execute(state, MixWord(0x1f440160)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x00000bb8)
+      execute(state, MixWord(0x1f440160)).memory.get(2001.toShort) must be equalTo MixWord(0x00000bb8)
       // A = 2001, I = 0, F = 1:5, C = 32 STJ
-      execute(state, MixWord(0x1f440360)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x40000bb8)
+      execute(state, MixWord(0x1f440360)).memory.get(2001.toShort) must be equalTo MixWord(0x40000bb8)
       // A = 2001, I = 0, F = 5:5, C = 32 STJ
-      execute(state, MixWord(0x1f440b60)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x41083138)
+      execute(state, MixWord(0x1f440b60)).memory.get(2001.toShort) must be equalTo MixWord(0x41083138)
       // A = 2001, I = 0, F = 2:2, C = 32 STJ
-      execute(state, MixWord(0x1f4404a0)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x41e03105)
+      execute(state, MixWord(0x1f4404a0)).memory.get(2001.toShort) must be equalTo MixWord(0x41e03105)
       // A = 2001, I = 0, F = 2:3, C = 32 STJ
-      execute(state, MixWord(0x1f4404e0)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x41bb8105)
+      execute(state, MixWord(0x1f4404e0)).memory.get(2001.toShort) must be equalTo MixWord(0x41bb8105)
       // A = 2001, I = 0, F = 0:1, C = 32 STJ
-      execute(state, MixWord(0x1f440060)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x38083105)
+      execute(state, MixWord(0x1f440060)).memory.get(2001.toShort) must be equalTo MixWord(0x38083105)
     }
 
     "store zero to memory" in {
       // A = 2001, I = 0, F = 0:5, C = 33 STZ
-      execute(state, MixWord(0x1f440161)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x00000000)
+      execute(state, MixWord(0x1f440161)).memory.get(2001.toShort) must be equalTo MixWord(0x00000000)
       // A = 2001, I = 0, F = 1:5, C = 33 STZ
-      execute(state, MixWord(0x1f440361)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x40000000)
+      execute(state, MixWord(0x1f440361)).memory.get(2001.toShort) must be equalTo MixWord(0x40000000)
       // A = 2001, I = 0, F = 5:5, C = 33 STZ
-      execute(state, MixWord(0x1f440b61)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x41083100)
+      execute(state, MixWord(0x1f440b61)).memory.get(2001.toShort) must be equalTo MixWord(0x41083100)
       // A = 2001, I = 0, F = 2:2, C = 33 STZ
-      execute(state, MixWord(0x1f4404a1)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x41003105)
+      execute(state, MixWord(0x1f4404a1)).memory.get(2001.toShort) must be equalTo MixWord(0x41003105)
       // A = 2001, I = 0, F = 2:3, C = 33 STZ
-      execute(state, MixWord(0x1f4404e1)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x41000105)
+      execute(state, MixWord(0x1f4404e1)).memory.get(2001.toShort) must be equalTo MixWord(0x41000105)
       // A = 2001, I = 0, F = 0:1, C = 33 STZ
-      execute(state, MixWord(0x1f440061)).memory.get(MixIndex(2001)) must be equalTo MixWord(0x00083105)
+      execute(state, MixWord(0x1f440061)).memory.get(2001.toShort) must be equalTo MixWord(0x00083105)
     }
 
     "move memory words" in {
@@ -408,9 +408,9 @@ class MemorySpec extends Specification {
       )
       // A = 2000, I = 0, F = 3, C = 7 MOVE
       val nextState = execute(prevState, MixWord(0x1f4000c7))
-      nextState.memory.get(MixIndex(3000)) must be equalTo MixWord(0x00000001)
-      nextState.memory.get(MixIndex(3001)) must be equalTo MixWord(0x00000002)
-      nextState.memory.get(MixIndex(3002)) must be equalTo MixWord(0x00000003)
+      nextState.memory.get(3000.toShort) must be equalTo MixWord(0x00000001)
+      nextState.memory.get(3001.toShort) must be equalTo MixWord(0x00000002)
+      nextState.memory.get(3002.toShort) must be equalTo MixWord(0x00000003)
     }
 
     "do nothing when the number of words to move is zero" in {
@@ -423,9 +423,9 @@ class MemorySpec extends Specification {
       )
       // A = 2000, I = 0, F = 0, C = 7 MOVE
       val nextState = execute(prevState, MixWord(0x1f400007))
-      nextState.memory.get(MixIndex(3000)) must be equalTo MixWord(0x00000000)
-      nextState.memory.get(MixIndex(3001)) must be equalTo MixWord(0x00000000)
-      nextState.memory.get(MixIndex(3002)) must be equalTo MixWord(0x00000000)
+      nextState.memory.get(3000.toShort) must be equalTo MixWord(0x00000000)
+      nextState.memory.get(3001.toShort) must be equalTo MixWord(0x00000000)
+      nextState.memory.get(3002.toShort) must be equalTo MixWord(0x00000000)
     }
 
     "move overlapping ranges in the downward direction" in {
@@ -438,10 +438,10 @@ class MemorySpec extends Specification {
       )
       // A = 2000, I = 0, F = 3, C = 7 MOVE
       val nextState = execute(prevState, MixWord(0x1f4000c7))
-      nextState.memory.get(MixIndex(1999)) must be equalTo MixWord(0x00000001)
-      nextState.memory.get(MixIndex(2000)) must be equalTo MixWord(0x00000002)
-      nextState.memory.get(MixIndex(2001)) must be equalTo MixWord(0x00000003)
-      nextState.memory.get(MixIndex(2002)) must be equalTo MixWord(0x00000003)
+      nextState.memory.get(1999.toShort) must be equalTo MixWord(0x00000001)
+      nextState.memory.get(2000.toShort) must be equalTo MixWord(0x00000002)
+      nextState.memory.get(2001.toShort) must be equalTo MixWord(0x00000003)
+      nextState.memory.get(2002.toShort) must be equalTo MixWord(0x00000003)
     }
 
     "move overlapping ranges in the upward direction" in {
@@ -454,10 +454,10 @@ class MemorySpec extends Specification {
       )
       // A = 2000, I = 0, F = 3, C = 7 MOVE
       val nextState = execute(prevState, MixWord(0x1f4000c7))
-      nextState.memory.get(MixIndex(2000)) must be equalTo MixWord(0x00000001)
-      nextState.memory.get(MixIndex(2001)) must be equalTo MixWord(0x00000001)
-      nextState.memory.get(MixIndex(2002)) must be equalTo MixWord(0x00000001)
-      nextState.memory.get(MixIndex(2003)) must be equalTo MixWord(0x00000001)
+      nextState.memory.get(2000.toShort) must be equalTo MixWord(0x00000001)
+      nextState.memory.get(2001.toShort) must be equalTo MixWord(0x00000001)
+      nextState.memory.get(2002.toShort) must be equalTo MixWord(0x00000001)
+      nextState.memory.get(2003.toShort) must be equalTo MixWord(0x00000001)
     }
   }
 }

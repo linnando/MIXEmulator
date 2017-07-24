@@ -14,28 +14,226 @@ object binary extends ProcessingModel {
 
   override def createVirtualMachineBuilder(): VirtualMachineBuilder = BinaryVirtualMachineBuilder()
 
-  case class BinaryVirtualMachineBuilder(state: State = initialState) extends VirtualMachineBuilder {
-    override def update(address: Short, uniWord: UniWord): VirtualMachineBuilder = copy(
-      state = state.copy(
-        memory = state.memory.updated(MixIndex(address), MixWord(uniWord))
-      )
-    )
+  case class BinaryVirtualMachineBuilder(state: State = initialState,
+                                         counter: I = MixIndex(0),
+                                         symbols: Map[String, W] = Map.empty,
+                                         forwardReferences: Map[String, Seq[I]] = Map.empty.withDefaultValue(Seq.empty),
+                                         literals: Map[W, Seq[I]] = Map.empty.withDefaultValue(Seq.empty)) extends VirtualMachineBuilder {
 
-    override def updateProgramCounter(programCounter: Short): VirtualMachineBuilder = copy(
-      state = state.copy(
-        programCounter = MixIndex(programCounter)
+    override def getCounter: Short = counter.toShort
+
+    override def withWValueSymbol(label: String, wValue: String): BinaryVirtualMachineBuilder =
+      withSymbol(label, evaluateWValue(wValue))
+
+    private def withSymbol(label: String, value: W) = label match {
+      case null | "" => this
+      case VirtualMachineBuilder.localBackReference(_*) =>
+        throw new WrongLabelException(label)
+      case VirtualMachineBuilder.localForwardReference(_*) =>
+        throw new WrongLabelException(label)
+      case VirtualMachineBuilder.localLabel(_*) =>
+        copy(symbols = symbols.updated(label, value), forwardReferences = forwardReferences - label)
+          .withAddressFields(forwardReferences(label), value)
+      case _ =>
+        if (symbols.contains(label)) throw new DuplicateSymbolException(label)
+        else copy(symbols = symbols.updated(label, value), forwardReferences = forwardReferences - label)
+          .withAddressFields(forwardReferences(label), value)
+    }
+
+    private def withAddressFields(addresses: Seq[I], addressFieldValue: W): BinaryVirtualMachineBuilder = {
+      if (addresses.isEmpty) this
+      else {
+        if ((addressFieldValue.contents & 0x3ffff000) > 0)
+          throw new OverflowException
+        val addressField = (addressFieldValue.contents & 0x40000000) | ((addressFieldValue.contents & 0xfff) << 18)
+        copy(state = addresses.foldLeft(state) { (s, address) =>
+          val value = MixWord(addressField | s.memory.get(address).contents & 0x0003ffff)
+          s.copy(memory = s.memory.updated(address, value))
+        })
+      }
+    }
+
+    private def evaluateWValue(wValue: String): W =
+      wValue.split(",").foldLeft(MixWord(0)) { (word, segment) =>
+        segment match {
+          case VirtualMachineBuilder.expressionAndFieldSpec(expression, _, fPart) =>
+            val value = evaluateExpression(expression)
+            val fieldSpec = evaluateFPart(fPart, 5)
+            val l = fieldSpec.contents >> 3
+            val r = fieldSpec.contents & 0x07
+            if (l > r) throw new WrongFieldSpecException(fieldSpec.contents)
+            val shiftedValue = value.contents & 0x40000000 | ((value.contents << (6 * (5 - r))) & 0x3fffffff)
+            val mask = MixWord.bitMask(l, r)
+            MixWord(shiftedValue & mask | word.contents & ~mask & 0x7fffffff)
+          case _ => throw new InvalidExpressionException(segment)
+        }
+      }
+
+    private def evaluateExpression(expression: String): W = {
+      def _op(left: W, op: String, right: W): W = op match {
+        case "+" => (left + right)._2
+        case "-" => (left - right)._2
+        case "*" => (left * right).toWord
+        case "/" => (left.toDWordRight / right)._1
+        case "//" => (left.toDWordLeft / right)._1
+        case ":" =>
+          val shiftedLeft = MixWord(left.contents & 0x40000000 | ((left.contents & 0x07ffffff) << 3))
+          (shiftedLeft + right)._2
+      }
+
+      def _evaluate(acc: W, tail: CharSequence): W =
+        if (tail == null || tail.length() == 0) acc
+        else VirtualMachineBuilder.expressionSegment.findPrefixMatchOf(tail) match {
+          case Some(m) =>
+            val op = m.group(1)
+            val value = evaluateElementaryExpression(m.group(2))
+            val next = _op(acc, op, value)
+            _evaluate(next, m.after)
+          case None =>
+            throw new InvalidExpressionException(expression)
+        }
+
+      VirtualMachineBuilder.signedElementaryExpression.findPrefixMatchOf(expression) match {
+        case Some(m) =>
+          val sign = m.group(1)
+          val value = evaluateElementaryExpression(m.group(2))
+          val start = if (sign == null || sign == "" || sign == "+") value else -value
+          _evaluate(start, m.after)
+        case None =>
+          throw new InvalidExpressionException(expression)
+      }
+    }
+
+    private def evaluateElementaryExpression(expression: String): W = expression match {
+      case "*" =>
+        counter.toWord
+      case VirtualMachineBuilder.number(_*) =>
+        MixWord.get(expression.toLong)
+      case VirtualMachineBuilder.localLabel(_*) =>
+        throw new InvalidExpressionException(expression)
+      case VirtualMachineBuilder.localBackReference(id) => symbols.get(s"${id}H") match {
+        case Some(value) => value
+        case None => throw new UndefinedSymbolException(expression)
+      }
+      case VirtualMachineBuilder.localForwardReference(_*) =>
+        throw new UndefinedSymbolException(expression)
+      case VirtualMachineBuilder.numberOrSymbol(_*) => symbols.get(expression) match {
+        case Some(value) => value
+        case None => throw new UndefinedSymbolException(expression)
+      }
+    }
+
+    private def evaluateFPart(fPart: String, default: Byte): B = fPart match {
+      case null | "" => MixByte(default)
+      case _ => evaluateExpression(fPart).toByte
+    }
+
+    override def withCurrentCounterSymbol(label: String): BinaryVirtualMachineBuilder =
+      withSymbol(label, counter.toWord)
+
+    override def withOrig(wValue: String): BinaryVirtualMachineBuilder = {
+      val address = evaluateWValue(wValue)
+      if (address.isNegative || (address <=> MixWord(VirtualMachine.MEMORY_SIZE)) != Comparison.LESS)
+        throw new WrongMemoryAddressException(address.toLong)
+      copy(counter = address.toIndex)
+    }
+
+    override def withConstant(wValue: String): BinaryVirtualMachineBuilder =
+      withValue(evaluateWValue(wValue))
+
+    private def withValue(value: W): BinaryVirtualMachineBuilder = {
+      if (counter.contents >= VirtualMachine.MEMORY_SIZE)
+        throw new WrongMemoryAddressException(counter.contents)
+      copy(
+        state = state.copy(memory = state.memory.updated(counter, value)),
+        counter = counter.next
       )
-    )
+    }
+
+    override def withCharCode(chars: String): VirtualMachineBuilder =
+      withValue(translateCharCode(chars))
+
+    private def translateCharCode(chars: String): W =
+      MixWord((0 until 5).foldLeft(0) { (contents, i) =>
+        val char = chars(i)
+        VirtualMachine.CODES.get(char) match {
+          case Some(code) => contents | (code << 6 * (4 - i))
+          case None => throw new UnsupportedCharacterException(char)
+        }
+      })
+
+    override def withFinalSection(label: String, value: String): VirtualMachineBuilder = {
+      val withSymbols = forwardReferences.keys.foldLeft(this) { (s, ref) =>
+        if (ref == label) s
+        else s.withCurrentCounterSymbol(ref).withValue(MixWord(0))
+      }
+      val withLiterals = literals.foldLeft(withSymbols) { (s, literal) =>
+        s.withAddressFields(literal._2, s.counter.toWord).withValue(literal._1)
+      }
+      withLiterals.withCurrentCounterSymbol(label)
+        .withProgramCounter(evaluateWValue(value).toIndex)
+    }
+
+    private def withProgramCounter(value: I): BinaryVirtualMachineBuilder =
+      copy(state = state.copy(programCounter = value))
+
+    override def withCommand(aPart: String, indexPart: String, fPart: String, opCode: Byte, defaultFieldSpec: Byte): BinaryVirtualMachineBuilder = {
+      val fieldSpec = evaluateFPart(fPart, defaultFieldSpec)
+      val indexSpec = evaluateIndexPart(indexPart)
+      try {
+        val address = evaluateAPart(aPart)
+        val cellValue = MixWord(address, indexSpec, fieldSpec, MixByte(opCode))
+        withValue(cellValue)
+      }
+      catch {
+        case e: ForwardReferenceException =>
+          val cellValue = MixWord(MixIndex(0.toShort), indexSpec, fieldSpec, MixByte(opCode))
+          withForwardReference(e.symbol).withValue(cellValue)
+        case e: LiteralException =>
+          val cellValue = MixWord(MixIndex(0.toShort), indexSpec, fieldSpec, MixByte(opCode))
+          withLiteral(e.value).withValue(cellValue)
+      }
+    }
+
+    private def evaluateIndexPart(indexPart: String): B = indexPart match {
+      case null | "" => MixByte(0)
+      case _ => evaluateExpression(indexPart).toByte
+    }
+
+    private def evaluateAPart(aPart: String): I = aPart match {
+      case null | "" => MixIndex(0.toShort)
+      case VirtualMachineBuilder.numberOrSymbol(_*) =>
+        try {
+          evaluateElementaryExpression(aPart).toIndex
+        }
+        catch {
+          case e: UndefinedSymbolException => throw new ForwardReferenceException(e.symbol)
+        }
+      case VirtualMachineBuilder.literal(wValue) => throw new LiteralException(evaluateWValue(wValue))
+      case _ => evaluateExpression(aPart).toIndex
+    }
+
+    private def withForwardReference(symbol: String): BinaryVirtualMachineBuilder =
+      copy(forwardReferences = forwardReferences.updated(symbol, forwardReferences(symbol) :+ counter))
+
+    private def withLiteral(value: W): BinaryVirtualMachineBuilder =
+      copy(literals = literals.updated(value, literals(value) :+ counter))
 
     override def build: VirtualMachine = new VirtualMachineImpl(state)
 
     override def buildTracking: TrackingVirtualMachine = new TrackingVirtualMachineImpl(state)
   }
 
+  class ForwardReferenceException(val symbol: String) extends Exception {
+  }
+
+  class LiteralException(val value: W) extends Exception {
+  }
+
   def initialState = State(
     registers = RegisterState.initialState,
     memory = MemoryState.initialState,
-    programCounter = MixIndex(0),
+    programCounter = MixIndex(0.toShort),
     timeCounter = 0,
     isHalted = false,
     devices = IndexedSeq.empty
@@ -104,29 +302,31 @@ object binary extends ProcessingModel {
   }
 
   case class MemoryState(contents: Vector[Int], sharedLocks: List[(I, Int, Int)], exclusiveLocks: List[(I, Int, Int)]) extends AbstractMemoryState {
-    override def get(address: I): W = {
-      if (address.contents >= MemoryState.MEMORY_SIZE)
-        throw new WrongMemoryAddressException(address.contents)
+    override def get(address: I): W = get(address.contents)
+
+    override def get(address: Short): MixWord = {
+      if (address >= VirtualMachine.MEMORY_SIZE)
+        throw new WrongMemoryAddressException(address)
       if (exclusiveLocks exists { l => conflicts(l, address) }) throw new InconsistentReadException
-      MixWord(contents(address.contents))
+      MixWord(contents(address))
     }
 
-    private def conflicts(lock: (I, Int, Int), address: I, size: Int = 1) =
-      address.contents < lock._1.contents + lock._2 && lock._1.contents < address.contents + size
+    private def conflicts(lock: (I, Int, Int), address: Short, size: Int = 1) =
+      address < lock._1.contents + lock._2 && lock._1.contents < address + size
 
     override def updated(address: I, value: W): MS = {
-      if (address.contents >= MemoryState.MEMORY_SIZE)
+      if (address.contents >= VirtualMachine.MEMORY_SIZE)
         throw new WrongMemoryAddressException(address.contents)
-      if (sharedLocks exists { l => conflicts(l, address) }) throw new InconsistentReadException
-      if (exclusiveLocks exists { l => conflicts(l, address) }) throw new WriteConflictException
+      if (sharedLocks exists { l => conflicts(l, address.contents) }) throw new InconsistentReadException
+      if (exclusiveLocks exists { l => conflicts(l, address.contents) }) throw new WriteConflictException
       copy(contents = contents.updated(address.contents, value.contents))
     }
 
     override def updated(address: I, fieldSpec: B, value: W): MS = {
-      if (address.contents >= MemoryState.MEMORY_SIZE)
+      if (address.contents >= VirtualMachine.MEMORY_SIZE)
         throw new WrongMemoryAddressException(address.contents)
-      if (sharedLocks exists { l => conflicts(l, address) }) throw new InconsistentReadException
-      if (exclusiveLocks exists { l => conflicts(l, address) }) throw new WriteConflictException
+      if (sharedLocks exists { l => conflicts(l, address.contents) }) throw new InconsistentReadException
+      if (exclusiveLocks exists { l => conflicts(l, address.contents) }) throw new WriteConflictException
       val l = fieldSpec.contents >> 3
       val r = fieldSpec.contents & 0x07
       if (l > r) throw new WrongFieldSpecException(fieldSpec.contents)
@@ -137,17 +337,17 @@ object binary extends ProcessingModel {
     }
 
     override def withSharedLock(address: I, size: Int, deviceNum: Int): MS = {
-      if (address.contents + size > MemoryState.MEMORY_SIZE)
+      if (address.contents + size > VirtualMachine.MEMORY_SIZE)
         throw new WrongMemoryAddressException(address.contents)
-      if (exclusiveLocks exists { l => conflicts(l, address, size) }) throw new InconsistentReadException
+      if (exclusiveLocks exists { l => conflicts(l, address.contents, size) }) throw new InconsistentReadException
       copy(sharedLocks = (address, size, deviceNum) :: sharedLocks)
     }
 
     override def withExclusiveLock(address: I, size: Int, deviceNum: Int): MS = {
-      if (address.contents + size > MemoryState.MEMORY_SIZE)
+      if (address.contents + size > VirtualMachine.MEMORY_SIZE)
         throw new WrongMemoryAddressException(address.contents)
-      if (sharedLocks exists { l => conflicts(l, address, size) }) throw new InconsistentReadException
-      if (exclusiveLocks exists { l => conflicts(l, address, size) }) throw new WriteConflictException
+      if (sharedLocks exists { l => conflicts(l, address.contents, size) }) throw new InconsistentReadException
+      if (exclusiveLocks exists { l => conflicts(l, address.contents, size) }) throw new WriteConflictException
       copy(exclusiveLocks = (address, size, deviceNum) :: exclusiveLocks)
     }
 
@@ -158,10 +358,8 @@ object binary extends ProcessingModel {
   }
 
   object MemoryState {
-    val MEMORY_SIZE: Short = 4000
-
     def initialState = MemoryState(
-      contents = Vector.fill(MEMORY_SIZE)(0),
+      contents = Vector.fill(VirtualMachine.MEMORY_SIZE)(0),
       sharedLocks = List.empty,
       exclusiveLocks = List.empty
     )
@@ -252,6 +450,22 @@ object binary extends ProcessingModel {
       else (-(contents ^ 0x1000)).toShort
 
     override def toWord: W = MixWord((contents & 0x1000) << 18 | (contents & 0xfff))
+
+    override def toIOWord: IOWord = {
+      IOWord(
+        (contents & MixIndex.masks(0)) > 0,
+        Seq[Byte](0, 0, 0) ++ (1 to 2).map(i => ((contents & MixIndex.masks(i)) >> (6 * (2 - i))).toByte)
+      )
+    }
+  }
+
+  object MixIndex {
+    val masks: Array[Int] = Array(0x1000, 0xfc0, 0x3f)
+
+    def bitMask(l: Int, r: Int): Int = {
+      if (l > 5 || r > 5) throw new WrongFieldSpecException((8 * l + r).toByte)
+      (l to r).foldLeft(0) { (m, i) => m | masks(i - 3) }
+    }
   }
 
   case class MixWord(contents: Int) extends AbstractMixWord {
@@ -340,10 +554,21 @@ object binary extends ProcessingModel {
       MixIndex(((contents & 0x40000000) >> 18 | (contents & 0xfff)).toShort)
     }
 
+    override def toByte: MixByte = {
+      if ((contents & 0x7fffffc0) > 0) throw new OverflowException
+      MixByte((contents & 0x3f).toByte)
+    }
+
     override def toLong: Long = {
       if (isPositive) contents
       else -(contents ^ 0x40000000)
     }
+
+    override def toDWordLeft: MixDWord = MixDWord(contents.toLong << 30)
+
+    override def toDWordRight: MixDWord =
+      MixDWord(((contents & 0x40000000).toLong << 30) | (contents & 0x3fffffff).toLong)
+
 
     override def toIOWord: IOWord = IOWord(
       (contents & MixWord.masks(0)) > 0,
@@ -362,21 +587,16 @@ object binary extends ProcessingModel {
   object MixWord {
     val masks: Array[Int] = Array(0x40000000, 0x3f000000, 0xfc0000, 0x3f000, 0xfc0, 0x3f)
 
-    def apply(uniWord: UniWord): MixWord = {
-      val signed = if (uniWord.negative) 0x40000000 else 0x00000000
-      val word = uniWord.fields.foldLeft(signed) { (word, field) =>
-        val l = field._1 >> 3
-        val r = field._1 & 0x07
-        if (l > r) throw new WrongFieldSpecException(field._1)
-        if (l == 0) throw new WrongFieldSpecException(field._1)
-        if (field._2 < 0L || field._2 >= (1L << 6 * (r - l + 1)))
-          throw new WrongFieldValueException(field._2)
-        val mask = MixWord.bitMask(l, r)
-        val shiftedValue = field._2.toInt << (6 * (5 - r))
-        shiftedValue | word & ~mask & 0x7fffffff
-      }
-      MixWord(word)
+    def get(value: Long): MixWord = {
+      val sign = if (value < 0) 0x40000000 else 0x0
+      val abs = value.abs
+      if ((abs & ~0x3fffffffL) != 0)
+        throw new OverflowException
+      MixWord(sign | abs.toInt)
     }
+
+    def apply(address: I, indexSpec: B, fieldSpec: B, opCode: B): MixWord =
+      MixWord((address.contents << 18) | (indexSpec.contents << 12) | (fieldSpec.contents << 6) | opCode.contents)
 
     def bitMask(l: Int, r: Int): Int = {
       if (l > 5 || r > 5) throw new WrongFieldSpecException((8 * l + r).toByte)
@@ -432,6 +652,10 @@ object binary extends ProcessingModel {
         (state._1 * 10 + d, state._2 >> 6)
       }
       MixWord((((contents & 0x1000000000000000L) >> 30) | (number._1 & 0x3fffffff)).toInt)
+    }
+
+    override def toWord: MixWord = {
+      MixWord((((contents & 0x1000000000000000L) >> 30) | (contents & 0x3fffffff)).toInt)
     }
   }
 }

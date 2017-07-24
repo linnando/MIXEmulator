@@ -1,4 +1,4 @@
 package org.linnando.mixemulator.vm.exceptions
 
-case class WrongCharacterCodeException(code: Byte) extends Exception {
+class WrongCharacterCodeException(val code: Byte) extends Exception {
 }

@@ -1,8 +1,7 @@
 package org.linnando.mixemulator.vm.binaryvm.datamodel
 
-import org.linnando.mixemulator.vm.UniWord
 import org.linnando.mixemulator.vm.binary._
-import org.linnando.mixemulator.vm.exceptions.{OverflowException, WrongFieldSpecException, WrongFieldValueException}
+import org.linnando.mixemulator.vm.exceptions.OverflowException
 import org.linnando.mixemulator.vm.io.data.IOWord
 import org.specs2.mutable.Specification
 
@@ -33,29 +32,29 @@ class ConversionOpsSpec extends Specification {
 
   "binary index conversion" should {
     "convert a positive index to a word" in {
-      MixIndex(0x1).toWord must be equalTo MixWord(0x1)
+      MixIndex(0x1.toShort).toWord must be equalTo MixWord(0x1)
     }
 
     "convert a negative index to a word" in {
-      MixIndex(0x1001).toWord must be equalTo MixWord(0x40000001)
+      MixIndex(0x1001.toShort).toWord must be equalTo MixWord(0x40000001)
     }
 
     "convert a positive index to a Short" in {
-      MixIndex(0x1).toShort must be equalTo 1
+      MixIndex(0x1.toShort).toShort must be equalTo 1
     }
 
     "convert a negative index to a Short" in {
-      MixIndex(0x1001).toShort must be equalTo -1
+      MixIndex(0x1001.toShort).toShort must be equalTo -1
     }
   }
 
   "binary word conversion" should {
     "convert a positive word to an index" in {
-      MixWord(0x1).toIndex must be equalTo MixIndex(0x1)
+      MixWord(0x1).toIndex must be equalTo MixIndex(0x1.toShort)
     }
 
     "convert a negative word to an index" in {
-      MixWord(0x40000001).toIndex must be equalTo MixIndex(0x1001)
+      MixWord(0x40000001).toIndex must be equalTo MixIndex(0x1001.toShort)
     }
 
     "throw an exception if the value is too big for an index" in {
@@ -86,55 +85,6 @@ class ConversionOpsSpec extends Specification {
 
     "convert a negative word to an i/o word" in {
       MixWord(0x41083105).toIOWord must be equalTo IOWord(negative = true, Vector(1, 2, 3, 4, 5))
-    }
-  }
-
-  "binary universal word conversion" should {
-    "convert a positive universal word to a word" in {
-      MixWord(UniWord(negative = false, Map(
-        9.toByte -> 1,
-        18.toByte -> 2,
-        27.toByte -> 3,
-        36.toByte -> 4,
-        45.toByte -> 5
-      ))) must be equalTo MixWord(0x01083105)
-    }
-
-    "convert a negative universal word to a word" in {
-      MixWord(UniWord(negative = true, Map(
-        9.toByte -> 1,
-        18.toByte -> 2,
-        27.toByte -> 3,
-        36.toByte -> 4,
-        45.toByte -> 5
-      ))) must be equalTo MixWord(0x41083105)
-    }
-
-    "fill missing fields with zeros" in {
-      MixWord(UniWord(negative = true, Map(
-        9.toByte -> 1,
-        27.toByte -> 2,
-        36.toByte -> 3,
-        45.toByte -> 4
-      ))) must be equalTo MixWord(0x410020c4)
-    }
-
-    "process multi-byte field specifications" in {
-      MixWord(UniWord(negative = true, Map(
-        11.toByte -> 123456L,
-        37.toByte -> 3210L
-      ))) must be equalTo MixWord(0x5e240c8a)
-    }
-
-    "reject incorrect field specifications" in {
-      MixWord(UniWord(negative = false, Map(8.toByte -> 0L))) must throwA[WrongFieldSpecException]
-      MixWord(UniWord(negative = false, Map(6.toByte -> 0L))) must throwA[WrongFieldSpecException]
-      MixWord(UniWord(negative = false, Map(5.toByte -> 0L))) must throwA[WrongFieldSpecException]
-    }
-
-    "reject incorrect field values" in {
-      MixWord(UniWord(negative = false, Map(9.toByte -> 64L))) must throwA[WrongFieldValueException]
-      MixWord(UniWord(negative = false, Map(13.toByte -> 0x40000000L))) must throwA[WrongFieldValueException]
     }
   }
 
