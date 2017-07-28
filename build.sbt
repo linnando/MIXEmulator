@@ -26,3 +26,21 @@ lazy val vm = project
     ),
     scalacOptions in Test ++= Seq("-Yrangepos")
   )
+
+lazy val webapp = project
+  .dependsOn(asm, vm)
+  .enablePlugins(ScalaJSPlugin)
+  .enablePlugins(Angulate2Plugin)
+  .settings(
+    sharedSettings,
+    name := "MIX Emulator Web",
+    ngBootstrap := Some("org.linnando.mixemulator.webapp.AppModule"),
+    scalacOptions in Test ++= Seq("-Yrangepos")
+  )
+
+val stage = taskKey[Unit]("Stage task")
+
+stage := {
+  (systemJS in (webapp, Compile, fullOptJS)).value
+  (fullOptJS in (webapp, Compile)).value
+}
