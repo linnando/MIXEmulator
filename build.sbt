@@ -40,7 +40,4 @@ lazy val webapp = project
 
 val stage = taskKey[Unit]("Stage task")
 
-stage := {
-  (systemJS in (webapp, Compile, fullOptJS)).value
-  (fullOptJS in (webapp, Compile)).value
-}
+stage := (fullOptJS in (webapp, Compile)).value
