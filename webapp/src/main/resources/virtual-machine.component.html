@@ -1,0 +1,28 @@
+<div class="container">
+    <div class="row control-row">
+        <div class="col-xs-8">
+            Create a virtual machine:
+            <button class="btn btn-default" (click)="assembleNonTracking()">Without tracking</button>
+            <button class="btn btn-default" (click)="assembleTracking()">With tracking</button>
+        </div>
+        <div class="col-xs-4">
+            <button class="btn btn-default" (click)="runBack()" [disabled]="!canMoveBack"><i class="fa fa-fast-backward" aria-hidden="true"></i></button>
+            <button class="btn btn-default" (click)="stepBack()" [disabled]="!canMoveBack"><i class="fa fa-step-backward" aria-hidden="true"></i></button>
+            <button class="btn btn-default" (click)="stepForward()" [disabled]="!canMoveForward"><i class="fa fa-step-forward" aria-hidden="true"></i></button>
+            <button class="btn btn-default" (click)="runForward()" [disabled]="!canMoveForward"><i class="fa fa-fast-forward" aria-hidden="true"></i></button>
+        </div>
+    </div>
+    <div *ngIf="isActive" class="row view-row">
+        <div class="col-xs-6 registers">
+            <registers></registers>
+        </div>
+        <div class="col-xs-6 memory">
+            <memory-data></memory-data>
+        </div>
+    </div>
+    <div *ngIf="isActive" class="row code-row">
+        <div class="col-xs-12">
+            <memory-text></memory-text>
+        </div>
+    </div>
+</div>

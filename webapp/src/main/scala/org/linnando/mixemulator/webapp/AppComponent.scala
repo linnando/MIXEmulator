@@ -1,11 +1,13 @@
 package org.linnando.mixemulator.webapp
 
+import angulate2.router.Router
 import angulate2.std._
 
 @Component(
   selector = "mix-emulator-app",
-  template = "<h1>{{greeting}}</h1>"
+  templateUrl = "webapp/src/main/resources/app.component.html",
+  styleUrls = @@@("webapp/src/main/resources/app.component.css")
 )
-class AppComponent {
-  val greeting = "Hello Angular!"
+class AppComponent(r: Router) {
+  val router: Router = r
 }

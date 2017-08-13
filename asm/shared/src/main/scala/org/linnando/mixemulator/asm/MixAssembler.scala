@@ -5,97 +5,133 @@ import org.linnando.mixemulator.vm.{VirtualMachine, VirtualMachineBuilder}
 
 import scala.util.matching.Regex
 
-case class MixAssembler(builder: VirtualMachineBuilder, counterHistory: List[List[Short]]) {
-  def parseLine(line: String): MixAssembler =
-    line match {
-      case MixAssembler.commentPattern(_*) =>
-        sequential(builder)
-      case MixAssembler.opLinePattern(label, op, rest) =>
-        withOpLine(label, op, rest)
-      case _ => throw new WrongLineException
+case class MixAssembler(builder: VirtualMachineBuilder,
+                        symbolsBeforeCounter: List[(Option[Short], Option[Int])] = List.empty,
+                        symbolsAfterCounter: List[(Option[Short], Option[Int])] = List.tabulate(VirtualMachine.MEMORY_SIZE)(i => (Some(i.toShort), None))) {
+  def withLine(lineNumber: Int, line: String): MixAssembler = MixAssembler.commentLinePrefix.findPrefixOf(line) match {
+    case Some(_) => sequential(lineNumber, builder)
+    case None => withOpLine(lineNumber: Int, line: String)
+  }
+
+  private def sequential(lineNumber: Int, nextBuilderState: VirtualMachineBuilder) = {
+    val (left, right) = symbolsAfterCounter.span(p => p._1.forall(pp => pp < nextBuilderState.getCounter))
+    copy(builder = nextBuilderState,
+      symbolsBeforeCounter = left match {
+        case Nil => (None, Some(lineNumber)) :: symbolsBeforeCounter
+        case x :: xs => xs.reverse ++ ((Some(x._1.get), Some(lineNumber)) :: symbolsBeforeCounter)
+      },
+      symbolsAfterCounter = right)
+  }
+
+  private def withOpLine(lineNumber: Int, line: String): MixAssembler = MixAssembler.labelAndOp.findPrefixMatchOf(line) match {
+    case Some(m) => withOp(lineNumber, m.group(1), m.group(2), m.after.toString)
+    case None => throw new WrongLineException
+  }
+
+  private def withOp(lineNumber: Int, label: String, op: String, rest: String) = op match {
+    case "EQU" => withEqu(lineNumber, label, rest)
+    case "ORIG" => withOrig(lineNumber, label, rest)
+    case "CON" => withCon(lineNumber, label, rest)
+    case "ALF" => withAlf(lineNumber, label, rest)
+    case "END" => withEnd(lineNumber, label, rest)
+    case _ => withCommand(lineNumber, label, op, rest)
+  }
+
+  private def withEqu(lineNumber: Int, label: String, rest: String) =
+    MixAssembler.addressPart.findPrefixMatchOf(rest) match {
+      case Some(m) => sequential(lineNumber, builder.withWValueSymbol(label, m.group(1)))
+      case None => throw new WrongAddressPartException(rest)
     }
 
-  private def sequential(nextBuilderState: VirtualMachineBuilder) = {
-    copy(builder = nextBuilderState,
-      counterHistory = (nextBuilderState.getCounter :: counterHistory.head) :: counterHistory.tail)
+  private def withOrig(lineNumber: Int, label: String, rest: String) =
+    MixAssembler.addressPart.findPrefixMatchOf(rest) match {
+      case Some(m) =>
+        val nextBuilderState = builder.withCurrentCounterSymbol(label).withOrig(m.group(1))
+        val symbols = symbolsBeforeCounter.reverse ++ symbolsAfterCounter
+        val (left, right) = symbols.span(p => p._1.forall(pp => pp < nextBuilderState.getCounter))
+        copy(builder = nextBuilderState,
+          symbolsBeforeCounter = (None, Some(lineNumber)) :: left.reverse,
+          symbolsAfterCounter = right)
+      case None => throw new WrongAddressPartException(rest)
+    }
+
+  private def withCon(lineNumber: Int, label: String, rest: String) =
+    MixAssembler.addressPart.findPrefixMatchOf(rest) match {
+      case Some(m) =>
+        sequential(lineNumber, builder.withCurrentCounterSymbol(label).withConstant(m.group(1)))
+      case None => throw new WrongAddressPartException(rest)
+    }
+
+  private def withAlf(lineNumber: Int, label: String, rest: String) = {
+    val chars =
+      if (rest.length < 6 || rest(1) == ' ' && rest.length < 7) throw new WrongAddressPartException(rest)
+      else if (rest(1) == ' ') rest.substring(2, 7)
+      else rest.substring(1, 6)
+    sequential(lineNumber, builder.withCurrentCounterSymbol(label).withCharCode(chars))
   }
 
-  private def withOpLine(label: String, op: String, rest: String) = op match {
-    case "EQU" => withEqu(label, rest)
-    case "ORIG" => withOrig(label, rest)
-    case "CON" => withCon(label, rest)
-    case "ALF" => withAlf(label, rest)
-    case "END" => withEnd(label, rest)
-    case _ => withCommand(label, op, rest)
-  }
+  private def withEnd(lineNumber: Int, label: String, addressPart: String) =
+    MixAssembler.addressPart.findPrefixMatchOf(addressPart) match {
+      case Some(m) =>
+        val nextBuilderState = builder.withFinalSection(label, m.group(1))
+        val (left, right) = symbolsAfterCounter.span(p => p._1.forall(pp => pp < nextBuilderState.getCounter))
+        copy(builder = nextBuilderState,
+          symbolsBeforeCounter = left.reverse ++ symbolsBeforeCounter,
+          symbolsAfterCounter = right match {
+            case Nil => List((None, Some(lineNumber)))
+            case x :: xs => (x._1, Some(lineNumber)) :: xs
+          })
+      case None => throw new WrongAddressPartException(addressPart)
+    }
 
-  private def withEqu(label: String, addressPart: String) = addressPart match {
-    case MixAssembler.addressPartWithWValue(wValue, _) =>
-      sequential(builder.withWValueSymbol(label, wValue))
-    case _ => throw new WrongAddressPartException(addressPart)
-  }
-
-  private def withOrig(label: String, addressPart: String) = addressPart match {
-    case MixAssembler.addressPartWithWValue(wValue, _) =>
-      val nextBuilderState = builder.withCurrentCounterSymbol(label).withOrig(wValue)
-      copy(builder = nextBuilderState,
-        counterHistory = List(nextBuilderState.getCounter) :: counterHistory)
-    case _ => throw new WrongAddressPartException(addressPart)
-  }
-
-  private def withCon(label: String, addressPart: String) = addressPart match {
-    case MixAssembler.addressPartWithWValue(wValue, _) =>
-      sequential(builder.withCurrentCounterSymbol(label).withConstant(wValue))
-    case _ => throw new WrongAddressPartException(addressPart)
-  }
-
-  private def withAlf(label: String, addressPart: String) = addressPart match {
-    case MixAssembler.alfConstantPartWithoutSpace(chars, _) =>
-      sequential(builder.withCurrentCounterSymbol(label).withCharCode(chars))
-    case MixAssembler.alfConstantPartWithSpace(chars, _) =>
-      sequential(builder.withCurrentCounterSymbol(label).withCharCode(chars))
-    case _ => throw new WrongAddressPartException(addressPart)
-  }
-
-  private def withEnd(label: String, addressPart: String) = addressPart match {
-    case MixAssembler.addressPartWithWValue(wValue, _) =>
-      sequential(builder.withFinalSection(label, wValue))
-    case _ => throw new WrongAddressPartException(addressPart)
-  }
-
-  private def withCommand(label: String, operator: String, addressPart: String) = {
+  private def withCommand(lineNumber: Int, label: String, operator: String, addressPart: String) = {
     if (!MixAssembler.commands.contains(operator))
       throw new WrongOperatorException
-    addressPart match {
-      case MixAssembler.addressPartWithOpAddress(aPart, _, indexPart, _, fPart, _) =>
-        val command = MixAssembler.commands(operator)
-        if (fPart != null && !command._3) throw new FixedFieldSpecException
-        else sequential(builder.withCurrentCounterSymbol(label)
-          .withCommand(aPart, indexPart, fPart, command._1, command._2))
-      case _ => throw new WrongAddressPartException(addressPart)
+    val command = MixAssembler.commands(operator)
+    val (aPart, indexPart, fPart) =
+      if (addressPart == "") (null, null, null)
+      else MixAssembler.addressPart.findPrefixMatchOf(addressPart) match {
+        case Some(m) => splitOpAddress(m.group(1))
+        case None => throw new WrongAddressPartException(addressPart)
+      }
+    if (fPart != null && !command._3) throw new FixedFieldSpecException
+    else sequential(lineNumber,
+      builder.withCurrentCounterSymbol(label)
+        withCommand(aPart, indexPart, fPart, command._1, command._2))
+  }
+
+  private def splitOpAddress(opAddress: String): (String, String, String) = {
+    opAddress match {
+      case MixAssembler.opAddress(aPart, _, indexPart, _, fPart) => (aPart, indexPart, fPart)
+      case _ => throw new WrongAddressPartException(opAddress)
     }
   }
 }
 
 object MixAssembler {
-  def translate(builder: VirtualMachineBuilder, lines: Seq[String]): (VirtualMachine, List[List[Short]]) = {
-    val translated = lines.foldLeft(MixAssembler(builder, List(List(0)))) { (asm, line) =>
-      asm.parseLine(line)
-    }
-    (translated.builder.build, translated.counterHistory)
+  def translateNonTracking(builder: VirtualMachineBuilder, lines: Seq[String]): (VirtualMachine, List[(Option[Short], Option[Int])]) = {
+    val translated = translate(builder, lines)
+    (translated.builder.build, translated.symbolsBeforeCounter.reverse ++ translated.symbolsAfterCounter)
   }
 
-  val commentPattern: Regex = raw" *\*.*".r
+  private def translate(builder: VirtualMachineBuilder, lines: Seq[String]): MixAssembler = {
+    lines.foldLeft((MixAssembler(builder), 0))((state, line) =>
+      (state._1.withLine(state._2, line), state._2 + 1)
+    )._1
+  }
 
-  val opLinePattern: Regex = raw"([A-Z0-9]{0,10}) +([A-Z0-9]{1,4}) (.*)".r
+  def translateTracking(builder: VirtualMachineBuilder, lines: Seq[String]): (VirtualMachine, List[(Option[Short], Option[Int])]) = {
+    val translated = translate(builder, lines)
+    (translated.builder.buildTracking, translated.symbolsBeforeCounter.reverse ++ translated.symbolsAfterCounter)
+  }
 
-  val addressPartWithWValue: Regex = raw" *([^ ]+)( .*)?".r
+  val commentLinePrefix: Regex = raw" *\*".r
 
-  val addressPartWithOpAddress: Regex = raw" *([^ ,(]*)(,([^( ]+))?(\(([^ ]+)\))?( .*)?".r
+  val labelAndOp: Regex = raw"([A-Z0-9]{0,10}) +([A-Z0-9]{1,4})".r
 
-  val alfConstantPartWithoutSpace: Regex = raw"([^ ].{4})( .*)?".r
+  val addressPart: Regex = raw" +([^ ]+)".r
 
-  val alfConstantPartWithSpace: Regex = raw" (.{5})( .*)?".r
+  val opAddress: Regex = raw"([^,(]*)(,([^(]+))?(\((.+)\))?".r
 
   val commands: Map[String, (Byte, Byte, Boolean)] = Map(
     "NOP" -> (0.toByte, 0.toByte, true),

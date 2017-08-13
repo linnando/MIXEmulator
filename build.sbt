@@ -1,41 +1,54 @@
-lazy val sharedSettings = Seq(
-  organization := "org.linnando",
-  scalaVersion := "2.11.8",
-  javacOptions in Compile ++= "-source" :: "1.7" :: "-target" :: "1.7" :: Nil
-)
+name := "MIX Emulator"
 
-lazy val asm = project
+scalaVersion in ThisBuild := "2.11.8"
+
+lazy val asm = crossProject
   .dependsOn(vm)
   .settings(
-    sharedSettings,
-    exportJars := true,
+    name := "asm",
+    organization := "org.linnando",
+    version := "0.1-SNAPSHOT"
+  )
+  .jvmSettings(
+    scalacOptions in Test ++= Seq("-Yrangepos"),
     libraryDependencies ++= Seq(
       "org.specs2" %% "specs2-core" % "3.9.2" % "test",
       "org.specs2" %% "specs2-matcher-extra" % "3.9.2" % "test"
-    ),
-    scalacOptions in Test ++= Seq("-Yrangepos")
+    )
   )
+  .jsSettings()
 
-lazy val vm = project
+lazy val asmJVM = asm.jvm
+
+lazy val asmJS = asm.js
+
+lazy val vm = crossProject
   .settings(
-    sharedSettings,
-    exportJars := true,
+    name := "vm",
+    organization := "org.linnando",
+    version := "0.1-SNAPSHOT"
+  )
+  .jvmSettings(
+    scalacOptions in Test ++= Seq("-Yrangepos"),
     libraryDependencies ++= Seq(
       "org.specs2" %% "specs2-core" % "3.9.2" % "test",
       "org.specs2" %% "specs2-matcher-extra" % "3.9.2" % "test"
-    ),
-    scalacOptions in Test ++= Seq("-Yrangepos")
+    )
   )
+  .jsSettings()
+
+lazy val vmJVM = vm.jvm
+
+lazy val vmJS = vm.js
 
 lazy val webapp = project
-  .dependsOn(asm, vm)
-  .enablePlugins(ScalaJSPlugin)
-  .enablePlugins(Angulate2Plugin)
+  .enablePlugins(ScalaJSPlugin, Angulate2Plugin)
+  .dependsOn(asmJS, vmJS)
   .settings(
-    sharedSettings,
-    name := "MIX Emulator Web",
-    ngBootstrap := Some("org.linnando.mixemulator.webapp.AppModule"),
-    scalacOptions in Test ++= Seq("-Yrangepos")
+    name := "webapp",
+    organization := "org.linnando",
+    version := "0.1-SNAPSHOT",
+    ngBootstrap := Some("org.linnando.mixemulator.webapp.AppModule")
   )
 
 val stage = taskKey[Unit]("Stage task")

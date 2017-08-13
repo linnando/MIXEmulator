@@ -18,9 +18,9 @@
     },
     packages: {
       app: {
-        main: './mix-emulator-web-sjsx.js',
+        main: './webapp-sjsx.js',
         map: {
-          'scalaModule': './mix-emulator-web-opt.js',
+          'scalaModule': './webapp-opt.js',
         },
         format: 'cjs',
         defaultExtension: 'js'

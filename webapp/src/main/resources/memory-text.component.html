@@ -1,0 +1,18 @@
+<div class="memory-text" #scrolling>
+    <table #table>
+        <tr *ngFor="let index of indices()">
+            <td><i *ngIf="isCurrent(index)" class="fa fa-arrow-circle-o-right" aria-hidden="true"></i></td>
+            <td *ngIf="hasWord(index)" class="address">{{cellAddress(index)}}:</td>
+            <td *ngIf="hasWord(index)" class="sign">{{cellSign(index)}}</td>
+            <td *ngIf="hasWord(index)" class="byte">{{cellByte(index, 0)}}</td>
+            <td *ngIf="hasWord(index)" class="byte">{{cellByte(index, 1)}}</td>
+            <td *ngIf="hasWord(index)" class="byte">{{cellByte(index, 2)}}</td>
+            <td *ngIf="hasWord(index)" class="byte">{{cellByte(index, 3)}}</td>
+            <td *ngIf="hasWord(index)" class="byte">{{cellByte(index, 4)}}</td>
+            <td *ngIf="!hasWord(index)" colspan="7"></td>
+            <td *ngIf="hasLine(index)" class="line-number">{{lineNumber(index)}}</td>
+            <td *ngIf="hasLine(index)" class="line">{{line(index)}}</td>
+            <td *ngIf="!hasLine(index)" colspan="2"></td>
+        </tr>
+    </table>
+</div>

@@ -1,0 +1,11 @@
+.control-row {
+    height: 35px;
+}
+
+.view-row {
+    height: 255px;
+}
+
+.code-row {
+    height: calc(100% - 361px);
+}
