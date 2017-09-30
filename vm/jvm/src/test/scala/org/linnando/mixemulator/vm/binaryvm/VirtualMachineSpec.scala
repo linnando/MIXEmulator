@@ -162,6 +162,18 @@ class VirtualMachineSpec extends Specification {
       machine.currentState must be equalTo initialState
     }
 
+    "go to the halted state when replaying history" in {
+      val machine = binary.createVirtualMachineBuilder()
+        .withOrig("3000").withCommand("", "", "", 5, 2)
+        .withFinalSection("", "3000")
+        .buildTracking
+      machine.runForward()
+      machine.runBack()
+      machine.runForward()
+      machine.currentState.getProgramCounter must be equalTo 3000
+      machine.currentState.isHalted must beTrue
+    }
+
     "not execute the command at the breakpoint" in {
       val machine = binary.createVirtualMachineBuilder()
         .withOrig("2000").withConstant("-1(0:1),16(2:2),3(3:3),5(4:4),4(5:5)")

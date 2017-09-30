@@ -21,16 +21,19 @@ abstract class ProcessingModel extends DataModel with Processor {
 
     override def runForward(): Unit =
       do stepForward()
-      while (!(_breakpoints(_currentState.programCounter.toShort) || _currentState.isHalted))
+      while (!_breakpoints(_currentState.programCounter.toShort) && !_currentState.isHalted)
 
     override def toggleBreakpoint(address: Short): Unit =
       if (_breakpoints(address)) _breakpoints -= address
       else _breakpoints += address.toShort
   }
 
-  class TrackingVirtualMachineImpl(initialState: State) extends TrackingVirtualMachine {
+  class TrackingVirtualMachineImpl(private val initialState: State) extends TrackingVirtualMachine {
+    // All states encountered so far: initialState +: LinkedList[State]
     private val stateIterator = new util.LinkedList[State]().listIterator()
-    private var lastState = initialState
+    // _currentState points to the current state of the virtual machine
+    // If stateIterator.hasPrevious, _currentState == the state that would be returned by stateIterator.previous()
+    // Otherwise, _currentState == initialState
     private var _currentState = initialState
     private var _breakpoints: Set[Short] = Set.empty
 
@@ -38,32 +41,45 @@ abstract class ProcessingModel extends DataModel with Processor {
 
     override def breakpoints: Set[Short] = _breakpoints
 
-    override def canMoveForward: Boolean = stateIterator.hasNext || !lastState.isHalted
+    override def canMoveForward: Boolean = stateIterator.hasNext || !_currentState.isHalted
 
-    override def stepForward(): Unit = {
+    override def stepForward(): Unit =
       if (stateIterator.hasNext) _currentState = stateIterator.next()
       else {
-        stateIterator.add(lastState)
-        lastState = forward(lastState)
-        _currentState = lastState
+        _currentState = forward(_currentState)
+        stateIterator.add(_currentState)
       }
-    }
 
     override def runForward(): Unit =
       do stepForward()
-      while (!(_breakpoints(_currentState.programCounter.toShort) || _currentState.isHalted))
+      while (!_breakpoints(_currentState.programCounter.toShort) && !_currentState.isHalted)
 
     override def canMoveBack: Boolean = stateIterator.hasPrevious
 
-    override def stepBack(): Unit =
-      if (stateIterator.hasPrevious) _currentState = stateIterator.previous()
-      else throw new BackFromInitialStateException
+    override def stepBack(): Unit = {
+      if (!stateIterator.hasPrevious)
+        throw new BackFromInitialStateException
+      stateIterator.previous()
+      if (stateIterator.hasPrevious) {
+        _currentState = stateIterator.previous()
+        stateIterator.next()
+      }
+      else _currentState = initialState
+    }
 
-    override def runBack(): Unit =
-      if (stateIterator.hasPrevious)
+    override def runBack(): Unit = {
+      if (!stateIterator.hasPrevious)
+        throw new BackFromInitialStateException
+      stateIterator.previous()
+      if (stateIterator.hasPrevious) {
         do _currentState = stateIterator.previous()
         while (!_breakpoints(_currentState.programCounter.toShort) && stateIterator.hasPrevious)
-      else throw new BackFromInitialStateException
+        if (_breakpoints(_currentState.programCounter.toShort)) stateIterator.next()
+        else _currentState = initialState
+      } else {
+        _currentState = initialState
+      }
+    }
 
     override def toggleBreakpoint(address: Short): Unit =
       if (_breakpoints(address)) _breakpoints -= address
