@@ -37,4 +37,8 @@ class RegistersComponent(virtualMachineService: VirtualMachineService) {
     case Comparison.EQUAL => 0
     case Comparison.GREATER => 1
   }).getOrElse(0)
+
+  def timeElapsed: Int = machineState.map(_.getTimeCounter).getOrElse(0)
+
+  def isHalted: Boolean = machineState.exists(_.isHalted)
 }

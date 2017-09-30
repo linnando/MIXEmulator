@@ -45,6 +45,8 @@ trait DataModel {
     override def getCMP: Comparison = registers.getCMP
 
     override def getProgramCounter: Short = programCounter.toShort
+
+    override def getTimeCounter: Int = timeCounter
   }
 
   def getZero: W

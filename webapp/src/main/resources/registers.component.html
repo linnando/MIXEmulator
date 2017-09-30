@@ -67,5 +67,10 @@
             <td colspan="3" class="flag">{{comparison < 0 ? 'L' : comparison === 0 ? 'E' : 'G'}}</td>
             <td colspan="3" class="flag">{{overflow ? 'OV' : 'NOV'}}</td>
         </tr>
+        <tr>
+            <td class="registerName">Time:</td>
+            <td colspan="3" class="time-elapsed">{{timeElapsed}}u</td>
+            <td colspan="3" class="is-halted">{{isHalted ? 'HALTED' : ''}}</td>
+        </tr>
     </table>
 </div>

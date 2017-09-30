@@ -3,9 +3,9 @@
 }
 
 .view-row {
-    height: 255px;
+    height: 280px;
 }
 
 .code-row {
-    height: calc(100% - 361px);
+    height: calc(100% - 386px);
 }

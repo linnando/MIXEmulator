@@ -35,3 +35,16 @@ td.flag {
     padding: 5px;
     font-style: italic;
 }
+
+td.time-elapsed {
+    text-align: center;
+    padding: 5px;
+    font-style: italic;
+}
+
+td.is-halted {
+    text-align: center;
+    padding: 5px;
+    font-style: italic;
+    color: red;
+}

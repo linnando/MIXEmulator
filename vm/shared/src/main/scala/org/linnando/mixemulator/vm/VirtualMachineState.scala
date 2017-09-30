@@ -30,5 +30,7 @@ trait VirtualMachineState {
 
   def getProgramCounter: Short
 
+  def getTimeCounter: Int
+
   def isHalted: Boolean
 }
