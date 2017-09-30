@@ -58,5 +58,10 @@ class MemoryTextComponent(virtualMachineService: VirtualMachineService) extends 
 
   def lineNumber(index: Int): Int = symbols(index)._2.getOrElse(0)
 
-  def line(index: Int): String = symbols(index)._2.map(virtualMachineService.getLine).getOrElse("")
+  def line(index: Int): String = {
+    val (address, lineNumber) = symbols(index)
+    lineNumber.map(virtualMachineService.getLine(_, address)).getOrElse("")
+  }
+
+  def lineIsModified(index: Int): Boolean = virtualMachineService.lineIsModified(symbols(index)._1)
 }

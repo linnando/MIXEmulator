@@ -12,6 +12,8 @@ object binary extends ProcessingModel {
   override type W = MixWord
   override type DW = MixDWord
 
+  override val BYTE_SIZE: Byte = 64
+
   override def createVirtualMachineBuilder(): VirtualMachineBuilder = BinaryVirtualMachineBuilder()
 
   case class BinaryVirtualMachineBuilder(state: State = initialState,

@@ -7,7 +7,7 @@ import org.linnando.mixemulator.vm.exceptions.BackFromInitialStateException
 abstract class ProcessingModel extends DataModel with Processor {
   def createVirtualMachineBuilder(): VirtualMachineBuilder
 
-  class VirtualMachineImpl(initialState: State) extends VirtualMachine {
+  class VirtualMachineImpl(private val initialState: State) extends VirtualMachine {
     private var _currentState: State = initialState
     private var _breakpoints: Set[Short] = Set.empty
 
@@ -26,6 +26,8 @@ abstract class ProcessingModel extends DataModel with Processor {
     override def toggleBreakpoint(address: Short): Unit =
       if (_breakpoints(address)) _breakpoints -= address
       else _breakpoints += address.toShort
+
+    override def isModified(address: Short): Boolean = _currentState.get(address) != initialState.get(address)
   }
 
   class TrackingVirtualMachineImpl(private val initialState: State) extends TrackingVirtualMachine {
@@ -84,5 +86,7 @@ abstract class ProcessingModel extends DataModel with Processor {
     override def toggleBreakpoint(address: Short): Unit =
       if (_breakpoints(address)) _breakpoints -= address
       else _breakpoints += address.toShort
+
+    override def isModified(address: Short): Boolean = _currentState.get(address) != initialState.get(address)
   }
 }

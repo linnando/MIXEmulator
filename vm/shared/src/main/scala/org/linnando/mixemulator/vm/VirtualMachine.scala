@@ -12,6 +12,8 @@ trait VirtualMachine {
   def runForward(): Unit
 
   def toggleBreakpoint(address: Short): Unit
+
+  def isModified(address: Short): Boolean
 }
 
 object VirtualMachine {

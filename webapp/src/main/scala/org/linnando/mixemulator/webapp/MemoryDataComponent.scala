@@ -1,7 +1,7 @@
 package org.linnando.mixemulator.webapp
 
 import angulate2.std._
-import org.linnando.mixemulator.vm.{VirtualMachine, VirtualMachineState}
+import org.linnando.mixemulator.vm.VirtualMachine
 import org.linnando.mixemulator.vm.io.data.IOWord
 
 import scala.collection.immutable.NumericRange

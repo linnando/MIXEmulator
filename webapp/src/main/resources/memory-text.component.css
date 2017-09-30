@@ -37,3 +37,11 @@ td.line-number {
     padding-right: 8px;
     font-style: italic;
 }
+
+td.line {
+    white-space: pre;
+}
+
+td.modified-line {
+    color: blue;
+}

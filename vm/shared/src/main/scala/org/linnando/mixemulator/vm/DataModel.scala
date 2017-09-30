@@ -14,6 +14,8 @@ trait DataModel {
   type W <: AbstractMixWord
   type DW <: AbstractMixDWord
 
+  def BYTE_SIZE: Byte
+
   case class State(registers: RS,
                    memory: MS,
                    programCounter: I,

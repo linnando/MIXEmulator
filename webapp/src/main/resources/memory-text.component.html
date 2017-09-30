@@ -11,7 +11,7 @@
             <td *ngIf="hasWord(index)" class="byte">{{cellByte(index, 4)}}</td>
             <td *ngIf="!hasWord(index)" colspan="7"></td>
             <td *ngIf="hasLine(index)" class="line-number">{{lineNumber(index)}}</td>
-            <td *ngIf="hasLine(index)" class="line">{{line(index)}}</td>
+            <td *ngIf="hasLine(index)" class="line" [ngClass]="{'modified-line': lineIsModified(index)}">{{line(index)}}</td>
             <td *ngIf="!hasLine(index)" colspan="2"></td>
         </tr>
     </table>

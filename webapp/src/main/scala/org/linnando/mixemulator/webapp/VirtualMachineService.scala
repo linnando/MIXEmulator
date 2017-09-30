@@ -1,7 +1,7 @@
 package org.linnando.mixemulator.webapp
 
 import angulate2.std._
-import org.linnando.mixemulator.asm.MixAssembler
+import org.linnando.mixemulator.asm.{MixAssembler, MixDisassembler}
 import org.linnando.mixemulator.vm.{TrackingVirtualMachine, VirtualMachine, VirtualMachineState, binary}
 import rxjs.Subject
 
@@ -22,12 +22,21 @@ class VirtualMachineService {
 
   private var _addressSymbols: Vector[Int] = Vector.empty
 
-  def getLine(index: Int): String = lines(index)
+  private var disassembler: MixDisassembler = _
+
+  def getLine(index: Int, address: Option[Short]): String =
+    _machine.flatMap(m => address.flatMap(a =>
+      if (m.isModified(a)) Some(disassembler.disassembleLine(m.currentState.get(a)))
+      else None
+    )).getOrElse(lines(index))
+
+  def lineIsModified(address: Option[Short]): Boolean = _machine.exists(m => address.exists(a => m.isModified(a)))
 
   def assembleBinaryNonTracking(): Future[Unit] = Future {
     lines = text.split("\n").toVector
     val builder = binary.createVirtualMachineBuilder()
     saveAssemble(MixAssembler.translateNonTracking(builder, lines))
+    disassembler = new MixDisassembler(binary)
   }
 
   private def saveAssemble(assemble: (VirtualMachine, List[(Option[Short], Option[Int])])): Unit = {
@@ -45,6 +54,7 @@ class VirtualMachineService {
     lines = text.split("\n").toVector
     val builder = binary.createVirtualMachineBuilder()
     saveAssemble(MixAssembler.translateTracking(builder, lines))
+    disassembler = new MixDisassembler(binary)
   }
 
   def isActive: Boolean = _machine.isDefined
