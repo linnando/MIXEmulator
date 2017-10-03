@@ -1,4 +1,4 @@
 package org.linnando.mixemulator.vm.exceptions
 
-class UndeterminedStateException extends Exception {
+abstract class UndeterminedStateException extends Exception {
 }

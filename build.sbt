@@ -48,6 +48,9 @@ lazy val webapp = project
     name := "webapp",
     organization := "org.linnando",
     version := "0.1-SNAPSHOT",
+    libraryDependencies ++= Seq(
+      "com.github.karasiq" %%% "scalajs-bootstrap" % "2.1.4"
+    ),
     ngBootstrap := Some("org.linnando.mixemulator.webapp.AppModule")
   )
 

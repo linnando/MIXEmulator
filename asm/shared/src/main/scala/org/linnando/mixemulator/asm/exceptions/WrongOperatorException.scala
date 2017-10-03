@@ -1,4 +1,4 @@
 package org.linnando.mixemulator.asm.exceptions
 
-class WrongOperatorException extends Exception {
+class WrongOperatorException(val operator: String, val line: Int) extends Exception {
 }

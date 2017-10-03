@@ -25,7 +25,7 @@ case class MixAssembler(builder: VirtualMachineBuilder,
 
   private def withOpLine(lineNumber: Int, line: String): MixAssembler = MixAssembler.labelAndOp.findPrefixMatchOf(line) match {
     case Some(m) => withOp(lineNumber, m.group(1), m.group(2), m.after.toString)
-    case None => throw new WrongLineException
+    case None => throw new WrongLineException(lineNumber)
   }
 
   private def withOp(lineNumber: Int, label: String, op: String, rest: String) = op match {
@@ -40,7 +40,7 @@ case class MixAssembler(builder: VirtualMachineBuilder,
   private def withEqu(lineNumber: Int, label: String, rest: String) =
     MixAssembler.addressPart.findPrefixMatchOf(rest) match {
       case Some(m) => sequential(lineNumber, builder.withWValueSymbol(label, m.group(1)))
-      case None => throw new WrongAddressPartException(rest)
+      case None => throw new WrongAddressPartException(rest, lineNumber)
     }
 
   private def withOrig(lineNumber: Int, label: String, rest: String) =
@@ -52,19 +52,19 @@ case class MixAssembler(builder: VirtualMachineBuilder,
         copy(builder = nextBuilderState,
           symbolsBeforeCounter = (None, Some(lineNumber)) :: left.reverse,
           symbolsAfterCounter = right)
-      case None => throw new WrongAddressPartException(rest)
+      case None => throw new WrongAddressPartException(rest, lineNumber)
     }
 
   private def withCon(lineNumber: Int, label: String, rest: String) =
     MixAssembler.addressPart.findPrefixMatchOf(rest) match {
       case Some(m) =>
         sequential(lineNumber, builder.withCurrentCounterSymbol(label).withConstant(m.group(1)))
-      case None => throw new WrongAddressPartException(rest)
+      case None => throw new WrongAddressPartException(rest, lineNumber)
     }
 
   private def withAlf(lineNumber: Int, label: String, rest: String) = {
     val chars =
-      if (rest.length < 6 || rest(1) == ' ' && rest.length < 7) throw new WrongAddressPartException(rest)
+      if (rest.length < 6 || rest(1) == ' ' && rest.length < 7) throw new WrongAddressPartException(rest, lineNumber)
       else if (rest(1) == ' ') rest.substring(2, 7)
       else rest.substring(1, 6)
     sequential(lineNumber, builder.withCurrentCounterSymbol(label).withCharCode(chars))
@@ -81,29 +81,29 @@ case class MixAssembler(builder: VirtualMachineBuilder,
             case Nil => List((None, Some(lineNumber)))
             case x :: xs => (x._1, Some(lineNumber)) :: xs
           })
-      case None => throw new WrongAddressPartException(addressPart)
+      case None => throw new WrongAddressPartException(addressPart, lineNumber)
     }
 
   private def withCommand(lineNumber: Int, label: String, operator: String, addressPart: String) = {
     if (!MixAssembler.commands.contains(operator))
-      throw new WrongOperatorException
+      throw new WrongOperatorException(operator, lineNumber)
     val command = MixAssembler.commands(operator)
     val (aPart, indexPart, fPart) =
       if (addressPart == "") (null, null, null)
       else MixAssembler.addressPart.findPrefixMatchOf(addressPart) match {
-        case Some(m) => splitOpAddress(m.group(1))
-        case None => throw new WrongAddressPartException(addressPart)
+        case Some(m) => splitOpAddress(m.group(1), lineNumber)
+        case None => throw new WrongAddressPartException(addressPart, lineNumber)
       }
-    if (fPart != null && !command._3) throw new FixedFieldSpecException
+    if (fPart != null && !command._3) throw new FixedFieldSpecException(operator, lineNumber)
     else sequential(lineNumber,
       builder.withCurrentCounterSymbol(label)
         withCommand(aPart, indexPart, fPart, command._1, command._2))
   }
 
-  private def splitOpAddress(opAddress: String): (String, String, String) = {
+  private def splitOpAddress(opAddress: String, lineNumber: Int): (String, String, String) = {
     opAddress match {
       case MixAssembler.opAddress(aPart, _, indexPart, _, fPart) => (aPart, indexPart, fPart)
-      case _ => throw new WrongAddressPartException(opAddress)
+      case _ => throw new WrongAddressPartException(opAddress, lineNumber)
     }
   }
 }

@@ -1,5 +1,4 @@
 package org.linnando.mixemulator.vm.exceptions
 
-class WrongIndexSpecException(indexSpec: Byte) extends Exception {
-
+class WrongIndexSpecException(val indexSpec: Byte) extends Exception {
 }
