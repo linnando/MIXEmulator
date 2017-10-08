@@ -114,6 +114,94 @@ class ArithmeticOpsSpec extends Specification {
     }
   }
 
+  "binary word division" should {
+    "divide a positive number by a positive number" in {
+      MixWord(0xf) / MixWord(0x7) must be equalTo (MixWord(0x2), MixWord(0x1))
+    }
+
+    "divide a positive number by a negative number" in {
+      MixWord(0xf) / MixWord(0x40000007) must be equalTo (MixWord(0x40000002), MixWord(0x1))
+    }
+
+    "divide a negative number by a positive number" in {
+      MixWord(0x4000000f) / MixWord(0x7) must be equalTo (MixWord(0x40000002), MixWord(0x40000001))
+    }
+
+    "divide a negative number by a negative number" in {
+      MixWord(0x4000000f) / MixWord(0x40000007) must be equalTo (MixWord(0x2), MixWord(0x40000001))
+    }
+
+    "divide the positive zero by a positive number" in {
+      MixWord(0x0) / MixWord(0x1) must be equalTo (MixWord(0x0), MixWord(0x0))
+    }
+
+    "divide the positive zero by a negative number" in {
+      MixWord(0x0) / MixWord(0x40000001) must be equalTo (MixWord(0x40000000), MixWord(0x0))
+    }
+
+    "divide the negative zero by a positive number" in {
+      MixWord(0x40000000) / MixWord(0x1) must be equalTo (MixWord(0x40000000), MixWord(0x40000000))
+    }
+
+    "divide the negative zero by a negative number" in {
+      MixWord(0x40000000) / MixWord(0x40000001) must be equalTo (MixWord(0x0), MixWord(0x40000000))
+    }
+
+    "throw an exception on division by the positive zero" in {
+      MixWord(0x1) / MixWord(0x0) must throwA[DivisionByZeroException]
+    }
+
+    "throw an exception on division by the negative zero" in {
+      MixWord(0x1) / MixWord(0x40000000) must throwA[DivisionByZeroException]
+    }
+  }
+
+  "binary word division to the fractional part" should {
+    "divide a positive number by a positive number" in {
+      MixWord(0x2) /\ MixWord(0x7) must be equalTo (MixWord(0x12492492), MixWord(0x2))
+    }
+
+    "divide a positive number by a negative number" in {
+      MixWord(0x2) /\ MixWord(0x40000007) must be equalTo (MixWord(0x52492492), MixWord(0x2))
+    }
+
+    "divide a negative number by a positive number" in {
+      MixWord(0x40000002) /\ MixWord(0x7) must be equalTo (MixWord(0x52492492), MixWord(0x40000002))
+    }
+
+    "divide a negative number by a negative number" in {
+      MixWord(0x40000002) /\ MixWord(0x40000007) must be equalTo (MixWord(0x12492492), MixWord(0x40000002))
+    }
+
+    "divide the positive zero by a positive number" in {
+      MixWord(0x0) /\ MixWord(0x1) must be equalTo (MixWord(0x0), MixWord(0x0))
+    }
+
+    "divide the positive zero by a negative number" in {
+      MixWord(0x0) /\ MixWord(0x40000001) must be equalTo (MixWord(0x40000000), MixWord(0x0))
+    }
+
+    "divide the negative zero by a positive number" in {
+      MixWord(0x40000000) /\ MixWord(0x1) must be equalTo (MixWord(0x40000000), MixWord(0x40000000))
+    }
+
+    "divide the negative zero by a negative number" in {
+      MixWord(0x40000000) /\ MixWord(0x40000001) must be equalTo (MixWord(0x0), MixWord(0x40000000))
+    }
+
+    "throw an exception on division by the positive zero" in {
+      MixWord(0x1) /\ MixWord(0x0) must throwA[DivisionByZeroException]
+    }
+
+    "throw an exception on division by the negative zero" in {
+      MixWord(0x1) /\ MixWord(0x40000000) must throwA[DivisionByZeroException]
+    }
+
+    "throw an exception if the dividend is too big" in {
+      MixWord(0x7) /\ MixWord(0x7) must throwAn[OverflowException]
+    }
+  }
+
   "binary double word division" should {
     "divide a positive number by a positive number" in {
       MixDWord(0xfL) / MixWord(0x7) must be equalTo (MixWord(0x2), MixWord(0x1))

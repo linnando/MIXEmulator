@@ -28,23 +28,31 @@ abstract class ProcessingModel extends DataModel with Processor {
       case VirtualMachineBuilder.localForwardReference(_*) =>
         throw new WrongLabelException(label)
       case VirtualMachineBuilder.localLabel(_*) =>
-        withDefinedForwardReference(label, value)
+        withSymbolValue(label, value)
       case _ =>
         if (symbols.contains(label)) throw new DuplicateSymbolException(label)
-        else withDefinedForwardReference(label, value)
+        else withSymbolValue(label, value)
     }
 
     protected def withoutChanges: VMB
 
-    protected def withDefinedForwardReference(label: String, value: W): VMB
+    protected def withSymbolValue(label: String, value: W): VMB
+
+    protected def withDefinedForwardReference(addresses: Seq[I], addressFieldValue: W): VMB = {
+      if (addresses.isEmpty) withoutChanges
+      else if (addressFieldValue.getField(getByte(11)) != getWord(0L)) throw new OverflowException
+      else withAddressFields(addresses, addressFieldValue)
+    }
+
+    protected def withAddressFields(addresses: Seq[I], addressFieldValue: W): VMB
 
     private def evaluateWValue(wValue: String): W =
-      wValue.split(",").foldLeft(getZero) { (word, segment) =>
+      wValue.split(",").foldLeft(getWord(0L)) { (word, segment) =>
         segment match {
           case VirtualMachineBuilder.expressionAndFieldSpec(expression, _, fPart) =>
             val value = evaluateExpression(expression)
             val fieldSpec = evaluateFPart(fPart, 5)
-            updatedWord(word, fieldSpec, value)
+            word.updated(fieldSpec, value)
           case _ => throw new InvalidExpressionException(segment)
         }
       }
@@ -54,9 +62,9 @@ abstract class ProcessingModel extends DataModel with Processor {
         case "+" => (left + right)._2
         case "-" => (left - right)._2
         case "*" => (left * right).toWord
-        case "/" => (left.toDWordRight / right)._1
-        case "//" => (left.toDWordLeft / right)._1
-        case ":" => buildFieldSpec(left, right)
+        case "/" => (left / right)._1
+        case "//" => (left /\ right)._1
+        case ":" => left :* right
       }
 
       def _evaluate(acc: W, tail: CharSequence): W =
@@ -82,8 +90,6 @@ abstract class ProcessingModel extends DataModel with Processor {
       }
     }
 
-    protected def buildFieldSpec(left: W, right: W): W
-
     private def evaluateElementaryExpression(expression: String): W = expression match {
       case "*" =>
         counter.toWord
@@ -103,16 +109,10 @@ abstract class ProcessingModel extends DataModel with Processor {
       }
     }
 
-    protected def getWord(expression: Long): W
-
     private def evaluateFPart(fPart: String, default: Byte): B = fPart match {
       case null | "" => getByte(default)
       case _ => evaluateExpression(fPart).toByte
     }
-
-    protected def getByte(value: Byte): B
-
-    protected def updatedWord(word: W, fieldSpec: B, value: W): W
 
     override def withCurrentCounterSymbol(label: String): VMB =
       withSymbol(label, counter.toWord)
@@ -132,23 +132,19 @@ abstract class ProcessingModel extends DataModel with Processor {
     protected def withValue(value: W): VMB
 
     override def withCharCode(chars: String): VMB =
-      withValue(translateCharCode(chars))
-
-    protected def translateCharCode(chars: String): W
+      withValue(getWord(chars))
 
     override def withFinalSection(label: String, value: String): VMB = {
       val withSymbols = forwardReferences.keys.foldLeft(withoutChanges) { (s, ref) =>
         if (ref == label) s
-        else s.withCurrentCounterSymbol(ref).withValue(getZero)
+        else s.withCurrentCounterSymbol(ref).withValue(getWord(0L))
       }
       val withLiterals = literals.foldLeft(withSymbols) { (s, literal) =>
-        s.withAddressFields(literal._2, s.counter.toWord).withValue(literal._1)
+        s.withDefinedForwardReference(literal._2, s.counter.toWord).withValue(literal._1)
       }
       withLiterals.withCurrentCounterSymbol(label)
         .withProgramCounter(evaluateWValue(value).toIndex)
     }
-
-    protected def withAddressFields(addresses: Seq[I], addressFieldValue: W): VMB
 
     protected def withProgramCounter(value: I): VMB
 
@@ -169,10 +165,6 @@ abstract class ProcessingModel extends DataModel with Processor {
           withLiteral(e.value).withValue(cellValue)
       }
     }
-
-    protected def getWord(address: I, indexSpec: B, fieldSpec: B, opCode: B): W
-
-    protected def getIndex(value: Short): I
 
     private def evaluateIndexPart(indexPart: String): B = indexPart match {
       case null | "" => getByte(0)

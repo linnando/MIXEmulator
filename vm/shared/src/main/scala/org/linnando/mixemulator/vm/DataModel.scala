@@ -51,9 +51,17 @@ trait DataModel {
     override def getTimeCounter: Int = timeCounter
   }
 
-  def getZero: W
+  def getByte(value: Byte): B
+
+  def getIndex(value: Short): I
+
+  def getWord(value: Long): W
+
+  def getWord(address: I, indexSpec: B, fieldSpec: B, opCode: B): W
 
   def getWord(ioWord: IOWord): W
+
+  def getWord(chars: String): W
 
   trait AbstractRegisterState {
     def getA: W
@@ -95,8 +103,6 @@ trait DataModel {
     def get(address: Short): W
 
     def updated(address: I, value: W): MS
-
-    def updated(address: I, fieldSpec: B, value: W): MS
 
     def withSharedLock(address: I, size: Int, deviceNum: Int): MS
 
@@ -152,6 +158,8 @@ trait DataModel {
 
     def getField(fieldSpec: B): W
 
+    def updated(fieldSpec: B, value: W): W
+
     def unary_-(): W
 
     def +(other: W): (Boolean, W)
@@ -159,6 +167,12 @@ trait DataModel {
     def -(subtrahend: W): (Boolean, W)
 
     def *(other: W): DW
+
+    def /(divisor: W): (W, W)
+
+    def /\(divisor: W): (W, W)
+
+    def :*(other: W): W
 
     def <=>(other: W): Comparison
 
@@ -171,10 +185,6 @@ trait DataModel {
     def toIndex: I
 
     def toLong: Long
-
-    def toDWordLeft: DW
-
-    def toDWordRight: DW
 
     def toIOWord: IOWord
 

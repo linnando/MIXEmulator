@@ -52,7 +52,7 @@ trait Processor {
   }
 
   // C = 00
-  def nop(state: State, command: W = getZero): State = {
+  def nop(state: State, command: W = getWord(0L)): State = {
     state.copy(
       programCounter = state.programCounter.next,
       timeCounter = state.timeCounter + 1
@@ -415,7 +415,8 @@ trait Processor {
   def setMemoryContents(state: State, command: W, contents: W): MS = {
     val address = getIndexedAddress(state, command)
     val fieldSpec = command.getFieldSpec
-    state.memory.updated(address, fieldSpec, contents)
+    val updatedWord = state.memory.get(address).updated(fieldSpec, contents)
+    state.memory.updated(address, updatedWord)
   }
 
   // C = 25
@@ -504,7 +505,7 @@ trait Processor {
 
   // C = 33
   def stz(state: State, command: W): State = {
-    val contents = getZero
+    val contents = getWord(0L)
     state.copy(
       memory = setMemoryContents(state, command, contents),
       programCounter = state.programCounter.next,
@@ -699,37 +700,37 @@ trait Processor {
 
   // C = 40, F = 0
   def jan(state: State, command: W): State = {
-    if ((state.registers.getA <=> getZero) == Comparison.LESS) jmp(state, command)
+    if ((state.registers.getA <=> getWord(0L)) == Comparison.LESS) jmp(state, command)
     else nop(state)
   }
 
   // C = 40, F = 1
   def jaz(state: State, command: W): State = {
-    if ((state.registers.getA <=> getZero) == Comparison.EQUAL) jmp(state, command)
+    if ((state.registers.getA <=> getWord(0L)) == Comparison.EQUAL) jmp(state, command)
     else nop(state)
   }
 
   // C = 40, F = 2
   def jap(state: State, command: W): State = {
-    if ((state.registers.getA <=> getZero) == Comparison.GREATER) jmp(state, command)
+    if ((state.registers.getA <=> getWord(0L)) == Comparison.GREATER) jmp(state, command)
     else nop(state)
   }
 
   // C = 40, F = 3
   def jann(state: State, command: W): State = {
-    if ((state.registers.getA <=> getZero) == Comparison.LESS) nop(state)
+    if ((state.registers.getA <=> getWord(0L)) == Comparison.LESS) nop(state)
     else jmp(state, command)
   }
 
   // C = 40, F = 4
   def janz(state: State, command: W): State = {
-    if ((state.registers.getA <=> getZero) == Comparison.EQUAL) nop(state)
+    if ((state.registers.getA <=> getWord(0L)) == Comparison.EQUAL) nop(state)
     else jmp(state, command)
   }
 
   // C = 40, F = 5
   def janp(state: State, command: W): State = {
-    if ((state.registers.getA <=> getZero) == Comparison.GREATER) nop(state)
+    if ((state.registers.getA <=> getWord(0L)) == Comparison.GREATER) nop(state)
     else jmp(state, command)
   }
 
@@ -741,37 +742,37 @@ trait Processor {
 
   // C = 41, F = 0
   def j1n(state: State, command: W): State = {
-    if ((state.registers.getI(1) <=> getZero) == Comparison.LESS) jmp(state, command)
+    if ((state.registers.getI(1) <=> getWord(0L)) == Comparison.LESS) jmp(state, command)
     else nop(state)
   }
 
   // C = 41, F = 1
   def j1z(state: State, command: W): State = {
-    if ((state.registers.getI(1) <=> getZero) == Comparison.EQUAL) jmp(state, command)
+    if ((state.registers.getI(1) <=> getWord(0L)) == Comparison.EQUAL) jmp(state, command)
     else nop(state)
   }
 
   // C = 41, F = 2
   def j1p(state: State, command: W): State = {
-    if ((state.registers.getI(1) <=> getZero) == Comparison.GREATER) jmp(state, command)
+    if ((state.registers.getI(1) <=> getWord(0L)) == Comparison.GREATER) jmp(state, command)
     else nop(state)
   }
 
   // C = 41, F = 3
   def j1nn(state: State, command: W): State = {
-    if ((state.registers.getI(1) <=> getZero) == Comparison.LESS) nop(state)
+    if ((state.registers.getI(1) <=> getWord(0L)) == Comparison.LESS) nop(state)
     else jmp(state, command)
   }
 
   // C = 41, F = 4
   def j1nz(state: State, command: W): State = {
-    if ((state.registers.getI(1) <=> getZero) == Comparison.EQUAL) nop(state)
+    if ((state.registers.getI(1) <=> getWord(0L)) == Comparison.EQUAL) nop(state)
     else jmp(state, command)
   }
 
   // C = 41, F = 5
   def j1np(state: State, command: W): State = {
-    if ((state.registers.getI(1) <=> getZero) == Comparison.GREATER) nop(state)
+    if ((state.registers.getI(1) <=> getWord(0L)) == Comparison.GREATER) nop(state)
     else jmp(state, command)
   }
 
@@ -783,37 +784,37 @@ trait Processor {
 
   // C = 42, F = 0
   def j2n(state: State, command: W): State = {
-    if ((state.registers.getI(2) <=> getZero) == Comparison.LESS) jmp(state, command)
+    if ((state.registers.getI(2) <=> getWord(0L)) == Comparison.LESS) jmp(state, command)
     else nop(state)
   }
 
   // C = 42, F = 1
   def j2z(state: State, command: W): State = {
-    if ((state.registers.getI(2) <=> getZero) == Comparison.EQUAL) jmp(state, command)
+    if ((state.registers.getI(2) <=> getWord(0L)) == Comparison.EQUAL) jmp(state, command)
     else nop(state)
   }
 
   // C = 42, F = 2
   def j2p(state: State, command: W): State = {
-    if ((state.registers.getI(2) <=> getZero) == Comparison.GREATER) jmp(state, command)
+    if ((state.registers.getI(2) <=> getWord(0L)) == Comparison.GREATER) jmp(state, command)
     else nop(state)
   }
 
   // C = 42, F = 3
   def j2nn(state: State, command: W): State = {
-    if ((state.registers.getI(2) <=> getZero) == Comparison.LESS) nop(state)
+    if ((state.registers.getI(2) <=> getWord(0L)) == Comparison.LESS) nop(state)
     else jmp(state, command)
   }
 
   // C = 42, F = 4
   def j2nz(state: State, command: W): State = {
-    if ((state.registers.getI(2) <=> getZero) == Comparison.EQUAL) nop(state)
+    if ((state.registers.getI(2) <=> getWord(0L)) == Comparison.EQUAL) nop(state)
     else jmp(state, command)
   }
 
   // C = 42, F = 5
   def j2np(state: State, command: W): State = {
-    if ((state.registers.getI(2) <=> getZero) == Comparison.GREATER) nop(state)
+    if ((state.registers.getI(2) <=> getWord(0L)) == Comparison.GREATER) nop(state)
     else jmp(state, command)
   }
 
@@ -825,37 +826,37 @@ trait Processor {
 
   // C = 43, F = 0
   def j3n(state: State, command: W): State = {
-    if ((state.registers.getI(3) <=> getZero) == Comparison.LESS) jmp(state, command)
+    if ((state.registers.getI(3) <=> getWord(0L)) == Comparison.LESS) jmp(state, command)
     else nop(state)
   }
 
   // C = 43, F = 1
   def j3z(state: State, command: W): State = {
-    if ((state.registers.getI(3) <=> getZero) == Comparison.EQUAL) jmp(state, command)
+    if ((state.registers.getI(3) <=> getWord(0L)) == Comparison.EQUAL) jmp(state, command)
     else nop(state)
   }
 
   // C = 43, F = 2
   def j3p(state: State, command: W): State = {
-    if ((state.registers.getI(3) <=> getZero) == Comparison.GREATER) jmp(state, command)
+    if ((state.registers.getI(3) <=> getWord(0L)) == Comparison.GREATER) jmp(state, command)
     else nop(state)
   }
 
   // C = 43, F = 3
   def j3nn(state: State, command: W): State = {
-    if ((state.registers.getI(3) <=> getZero) == Comparison.LESS) nop(state)
+    if ((state.registers.getI(3) <=> getWord(0L)) == Comparison.LESS) nop(state)
     else jmp(state, command)
   }
 
   // C = 43, F = 4
   def j3nz(state: State, command: W): State = {
-    if ((state.registers.getI(3) <=> getZero) == Comparison.EQUAL) nop(state)
+    if ((state.registers.getI(3) <=> getWord(0L)) == Comparison.EQUAL) nop(state)
     else jmp(state, command)
   }
 
   // C = 43, F = 5
   def j3np(state: State, command: W): State = {
-    if ((state.registers.getI(3) <=> getZero) == Comparison.GREATER) nop(state)
+    if ((state.registers.getI(3) <=> getWord(0L)) == Comparison.GREATER) nop(state)
     else jmp(state, command)
   }
 
@@ -867,37 +868,37 @@ trait Processor {
 
   // C = 44, F = 0
   def j4n(state: State, command: W): State = {
-    if ((state.registers.getI(4) <=> getZero) == Comparison.LESS) jmp(state, command)
+    if ((state.registers.getI(4) <=> getWord(0L)) == Comparison.LESS) jmp(state, command)
     else nop(state)
   }
 
   // C = 44, F = 1
   def j4z(state: State, command: W): State = {
-    if ((state.registers.getI(4) <=> getZero) == Comparison.EQUAL) jmp(state, command)
+    if ((state.registers.getI(4) <=> getWord(0L)) == Comparison.EQUAL) jmp(state, command)
     else nop(state)
   }
 
   // C = 44, F = 2
   def j4p(state: State, command: W): State = {
-    if ((state.registers.getI(4) <=> getZero) == Comparison.GREATER) jmp(state, command)
+    if ((state.registers.getI(4) <=> getWord(0L)) == Comparison.GREATER) jmp(state, command)
     else nop(state)
   }
 
   // C = 44, F = 3
   def j4nn(state: State, command: W): State = {
-    if ((state.registers.getI(4) <=> getZero) == Comparison.LESS) nop(state)
+    if ((state.registers.getI(4) <=> getWord(0L)) == Comparison.LESS) nop(state)
     else jmp(state, command)
   }
 
   // C = 44, F = 4
   def j4nz(state: State, command: W): State = {
-    if ((state.registers.getI(4) <=> getZero) == Comparison.EQUAL) nop(state)
+    if ((state.registers.getI(4) <=> getWord(0L)) == Comparison.EQUAL) nop(state)
     else jmp(state, command)
   }
 
   // C = 44, F = 5
   def j4np(state: State, command: W): State = {
-    if ((state.registers.getI(4) <=> getZero) == Comparison.GREATER) nop(state)
+    if ((state.registers.getI(4) <=> getWord(0L)) == Comparison.GREATER) nop(state)
     else jmp(state, command)
   }
 
@@ -909,37 +910,37 @@ trait Processor {
 
   // C = 45, F = 0
   def j5n(state: State, command: W): State = {
-    if ((state.registers.getI(5) <=> getZero) == Comparison.LESS) jmp(state, command)
+    if ((state.registers.getI(5) <=> getWord(0L)) == Comparison.LESS) jmp(state, command)
     else nop(state)
   }
 
   // C = 45, F = 1
   def j5z(state: State, command: W): State = {
-    if ((state.registers.getI(5) <=> getZero) == Comparison.EQUAL) jmp(state, command)
+    if ((state.registers.getI(5) <=> getWord(0L)) == Comparison.EQUAL) jmp(state, command)
     else nop(state)
   }
 
   // C = 45, F = 2
   def j5p(state: State, command: W): State = {
-    if ((state.registers.getI(5) <=> getZero) == Comparison.GREATER) jmp(state, command)
+    if ((state.registers.getI(5) <=> getWord(0L)) == Comparison.GREATER) jmp(state, command)
     else nop(state)
   }
 
   // C = 45, F = 3
   def j5nn(state: State, command: W): State = {
-    if ((state.registers.getI(5) <=> getZero) == Comparison.LESS) nop(state)
+    if ((state.registers.getI(5) <=> getWord(0L)) == Comparison.LESS) nop(state)
     else jmp(state, command)
   }
 
   // C = 45, F = 4
   def j5nz(state: State, command: W): State = {
-    if ((state.registers.getI(5) <=> getZero) == Comparison.EQUAL) nop(state)
+    if ((state.registers.getI(5) <=> getWord(0L)) == Comparison.EQUAL) nop(state)
     else jmp(state, command)
   }
 
   // C = 45, F = 5
   def j5np(state: State, command: W): State = {
-    if ((state.registers.getI(5) <=> getZero) == Comparison.GREATER) nop(state)
+    if ((state.registers.getI(5) <=> getWord(0L)) == Comparison.GREATER) nop(state)
     else jmp(state, command)
   }
 
@@ -951,37 +952,37 @@ trait Processor {
 
   // C = 46, F = 0
   def j6n(state: State, command: W): State = {
-    if ((state.registers.getI(6) <=> getZero) == Comparison.LESS) jmp(state, command)
+    if ((state.registers.getI(6) <=> getWord(0L)) == Comparison.LESS) jmp(state, command)
     else nop(state)
   }
 
   // C = 46, F = 1
   def j6z(state: State, command: W): State = {
-    if ((state.registers.getI(6) <=> getZero) == Comparison.EQUAL) jmp(state, command)
+    if ((state.registers.getI(6) <=> getWord(0L)) == Comparison.EQUAL) jmp(state, command)
     else nop(state)
   }
 
   // C = 46, F = 2
   def j6p(state: State, command: W): State = {
-    if ((state.registers.getI(6) <=> getZero) == Comparison.GREATER) jmp(state, command)
+    if ((state.registers.getI(6) <=> getWord(0L)) == Comparison.GREATER) jmp(state, command)
     else nop(state)
   }
 
   // C = 46, F = 3
   def j6nn(state: State, command: W): State = {
-    if ((state.registers.getI(6) <=> getZero) == Comparison.LESS) nop(state)
+    if ((state.registers.getI(6) <=> getWord(0L)) == Comparison.LESS) nop(state)
     else jmp(state, command)
   }
 
   // C = 46, F = 4
   def j6nz(state: State, command: W): State = {
-    if ((state.registers.getI(6) <=> getZero) == Comparison.EQUAL) nop(state)
+    if ((state.registers.getI(6) <=> getWord(0L)) == Comparison.EQUAL) nop(state)
     else jmp(state, command)
   }
 
   // C = 46, F = 5
   def j6np(state: State, command: W): State = {
-    if ((state.registers.getI(6) <=> getZero) == Comparison.GREATER) nop(state)
+    if ((state.registers.getI(6) <=> getWord(0L)) == Comparison.GREATER) nop(state)
     else jmp(state, command)
   }
 
@@ -993,37 +994,37 @@ trait Processor {
 
   // C = 47, F = 0
   def jxn(state: State, command: W): State = {
-    if ((state.registers.getX <=> getZero) == Comparison.LESS) jmp(state, command)
+    if ((state.registers.getX <=> getWord(0L)) == Comparison.LESS) jmp(state, command)
     else nop(state)
   }
 
   // C = 47, F = 1
   def jxz(state: State, command: W): State = {
-    if ((state.registers.getX <=> getZero) == Comparison.EQUAL) jmp(state, command)
+    if ((state.registers.getX <=> getWord(0L)) == Comparison.EQUAL) jmp(state, command)
     else nop(state)
   }
 
   // C = 47, F = 2
   def jxp(state: State, command: W): State = {
-    if ((state.registers.getX <=> getZero) == Comparison.GREATER) jmp(state, command)
+    if ((state.registers.getX <=> getWord(0L)) == Comparison.GREATER) jmp(state, command)
     else nop(state)
   }
 
   // C = 47, F = 3
   def jxnn(state: State, command: W): State = {
-    if ((state.registers.getX <=> getZero) == Comparison.LESS) nop(state)
+    if ((state.registers.getX <=> getWord(0L)) == Comparison.LESS) nop(state)
     else jmp(state, command)
   }
 
   // C = 47, F = 4
   def jxnz(state: State, command: W): State = {
-    if ((state.registers.getX <=> getZero) == Comparison.EQUAL) nop(state)
+    if ((state.registers.getX <=> getWord(0L)) == Comparison.EQUAL) nop(state)
     else jmp(state, command)
   }
 
   // C = 47, F = 5
   def jxnp(state: State, command: W): State = {
-    if ((state.registers.getX <=> getZero) == Comparison.GREATER) nop(state)
+    if ((state.registers.getX <=> getWord(0L)) == Comparison.GREATER) nop(state)
     else jmp(state, command)
   }
 

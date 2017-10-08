@@ -6,9 +6,42 @@ import org.linnando.mixemulator.vm.io.data.IOWord
 import org.specs2.mutable.Specification
 
 class ConversionOpsSpec extends Specification {
-  "binary zero" should {
-    "return zero word" in {
-      getZero must be equalTo MixWord(0x0)
+  "binary integer types conversion" should {
+    "convert a Byte to a MIX byte" in {
+      getByte(0x1) must be equalTo MixByte(0x01)
+      getByte(0x3f) must be equalTo MixByte(0x3f)
+    }
+
+    "convert a Short to a MIX index" in {
+      getIndex(0x1) must be equalTo MixIndex(0x0001)
+      getIndex(0xfff) must be equalTo MixIndex(0x0fff)
+      getIndex(-0x1) must be equalTo MixIndex(0x1001)
+      getIndex(-0xfff) must be equalTo MixIndex(0x1fff)
+    }
+
+    "convert an Long to a MIX word" in {
+      getWord(0x1L) must be equalTo MixWord(0x00000001)
+      getWord(0x3fffffffL) must be equalTo MixWord(0x3fffffff)
+      getWord(-0x1L) must be equalTo MixWord(0x40000001)
+      getWord(-0x3fffffffL) must be equalTo MixWord(0x7fffffff)
+    }
+
+    "convert a zero to a positive zero" in {
+      getByte(0) must be equalTo MixByte(0x00)
+      getIndex(0) must be equalTo MixIndex(0x0000)
+      getWord(0L) must be equalTo MixWord(0x00000000)
+    }
+
+    "throw an exception if a negative value is converted to a MIX byte" in {
+      getByte(-1) must throwAn[OverflowException]
+    }
+
+    "throw an exception if the value is too big" in {
+      getByte(0x40) must throwAn[OverflowException]
+      getIndex(0x1000) must throwAn[OverflowException]
+      getIndex(-0x1000) must throwAn[OverflowException]
+      getWord(0x40000000L) must throwAn[OverflowException]
+      getWord(-0x40000000L) must throwAn[OverflowException]
     }
   }
 
@@ -80,22 +113,6 @@ class ConversionOpsSpec extends Specification {
     "convert a negative word to a Long" in {
       MixWord(0x40000001).toLong must be equalTo -1
     }
-
-    "convert a positive word to the left part of a double word" in {
-      MixWord(0x1).toDWordLeft must be equalTo MixDWord(0x40000000L)
-    }
-
-    "convert a negative word to the left part of a double word" in {
-      MixWord(0x40000001).toDWordLeft must be equalTo MixDWord(0x1000000040000000L)
-    }
-
-    "convert a positive word to the right part of a double word" in {
-      MixWord(0x1).toDWordRight must be equalTo MixDWord(0x1L)
-    }
-
-    "convert a negative word to the right part of a double word" in {
-      MixWord(0x40000001).toDWordRight must be equalTo MixDWord(0x1000000000000001L)
-    }
   }
 
   "binary double word conversion" should {
@@ -139,6 +156,10 @@ class ConversionOpsSpec extends Specification {
   }
 
   "binary character code conversion" should {
+    "convert alphanumeric characters to a number" in {
+      getWord("A1\u03949@") must be equalTo MixWord(0x017ca9f4)
+    }
+
     "convert a character code to a positive number" in {
       // + 0 0 31 32 39 37 57 47 30 30 -> 12977700
       MixDWord(0x00007e09e5e6f79eL).charToNumber must be equalTo MixWord(12977700)

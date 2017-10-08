@@ -31,6 +31,12 @@ class FieldOpsSpec extends Specification {
     }
   }
 
+  "binary word building" should {
+    "collect a word from fields" in {
+      getWord(getIndex(-1000), getByte(1), getByte(5), getByte(8)) must be equalTo MixWord(0x4fa01148)
+    }
+  }
+
   "binary word field selection" should {
     "consider a positive number to be positive and not negative" in {
       // + 1 2 3 4 5
@@ -139,6 +145,68 @@ class FieldOpsSpec extends Specification {
 
     "throw an exception if l > r in a field spec" in {
       MixWord(0x0).getField(MixByte(0x08)) must throwA[WrongFieldSpecException]
+    }
+  }
+
+  "binary word field update" should {
+    "update a field of a positive word" in {
+      val word = MixWord(0x01083105) // + 1 2 3 4 5
+      val value = MixWord(0x061c8240) // + 6 7 8 9 0
+      word.updated(MixByte(0x00), value) must be equalTo MixWord(0x01083105) // + 1 2 3 4 5
+      word.updated(MixByte(0x01), value) must be equalTo MixWord(0x00083105) // + 0 2 3 4 5
+      word.updated(MixByte(0x02), value) must be equalTo MixWord(0x09003105) // + 9 0 3 4 5
+      word.updated(MixByte(0x03), value) must be equalTo MixWord(0x08240105) // + 8 9 0 4 5
+      word.updated(MixByte(0x04), value) must be equalTo MixWord(0x07209005) // + 7 8 9 0 5
+      word.updated(MixByte(0x05), value) must be equalTo MixWord(0x061c8240) // + 6 7 8 9 0
+      word.updated(MixByte(0x09), value) must be equalTo MixWord(0x00083105) // + 0 2 3 4 5
+      word.updated(MixByte(0x0a), value) must be equalTo MixWord(0x09003105) // + 9 0 3 4 5
+      word.updated(MixByte(0x0b), value) must be equalTo MixWord(0x08240105) // + 8 9 0 4 5
+      word.updated(MixByte(0x0c), value) must be equalTo MixWord(0x07209005) // + 7 8 9 0 5
+      word.updated(MixByte(0x0d), value) must be equalTo MixWord(0x061c8240) // + 6 7 8 9 0
+      word.updated(MixByte(0x12), value) must be equalTo MixWord(0x01003105) // + 1 0 3 4 5
+      word.updated(MixByte(0x13), value) must be equalTo MixWord(0x01240105) // + 1 9 0 4 5
+      word.updated(MixByte(0x14), value) must be equalTo MixWord(0x01209005) // + 1 8 9 0 5
+      word.updated(MixByte(0x15), value) must be equalTo MixWord(0x011c8240) // + 1 7 8 9 0
+      word.updated(MixByte(0x1b), value) must be equalTo MixWord(0x01080105) // + 1 2 0 4 5
+      word.updated(MixByte(0x1c), value) must be equalTo MixWord(0x01089005) // + 1 2 9 0 5
+      word.updated(MixByte(0x1d), value) must be equalTo MixWord(0x01088240) // + 1 2 8 9 0
+      word.updated(MixByte(0x24), value) must be equalTo MixWord(0x01083005) // + 1 2 3 0 5
+      word.updated(MixByte(0x25), value) must be equalTo MixWord(0x01083240) // + 1 2 3 9 0
+      word.updated(MixByte(0x2d), value) must be equalTo MixWord(0x01083100) // + 1 2 3 4 0
+    }
+
+    "update a field of a negative word" in {
+      val word = MixWord(0x41083105) // - 1 2 3 4 5
+      val value = MixWord(0x061c8240) // + 6 7 8 9 0
+      word.updated(MixByte(0x00), value) must be equalTo MixWord(0x01083105) // + 1 2 3 4 5
+      word.updated(MixByte(0x01), value) must be equalTo MixWord(0x00083105) // + 0 2 3 4 5
+      word.updated(MixByte(0x02), value) must be equalTo MixWord(0x09003105) // + 9 0 3 4 5
+      word.updated(MixByte(0x03), value) must be equalTo MixWord(0x08240105) // + 8 9 0 4 5
+      word.updated(MixByte(0x04), value) must be equalTo MixWord(0x07209005) // + 7 8 9 0 5
+      word.updated(MixByte(0x05), value) must be equalTo MixWord(0x061c8240) // + 6 7 8 9 0
+      word.updated(MixByte(0x09), value) must be equalTo MixWord(0x40083105) // - 0 2 3 4 5
+      word.updated(MixByte(0x0a), value) must be equalTo MixWord(0x49003105) // - 9 0 3 4 5
+      word.updated(MixByte(0x0b), value) must be equalTo MixWord(0x48240105) // - 8 9 0 4 5
+      word.updated(MixByte(0x0c), value) must be equalTo MixWord(0x47209005) // - 7 8 9 0 5
+      word.updated(MixByte(0x0d), value) must be equalTo MixWord(0x461c8240) // - 6 7 8 9 0
+      word.updated(MixByte(0x12), value) must be equalTo MixWord(0x41003105) // - 1 0 3 4 5
+      word.updated(MixByte(0x13), value) must be equalTo MixWord(0x41240105) // - 1 9 0 4 5
+      word.updated(MixByte(0x14), value) must be equalTo MixWord(0x41209005) // - 1 8 9 0 5
+      word.updated(MixByte(0x15), value) must be equalTo MixWord(0x411c8240) // - 1 7 8 9 0
+      word.updated(MixByte(0x1b), value) must be equalTo MixWord(0x41080105) // - 1 2 0 4 5
+      word.updated(MixByte(0x1c), value) must be equalTo MixWord(0x41089005) // - 1 2 9 0 5
+      word.updated(MixByte(0x1d), value) must be equalTo MixWord(0x41088240) // - 1 2 8 9 0
+      word.updated(MixByte(0x24), value) must be equalTo MixWord(0x41083005) // - 1 2 3 0 5
+      word.updated(MixByte(0x25), value) must be equalTo MixWord(0x41083240) // - 1 2 3 9 0
+      word.updated(MixByte(0x2d), value) must be equalTo MixWord(0x41083100) // - 1 2 3 4 0
+    }
+
+    "throw an exception if field number is wrong" in {
+      MixWord(0x0).updated(MixByte(0x06), MixWord(0x0)) must throwA[WrongFieldSpecException]
+    }
+
+    "throw an exception if l > r in a field spec" in {
+      MixWord(0x0).updated(MixByte(0x08), MixWord(0x0)) must throwA[WrongFieldSpecException]
     }
   }
 

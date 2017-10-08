@@ -25,47 +25,20 @@ object binary extends ProcessingModel {
 
     protected def withoutChanges: VMB = this
 
-    protected def withDefinedForwardReference(label: String, value: W): VMB =
+    protected def withSymbolValue(label: String, value: W): VMB =
       copy(symbols = symbols.updated(label, value), forwardReferences = forwardReferences - label)
-        .withAddressFields(forwardReferences(label), value)
+        .withDefinedForwardReference(forwardReferences(label), value)
 
     protected def withAddressFields(addresses: Seq[I], addressFieldValue: W): VMB = {
-      if (addresses.isEmpty) this
-      else {
-        if ((addressFieldValue.contents & 0x3ffff000) > 0)
-          throw new OverflowException
-        copy(state = addresses.foldLeft(state) { (s, address) =>
-          val value = updatedWord(s.memory.get(address), getByte(2), addressFieldValue)
-          s.copy(memory = s.memory.updated(address, value))
-        })
+      val nextState = addresses.foldLeft(state) { (s, address) =>
+        val value = s.memory.get(address).updated(getByte(2), addressFieldValue)
+        s.copy(memory = s.memory.updated(address, value))
       }
+      copy(state = nextState)
     }
 
-    protected def buildFieldSpec(left: W, right: W): W = {
-      val shiftedLeft = MixWord(left.contents & 0x40000000 | ((left.contents & 0x07ffffff) << 3))
-      (shiftedLeft + right)._2
-    }
-
-    protected def getWord(value: Long): W = {
-      MixWord.get(value)
-    }
-
-    protected def getByte(value: Byte): B = {
-      MixByte(value)
-    }
-
-    protected def updatedWord(word: W, fieldSpec: B, value: W): W = {
-      val l = fieldSpec.contents >> 3
-      val r = fieldSpec.contents & 0x07
-      if (l > r) throw new WrongFieldSpecException(fieldSpec.contents)
-      val shiftedValue = value.contents & 0x40000000 | ((value.contents << (6 * (5 - r))) & 0x3fffffff)
-      val mask = MixWord.bitMask(l, r)
-      MixWord(shiftedValue & mask | word.contents & ~mask & 0x7fffffff)
-    }
-
-    protected def withChangedCounter(address: W): VMB = {
+    protected def withChangedCounter(address: W): VMB =
       copy(counter = address.toIndex)
-    }
 
     protected def withValue(value: W): VMB = {
       if (counter.contents >= VirtualMachine.MEMORY_SIZE)
@@ -76,23 +49,8 @@ object binary extends ProcessingModel {
       )
     }
 
-    protected def translateCharCode(chars: String): W =
-      MixWord((0 until 5).foldLeft(0) { (contents, i) =>
-        val char = chars(i)
-        VirtualMachine.CODES.get(char) match {
-          case Some(code) => contents | (code << 6 * (4 - i))
-          case None => throw new UnsupportedCharacterException(char)
-        }
-      })
-
     protected def withProgramCounter(value: I): VMB =
       copy(state = state.copy(programCounter = value))
-
-    protected def getWord(address: I, indexSpec: B, fieldSpec: B, opCode: B): W = {
-      MixWord(address, indexSpec, fieldSpec, opCode)
-    }
-
-    protected def getIndex(value: Short): I = MixIndex(value)
 
     protected def withForwardReference(symbol: String): VMB =
       copy(forwardReferences = forwardReferences.updated(symbol, forwardReferences(symbol) :+ counter))
@@ -110,11 +68,47 @@ object binary extends ProcessingModel {
     devices = IndexedSeq.empty
   )
 
-  override def getZero: W = MixWord(0)
+  override def getByte(value: Byte): B = {
+    if ((value & ~0x3f) != 0)
+      throw new OverflowException
+    MixByte(value)
+  }
+
+  override def getIndex(value: Short): I = {
+    val sign = if (value < 0) 0x1000 else 0x0
+    val abs = value.abs
+    if ((abs & ~0x0fffL) != 0)
+      throw new OverflowException
+    MixIndex((sign | abs).toShort)
+  }
+
+  override def getWord(value: Long): W = {
+    val sign = if (value < 0) 0x40000000 else 0x0
+    val abs = value.abs
+    if ((abs & ~0x3fffffffL) != 0)
+      throw new OverflowException
+    MixWord(sign | abs.toInt)
+  }
+
+  override def getWord(address: I, indexSpec: B, fieldSpec: B, opCode: B): W = {
+    val value = (address.contents << 18) | (indexSpec.contents << 12) | (fieldSpec.contents << 6) | opCode.contents
+    MixWord(value)
+  }
 
   override def getWord(ioWord: IOWord): W = {
     val init = if (ioWord.negative) 1 else 0
-    MixWord(ioWord.bytes.foldLeft(init)((w, b) => w << 6 | b))
+    MixWord(ioWord.bytes.foldLeft(init)((w, b) => (w << 6) | b))
+  }
+
+  override def getWord(chars: String): W = {
+    if (chars.length != 5) throw new Error
+    val value = chars.foldLeft(0) { (w, c) =>
+      VirtualMachine.CODES.get(c) match {
+        case Some(code) => (w << 6) | code
+        case None => throw new UnsupportedCharacterException(c)
+      }
+    }
+    MixWord(value)
   }
 
   case class RegisterState(a: Int, x: Int, i: Vector[Short], j: Short, ov: Boolean, cmp: Comparison)
@@ -191,20 +185,6 @@ object binary extends ProcessingModel {
       if (sharedLocks exists { l => conflicts(l, address.contents) }) throw new InconsistentReadException
       if (exclusiveLocks exists { l => conflicts(l, address.contents) }) throw new WriteConflictException
       copy(contents = contents.updated(address.contents, value.contents))
-    }
-
-    override def updated(address: I, fieldSpec: B, value: W): MS = {
-      if (address.contents >= VirtualMachine.MEMORY_SIZE)
-        throw new WrongMemoryAddressException(address.contents)
-      if (sharedLocks exists { l => conflicts(l, address.contents) }) throw new InconsistentReadException
-      if (exclusiveLocks exists { l => conflicts(l, address.contents) }) throw new WriteConflictException
-      val l = fieldSpec.contents >> 3
-      val r = fieldSpec.contents & 0x07
-      if (l > r) throw new WrongFieldSpecException(fieldSpec.contents)
-      val shiftedValue = value.contents & 0x40000000 | ((value.contents << (6 * (5 - r))) & 0x3fffffff)
-      val mask = MixWord.bitMask(l, r)
-      val updatedWord = MixWord(shiftedValue & mask | contents(address.contents) & ~mask & 0x7fffffff)
-      copy(contents = contents.updated(address.contents, updatedWord.contents))
     }
 
     override def withSharedLock(address: I, size: Int, deviceNum: Int): MS = {
@@ -360,6 +340,15 @@ object binary extends ProcessingModel {
       MixWord(sign | abs)
     }
 
+    override def updated(fieldSpec: B, value: W): W = {
+      val l = fieldSpec.contents >> 3
+      val r = fieldSpec.contents & 0x07
+      if (l > r) throw new WrongFieldSpecException(fieldSpec.contents)
+      val shiftedValue = value.contents & 0x40000000 | ((value.contents << (6 * (5 - r))) & 0x3fffffff)
+      val mask = MixWord.bitMask(l, r)
+      MixWord(shiftedValue & mask | contents & ~mask & 0x7fffffff)
+    }
+
     override def unary_-(): W = MixWord(contents ^ 0x40000000)
 
     override def +(other: W): (Boolean, W) =
@@ -395,6 +384,35 @@ object binary extends ProcessingModel {
       val abs = (contents & 0x3fffffff).toLong * (other.contents & 0x3fffffff)
       val sign = (contents & ~other.contents | ~contents & other.contents) & 0x40000000
       MixDWord((sign.toLong << 30) | abs)
+    }
+
+    override def /(divisor: W): (W, W) = {
+      if ((divisor.contents & 0x3fffffff) == 0)
+        throw new DivisionByZeroException
+      val absDividend = contents & 0x3fffffff
+      val absDivisor = divisor.contents & 0x3fffffff
+      val absQuotient = absDividend / absDivisor
+      val absRemainder = absDividend % absDivisor
+      val signQuotient = (contents & ~divisor.contents | ~contents & divisor.contents) & 0x40000000
+      (MixWord(signQuotient | absQuotient), MixWord(contents & 0x40000000 | absRemainder))
+    }
+
+    override def /\(divisor: W): (W, W) = {
+      if ((divisor.contents & 0x3fffffff) == 0)
+        throw new DivisionByZeroException
+      if ((contents & 0x3ffffff) >= (divisor.contents & 0x3fffffff))
+        throw new OverflowException
+      val absDividend = (contents & 0x3fffffff).toLong << 30
+      val absDivisor = divisor.contents & 0x3fffffff
+      val absQuotient = (absDividend / absDivisor).toInt
+      val absRemainder = (absDividend % absDivisor).toInt
+      val signQuotient = (contents & ~divisor.contents | ~contents & divisor.contents) & 0x40000000
+      (MixWord(signQuotient | absQuotient), MixWord(contents & 0x40000000 | absRemainder))
+    }
+
+    override def :*(other: W): W = {
+      val shiftedLeft = MixWord(contents & 0x40000000 | ((contents & 0x07ffffff) << 3))
+      (shiftedLeft + other)._2
     }
 
     override def <=>(other: W): Comparison = {
@@ -433,11 +451,6 @@ object binary extends ProcessingModel {
       else -(contents ^ 0x40000000)
     }
 
-    override def toDWordLeft: MixDWord = MixDWord(contents.toLong << 30)
-
-    override def toDWordRight: MixDWord =
-      MixDWord(((contents & 0x40000000).toLong << 30) | (contents & 0x3fffffff).toLong)
-
     override def toIOWord: IOWord = {
       val bytes = (1 to 5).map(i => ((contents & MixWord.masks(i)) >> (6 * (5 - i))).toByte)
       IOWord(isNegative, bytes)
@@ -455,17 +468,6 @@ object binary extends ProcessingModel {
   object MixWord {
     val masks: Array[Int] = Array(0x40000000, 0x3f000000, 0xfc0000, 0x3f000, 0xfc0, 0x3f)
 
-    def get(value: Long): MixWord = {
-      val sign = if (value < 0) 0x40000000 else 0x0
-      val abs = value.abs
-      if ((abs & ~0x3fffffffL) != 0)
-        throw new OverflowException
-      MixWord(sign | abs.toInt)
-    }
-
-    def apply(address: I, indexSpec: B, fieldSpec: B, opCode: B): MixWord =
-      MixWord((address.contents << 18) | (indexSpec.contents << 12) | (fieldSpec.contents << 6) | opCode.contents)
-
     def bitMask(l: Int, r: Int): Int = {
       if (l > 5 || r > 5) throw new WrongFieldSpecException((8 * l + r).toByte)
       (l to r).foldLeft(0) { (m, i) => m | masks(i) }
@@ -482,10 +484,12 @@ object binary extends ProcessingModel {
         throw new DivisionByZeroException
       if (((contents >> 30) & 0x3ffffff) >= (divisor.contents & 0x3fffffff))
         throw new OverflowException
-      val absDividend = ((contents & 0xfffffffffffffffL) / (divisor.contents & 0x3fffffff)).toInt
-      val absRemainder = ((contents & 0xfffffffffffffffL) % (divisor.contents & 0x3fffffff)).toInt
-      val signDividend = ((contents >> 30) & ~divisor.contents | (~contents >> 30) & divisor.contents).toInt & 0x40000000
-      (MixWord(signDividend | absDividend), MixWord((contents >> 30).toInt & 0x40000000 | absRemainder))
+      val absDividend = contents & 0xfffffffffffffffL
+      val absDivisor = divisor.contents & 0x3fffffff
+      val absQuotient = (absDividend / absDivisor).toInt
+      val absRemainder = (absDividend % absDivisor).toInt
+      val signQuotient = ((contents >> 30) & ~divisor.contents | (~contents >> 30) & divisor.contents).toInt & 0x40000000
+      (MixWord(signQuotient | absQuotient), MixWord((contents >> 30).toInt & 0x40000000 | absRemainder))
     }
 
     override def <<(n: I): DW = {
@@ -522,7 +526,7 @@ object binary extends ProcessingModel {
       MixWord((((contents & 0x1000000000000000L) >> 30) | (number._1 & 0x3fffffff)).toInt)
     }
 
-    override def toWord: MixWord = {
+    override def toWord: W = {
       if ((contents & 0xfffffffc0000000L) > 0) throw new OverflowException
       MixWord((((contents & 0x1000000000000000L) >> 30) | (contents & 0x3fffffff)).toInt)
     }
