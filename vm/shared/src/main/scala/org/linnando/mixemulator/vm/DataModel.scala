@@ -166,9 +166,9 @@ trait DataModel {
 
     def >>(n: I): W
 
-    def toIndex: I
-
     def toByte: B
+
+    def toIndex: I
 
     def toLong: Long
 

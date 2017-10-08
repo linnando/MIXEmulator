@@ -49,6 +49,18 @@ class ConversionOpsSpec extends Specification {
   }
 
   "binary word conversion" should {
+    "convert a positive word to a byte" in {
+      MixWord(0x1).toByte must be equalTo MixByte(0x1)
+    }
+
+    "throw an exception if a negative value is converted to a byte" in {
+      MixWord(0x40000001).toByte must throwAn[OverflowException]
+    }
+
+    "throw an exception if the value is too big for a byte" in {
+      MixWord(0x40).toByte must throwAn[OverflowException]
+    }
+
     "convert a positive word to an index" in {
       MixWord(0x1).toIndex must be equalTo MixIndex(0x1.toShort)
     }
@@ -68,15 +80,45 @@ class ConversionOpsSpec extends Specification {
     "convert a negative word to a Long" in {
       MixWord(0x40000001).toLong must be equalTo -1
     }
+
+    "convert a positive word to the left part of a double word" in {
+      MixWord(0x1).toDWordLeft must be equalTo MixDWord(0x40000000L)
+    }
+
+    "convert a negative word to the left part of a double word" in {
+      MixWord(0x40000001).toDWordLeft must be equalTo MixDWord(0x1000000040000000L)
+    }
+
+    "convert a positive word to the right part of a double word" in {
+      MixWord(0x1).toDWordRight must be equalTo MixDWord(0x1L)
+    }
+
+    "convert a negative word to the right part of a double word" in {
+      MixWord(0x40000001).toDWordRight must be equalTo MixDWord(0x1000000000000001L)
+    }
+  }
+
+  "binary double word conversion" should {
+    "convert a positive double word to a word" in {
+      MixDWord(0x1L).toWord must be equalTo MixWord(0x1)
+    }
+
+    "convert a negative double word to a word" in {
+      MixDWord(0x1000000000000001L).toWord must be equalTo MixWord(0x40000001)
+    }
+
+    "throw an exception if the value is too big for a word" in {
+      MixDWord(0x40000000).toWord must throwAn[OverflowException]
+    }
   }
 
   "binary i/o word conversion" should {
-    "convert a positive i/o word to a word" in {
-      getWord(IOWord(negative = false, Seq(1, 2, 3, 4, 5))) must be equalTo MixWord(0x01083105)
+    "convert a positive index to an i/o word" in {
+      MixIndex(0x0042).toIOWord must be equalTo IOWord(negative = false, Vector(0, 0, 0, 1, 2))
     }
 
-    "convert a negative i/o word to a word" in {
-      getWord(IOWord(negative = true, Seq(1, 2, 3, 4, 5))) must be equalTo MixWord(0x41083105)
+    "convert a negative index to an i/o word" in {
+      MixIndex(0x1042).toIOWord must be equalTo IOWord(negative = true, Vector(0, 0, 0, 1, 2))
     }
 
     "convert a positive word to an i/o word" in {
@@ -85,6 +127,14 @@ class ConversionOpsSpec extends Specification {
 
     "convert a negative word to an i/o word" in {
       MixWord(0x41083105).toIOWord must be equalTo IOWord(negative = true, Vector(1, 2, 3, 4, 5))
+    }
+
+    "convert a positive i/o word to a word" in {
+      getWord(IOWord(negative = false, Seq(1, 2, 3, 4, 5))) must be equalTo MixWord(0x01083105)
+    }
+
+    "convert a negative i/o word to a word" in {
+      getWord(IOWord(negative = true, Seq(1, 2, 3, 4, 5))) must be equalTo MixWord(0x41083105)
     }
   }
 
@@ -105,7 +155,7 @@ class ConversionOpsSpec extends Specification {
     }
 
     "convert a positive number to character code" in {
-      // 12977699 -> + 0 0 31 32 39 37 37 36 39 39
+      // 12977699 -> + 30 30 31 32 39 37 37 36 39 39
       MixWord(12977699).toCharCode must be equalTo MixDWord(0x079e7e09e59649e7L)
     }
 

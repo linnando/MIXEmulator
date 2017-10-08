@@ -5,7 +5,7 @@ import org.linnando.mixemulator.vm.exceptions.WrongFieldSpecException
 import org.specs2.mutable.Specification
 
 class FieldOpsSpec extends Specification {
-  "index field selection" should {
+  "binary index field selection" should {
     "consider a positive number to be positive and not negative" in {
       // + 1 2
       MixIndex(0x0042).isPositive must beTrue
@@ -31,7 +31,7 @@ class FieldOpsSpec extends Specification {
     }
   }
 
-    "word field selection" should {
+  "binary word field selection" should {
     "consider a positive number to be positive and not negative" in {
       // + 1 2 3 4 5
       MixWord(0x01083105).isPositive must beTrue
@@ -72,7 +72,7 @@ class FieldOpsSpec extends Specification {
     }
 
     "select operation modifier from a word" in {
-      // + 1 2 3 4 5 -> 3
+      // + 1 2 3 4 5 -> 4
       MixWord(0x01083105).getFieldSpec must be equalTo MixByte(0x04)
     }
 
@@ -142,7 +142,7 @@ class FieldOpsSpec extends Specification {
     }
   }
 
-  "double word field selection" should {
+  "binary double word field selection" should {
     "consider a positive number to be positive and not negative" in {
       // + 1 2 3 4 5 6 7 8 9 0
       MixDWord(0x00420c41461c8240L).isPositive must beTrue

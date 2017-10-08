@@ -23,7 +23,7 @@ class MemorySpec extends Specification {
       .updated(MixIndex(2001), MixWord(0x41083105)) // - 1 2 3 4 5
   )
 
-  "binary memory module" should {
+  "binary loading from memory" should {
     "load register A from memory" in {
       // A = 2000, I = 0, F = 0:5, C = 8 LDA
       execute(state, MixWord(0x1f400148)).registers.getA must be equalTo MixWord(0x41403144)
@@ -247,7 +247,9 @@ class MemorySpec extends Specification {
       // A = 2000, I = 0, F = 1:1, C = 23 LDXN
       execute(state, MixWord(0x1f400257)).registers.getX must be equalTo MixWord(0x40000001)
     }
+  }
 
+  "binary storing to memory" should {
     "store register A to memory" in {
       // A = 2001, I = 0, F = 0:5, C = 24 STA
       execute(state, MixWord(0x1f440158)).memory.get(2001.toShort) must be equalTo MixWord(0x061c8240)
@@ -397,7 +399,9 @@ class MemorySpec extends Specification {
       // A = 2001, I = 0, F = 0:1, C = 33 STZ
       execute(state, MixWord(0x1f440061)).memory.get(2001.toShort) must be equalTo MixWord(0x00083105)
     }
+  }
 
+  "binary moving in memory" should {
     "move memory words" in {
       val prevState = initialState.copy(
         registers = initialState.registers.updatedI(1, MixIndex(3000)),

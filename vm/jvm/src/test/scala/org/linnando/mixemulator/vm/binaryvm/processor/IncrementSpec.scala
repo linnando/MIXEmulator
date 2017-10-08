@@ -14,7 +14,7 @@ class IncrementSpec extends Specification {
       .updatedI(1, MixIndex(0x07c3)) // + 31 3
       .updatedI(2, MixIndex(0x08c8)) // + 35 8
       .updatedI(3, MixIndex(0x0d29)) // + 52 41
-      .updatedI(4, MixIndex(0x05bf)) // + 32 63
+      .updatedI(4, MixIndex(0x05bf)) // + 22 63
       .updatedI(5, MixIndex(0x00fd)) // + 3 61
       .updatedI(6, MixIndex(0x1de3)) // - 55 35
   )

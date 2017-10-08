@@ -38,6 +38,7 @@ class ArithmeticSpec extends Specification {
           .updatedA(MixWord(0x00000001)), // + 0 0 0 0 1
         memory = initialState.memory.updated(MixIndex(1000), MixWord(0x00000002)) // + 0 0 0 0 2
       )
+      // A = 1000, I = 0, F = 0:5, C = 1 ADD
       execute(state, MixWord(0x0fa00141)).registers.getOV must beTrue
     }
 
