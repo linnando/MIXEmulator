@@ -2,7 +2,6 @@ package org.linnando.mixemulator.webapp
 
 import angulate2.core.{AfterViewInit, ElementRef}
 import angulate2.std._
-import org.linnando.mixemulator.vm.io.data.IOWord
 
 import scala.scalajs.js
 
@@ -12,10 +11,6 @@ import scala.scalajs.js
   styleUrls = @@@("webapp/src/main/resources/memory-text.component.css")
 )
 class MemoryTextComponent(virtualMachineService: VirtualMachineService) extends OnInit with AfterViewInit {
-  private def machineState = virtualMachineService.machineState
-
-  private def symbols = virtualMachineService.symbols
-
   @ViewChild("scrolling")
   var scrolling: ElementRef = _
 
@@ -27,41 +22,56 @@ class MemoryTextComponent(virtualMachineService: VirtualMachineService) extends 
     positionToProgramCounter()
   }
 
-  private def positionToProgramCounter(): Unit = virtualMachineService.getProgramCounterIndex match {
+  private def positionToProgramCounter(): Unit = virtualMachineService.programCounterIndex match {
     case Some(index) =>
       val scrollHeight = scrolling.nativeElement.scrollHeight.asInstanceOf[Double]
       val clientHeight = scrolling.nativeElement.clientHeight.asInstanceOf[Double]
-      scrolling.nativeElement.scrollTop = index * scrollHeight / symbols.length - clientHeight / 2
+      scrolling.nativeElement.scrollTop = index * scrollHeight / virtualMachineService.symbolsLength - clientHeight / 2
     case None =>
   }
 
-  def indices(): js.Array[Int] = js.Array[Int]() ++ symbols.indices
+  def indices: js.Array[Int] = js.Array[Int]() ++ virtualMachineService.symbolIndices
 
-  def isCurrent(index: Int): Boolean = virtualMachineService.getProgramCounterIndex.contains(index)
+  def toggleBreakpoint(index: Int): Unit = virtualMachineService.toggleBreakpointAt(index)
 
-  def hasWord(index: Int): Boolean = symbols(index)._1.isDefined
+  def hasBreakpointAt(index: Int): Boolean = virtualMachineService.breakpointAt(index).exists(b => b)
 
-  def cellAddress(index: Int): Short = symbols(index)._1.getOrElse(0)
+  def isCurrent(index: Int): Boolean = virtualMachineService.programCounterIndex.contains(index)
 
-  def cellSign(index: Int): String =
-    cellContent(index).map(w => if (w.negative) "-" else "+").getOrElse("+")
-
-  def cellByte(index: Int, pos: Int): Byte =
-    cellContent(index).map(_.bytes(pos)).getOrElse(0)
-
-  private def cellContent(index: Int): Option[IOWord] = {
-    val address = symbols(index)._1
-    machineState.flatMap(m => address.map(m.get))
+  def hasWordAt(index: Int): Boolean = {
+    val address = virtualMachineService.addressAt(index)
+    address.isDefined
   }
 
-  def hasLine(index: Int): Boolean = symbols(index)._2.isDefined
-
-  def lineNumber(index: Int): Int = symbols(index)._2.getOrElse(0)
-
-  def line(index: Int): String = {
-    val (address, lineNumber) = symbols(index)
-    lineNumber.map(virtualMachineService.getLine(_, address)).getOrElse("")
+  def cellAddressAt(index: Int): Short = {
+    val address = virtualMachineService.addressAt(index)
+    address.getOrElse(0)
   }
 
-  def lineIsModified(index: Int): Boolean = virtualMachineService.lineIsModified(symbols(index)._1)
+  def cellSignAt(index: Int): String = {
+    val cellContent = virtualMachineService.cellContent(index)
+    cellContent.map(w => if (w.negative) "-" else "+").getOrElse("+")
+  }
+
+  def cellByteAt(index: Int, pos: Int): Byte = {
+    val cellContent = virtualMachineService.cellContent(index)
+    cellContent.map(_.bytes(pos)).getOrElse(0)
+  }
+
+  def hasLineAt(index: Int): Boolean = {
+    val lineNumber = virtualMachineService.lineNumberAt(index)
+    lineNumber.isDefined
+  }
+
+  def lineNumberAt(index: Int): Int = {
+    val lineNumber = virtualMachineService.lineNumberAt(index)
+    lineNumber.getOrElse(0)
+  }
+
+  def lineAt(index: Int): String = {
+    val line = virtualMachineService.lineAt(index)
+    line.getOrElse("")
+  }
+
+  def lineIsModifiedAt(index: Int): Boolean = virtualMachineService.lineIsModifiedAt(index).getOrElse(false)
 }

@@ -1,6 +1,6 @@
 name := "MIX Emulator"
 
-scalaVersion in ThisBuild := "2.11.8"
+scalaVersion in ThisBuild := "2.11.11"
 
 lazy val asm = crossProject
   .dependsOn(vm)

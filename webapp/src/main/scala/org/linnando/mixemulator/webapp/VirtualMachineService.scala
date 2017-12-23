@@ -2,6 +2,7 @@ package org.linnando.mixemulator.webapp
 
 import angulate2.std._
 import org.linnando.mixemulator.asm.{MixAssembler, MixDisassembler}
+import org.linnando.mixemulator.vm.io.data.IOWord
 import org.linnando.mixemulator.vm.{TrackingVirtualMachine, VirtualMachine, VirtualMachineState, binary}
 import rxjs.Subject
 
@@ -23,14 +24,6 @@ class VirtualMachineService {
   private var _addressSymbols: Vector[Int] = Vector.empty
 
   private var disassembler: MixDisassembler = _
-
-  def getLine(index: Int, address: Option[Short]): String =
-    _machine.flatMap(m => address.flatMap(a =>
-      if (m.isModified(a)) Some(disassembler.disassembleLine(m.currentState.get(a)))
-      else None
-    )).getOrElse(lines(index))
-
-  def lineIsModified(address: Option[Short]): Boolean = _machine.exists(m => address.exists(a => m.isModified(a)))
 
   def assembleBinaryNonTracking(): Future[Unit] = Future {
     lines = text.split("\n").toVector
@@ -59,10 +52,7 @@ class VirtualMachineService {
 
   def isActive: Boolean = _machine.isDefined
 
-  def canMoveForward: Boolean = _machine match {
-    case None => false
-    case Some(m) => m.canMoveForward
-  }
+  def canMoveForward: Boolean = _machine.exists(_.canMoveForward)
 
   def runForward(): Unit = _machine match {
     case Some(m) =>
@@ -78,10 +68,10 @@ class VirtualMachineService {
     case None => throw new Error
   }
 
-  def canMoveBack: Boolean = _machine match {
-    case Some(m: TrackingVirtualMachine) => m.canMoveBack
+  def canMoveBack: Boolean = _machine.exists({
+    case m: TrackingVirtualMachine => m.canMoveBack
     case _ => false
-  }
+  })
 
   def runBack(): Unit = _machine match {
     case Some(m: TrackingVirtualMachine) =>
@@ -99,7 +89,40 @@ class VirtualMachineService {
 
   def machineState: Option[VirtualMachineState] = _machine.map(_.currentState)
 
-  def getProgramCounterIndex: Option[Int] = machineState.map(s => _addressSymbols(s.getProgramCounter))
+  def symbolsLength: Int = _symbols.length
 
-  def symbols: Vector[(Option[Short], Option[Int])] = _symbols
+  def symbolIndices: Range = _symbols.indices
+
+  def programCounterIndex: Option[Int] = machineState.map(s => _addressSymbols(s.getProgramCounter))
+
+  def toggleBreakpointAt(index: Int): Unit = _machine match {
+    case Some(m) => addressAt(index).foreach(m.toggleBreakpoint)
+    case None => throw new Error
+  }
+
+  def addressAt(index: Int): Option[Short] = _symbols(index)._1
+
+  def breakpointAt(index: Int): Option[Boolean] = _machine.map(m => addressAt(index).exists(m.breakpoints))
+
+  def cellContent(index: Int): Option[IOWord] = {
+    val address = addressAt(index)
+    machineState.flatMap(s => address.map(s.get))
+  }
+
+  def lineNumberAt(index: Int): Option[Int] = _symbols(index)._2
+
+  def lineAt(index: Int): Option[String] = _machine.flatMap(m => {
+    val (address, lineNumber) = _symbols(index)
+    lineNumber.map(ln =>
+      if (address.exists(m.isModified)) {
+        val cellContent = m.currentState.get(address.get)
+        disassembler.disassembleLine(cellContent)
+      } else lines(ln)
+    )
+  })
+
+  def lineIsModifiedAt(index: Int): Option[Boolean] = _machine.map(m => {
+    val address = addressAt(index)
+    address.exists(m.isModified)
+  })
 }
