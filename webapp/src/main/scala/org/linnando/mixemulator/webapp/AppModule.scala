@@ -12,13 +12,18 @@ import scala.scalajs.js
     RouterModule.forRoot(@@@(
       Route(path = "", redirectTo = "/about", pathMatch = "full"),
       Route(path = "about", component = %%[AboutComponent]),
+      Route(path = "devices", component = %%[DevicesComponent]),
       Route(path = "editor", component = %%[EditorComponent]),
       Route(path = "vm", component = %%[VirtualMachineComponent])
     ), js.Dynamic.literal(useHash = true)),
   declarations = @@[
     AboutComponent,
     AppComponent,
+    BlockIODeviceComponent,
+    DevicesComponent,
     EditorComponent,
+    LineInputDeviceComponent,
+    LineOutputDeviceComponent,
     MemoryDataComponent,
     MemoryTextComponent,
     RegistersComponent,

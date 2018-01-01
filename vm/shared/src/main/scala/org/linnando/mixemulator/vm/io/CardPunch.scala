@@ -1,6 +1,6 @@
 package org.linnando.mixemulator.vm.io
 
-trait CardPunch extends PositionalOutputDevice {
+trait CardPunch extends LineDevice with PositionalOutputDevice {
 }
 
 object CardPunch {

@@ -4,28 +4,25 @@ import org.linnando.mixemulator.vm.io.SequentialIODevice
 import org.linnando.mixemulator.vm.io.data.IOWord
 
 import scala.collection.immutable.Queue
-import scala.concurrent.{Await, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration._
-import scala.language.postfixOps
-import scala.util.Success
+import scala.concurrent.Future
+import scala.util.{Failure, Success}
 
 trait FileSequentialBlockIODevice extends SequentialIODevice with FileBlockIODevice {
   def pos: Long
-  def tasks: Future[Queue[IndexedSeq[IOWord]]]
 
   override def read(): FileSequentialBlockIODevice =
-    withTasks(tasks flatMap { prev => Future { prev.enqueue(readBlock(pos)) }})
+    withTasks(tasks flatMap { prev => readBlock(pos).map(words => prev.enqueue(words)) })
 
   def withTasks(tasks: Future[Queue[IndexedSeq[IOWord]]]): FileSequentialBlockIODevice
 
   override def write(words: IndexedSeq[IOWord]): FileSequentialBlockIODevice =
-    newVersion(tasks andThen { case Success(_) => writeBlock(pos, words) })
+    newVersion(tasks flatMap { prev => writeBlock(pos, words).map(_ => prev) })
 
   def newVersion(tasks: Future[Queue[IndexedSeq[IOWord]]]): FileSequentialBlockIODevice
 
-  override def flush(): (FileSequentialBlockIODevice, Queue[IndexedSeq[IOWord]]) =
-    (withoutTasks, Await.result(tasks, 1 seconds))
+  override def flush(): Future[(FileSequentialBlockIODevice, Queue[IndexedSeq[IOWord]])] =
+    tasks.map((withoutTasks, _))
 
   def withoutTasks: FileSequentialBlockIODevice
 

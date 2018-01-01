@@ -2,6 +2,8 @@ name := "MIX Emulator"
 
 scalaVersion in ThisBuild := "2.11.11"
 
+resolvers += Resolver.sonatypeRepo("releases")
+
 lazy val asm = crossProject
   .dependsOn(vm)
   .settings(
@@ -35,7 +37,11 @@ lazy val vm = crossProject
       "org.specs2" %% "specs2-matcher-extra" % "3.9.2" % "test"
     )
   )
-  .jsSettings()
+  .jsSettings(
+    libraryDependencies ++= Seq(
+      "io.scalajs" %%% "nodejs-lts" % "0.4.2"
+    )
+  )
 
 lazy val vmJVM = vm.jvm
 

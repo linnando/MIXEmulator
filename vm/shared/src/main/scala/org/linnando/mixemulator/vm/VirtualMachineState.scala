@@ -1,6 +1,7 @@
 package org.linnando.mixemulator.vm
 
 import org.linnando.mixemulator.vm.Comparison.Comparison
+import org.linnando.mixemulator.vm.io.Device
 import org.linnando.mixemulator.vm.io.data.IOWord
 
 trait VirtualMachineState {
@@ -31,6 +32,8 @@ trait VirtualMachineState {
   def getProgramCounter: Short
 
   def getTimeCounter: Int
+
+  def getDevice(deviceNum: Int): Device
 
   def isHalted: Boolean
 }

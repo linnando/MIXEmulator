@@ -2,10 +2,20 @@ package org.linnando.mixemulator.vm.io
 
 import org.linnando.mixemulator.vm.io.data.IOWord
 
+import scala.concurrent.Future
+
 trait Device {
   def blockSize: Int
   def isBusy: Boolean
-  def flush(): (Device, Seq[IndexedSeq[IOWord]])
+  def flush(): Future[(Device, Seq[IndexedSeq[IOWord]])]
+}
+
+trait LineDevice extends Device {
+  def data: Future[IndexedSeq[String]]
+}
+
+trait BlockDevice extends Device {
+  def data: Future[IndexedSeq[IOWord]]
 }
 
 trait PositionalInputDevice extends Device {

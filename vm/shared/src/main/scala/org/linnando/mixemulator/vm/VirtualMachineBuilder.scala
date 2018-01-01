@@ -1,5 +1,7 @@
 package org.linnando.mixemulator.vm
 
+import org.linnando.mixemulator.vm.io.Device
+
 import scala.util.matching.Regex
 
 trait VirtualMachineBuilder {
@@ -18,6 +20,8 @@ trait VirtualMachineBuilder {
   def withFinalSection(label: String, value: String): VirtualMachineBuilder
 
   def withCommand(aPart: String, indexPart: String, fPart: String, opCode: Byte, defaultFieldSpec: Byte): VirtualMachineBuilder
+
+  def withDevices(devices: Map[Int, Device]): VirtualMachineBuilder
 
   def build: VirtualMachine
 

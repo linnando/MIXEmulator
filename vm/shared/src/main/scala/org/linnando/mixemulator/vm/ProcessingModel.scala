@@ -4,6 +4,9 @@ import java.util
 
 import org.linnando.mixemulator.vm.exceptions._
 
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+
 abstract class ProcessingModel extends DataModel with Processor {
   type VMB <: AbstractVirtualMachineBuilder
 
@@ -11,9 +14,13 @@ abstract class ProcessingModel extends DataModel with Processor {
 
   abstract class AbstractVirtualMachineBuilder extends VirtualMachineBuilder {
     def state: State
+
     def counter: I
+
     def symbols: Map[String, W]
+
     def forwardReferences: Map[String, Seq[I]]
+
     def literals: Map[W, Seq[I]]
 
     override def getCounter: Short = counter.toShort
@@ -209,11 +216,15 @@ abstract class ProcessingModel extends DataModel with Processor {
 
     override def canMoveForward: Boolean = !_currentState.isHalted
 
-    override def stepForward(): Unit = _currentState = forward(_currentState)
+    override def stepForward(): Future[Unit] = forward(_currentState).map(_currentState = _)
 
-    override def runForward(): Unit =
-      do stepForward()
-      while (!_breakpoints(_currentState.programCounter.toShort) && !_currentState.isHalted)
+    override def runForward(): Future[Unit] = {
+      val success = Future.successful(())
+      success.flatMap(_ => stepForward()) flatMap { _ =>
+        if (_breakpoints(_currentState.programCounter.toShort) || _currentState.isHalted) success
+        else runForward()
+      }
+    }
 
     override def toggleBreakpoint(address: Short): Unit =
       if (_breakpoints(address)) _breakpoints -= address
@@ -237,16 +248,20 @@ abstract class ProcessingModel extends DataModel with Processor {
 
     override def canMoveForward: Boolean = stateIterator.hasNext || !_currentState.isHalted
 
-    override def stepForward(): Unit =
-      if (stateIterator.hasNext) _currentState = stateIterator.next()
-      else {
-        _currentState = forward(_currentState)
+    override def stepForward(): Future[Unit] =
+      if (stateIterator.hasNext) Future { _currentState = stateIterator.next() }
+      else forward(_currentState) map { state =>
+        _currentState = state
         stateIterator.add(_currentState)
       }
 
-    override def runForward(): Unit =
-      do stepForward()
-      while (!_breakpoints(_currentState.programCounter.toShort) && !_currentState.isHalted)
+    override def runForward(): Future[Unit] = {
+      val success = Future.successful(())
+      success.flatMap(_ => stepForward()) flatMap { _ =>
+        if (_breakpoints(_currentState.programCounter.toShort) || _currentState.isHalted) success
+        else runForward()
+      }
+    }
 
     override def canMoveBack: Boolean = stateIterator.hasPrevious
 
@@ -281,4 +296,5 @@ abstract class ProcessingModel extends DataModel with Processor {
 
     override def isModified(address: Short): Boolean = _currentState.get(address) != initialState.get(address)
   }
+
 }

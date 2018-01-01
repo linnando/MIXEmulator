@@ -14,6 +14,11 @@
       '@angular/router': 'npm:@angular/router/bundles/router.umd.js',
       '@angular/forms': 'npm:@angular/forms/bundles/forms.umd.js',
       '@angular/upgrade': 'npm:@angular/upgrade/bundles/upgrade.umd.js',
+      'buffer': 'lib/browserfs/shims/buffer.js',
+      'bufferGlobal': 'lib/browserfs/shims/bufferGlobal.js',
+      'fs': 'lib/browserfs/shims/fs.js',
+      'path': 'lib/browserfs/shims/path.js',
+      'processGlobal': 'lib/browserfs/shims/process.js',
       'rxjs': 'npm:rxjs'
     },
     packages: {

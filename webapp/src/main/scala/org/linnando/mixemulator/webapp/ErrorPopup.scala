@@ -18,6 +18,7 @@ object ErrorPopup {
 
   private def errorMessage(exception: Throwable): String = exception match {
     case _: BackFromInitialStateException => "Cannot move back from the initial state"
+    case e: DeviceNotConnectedException => s"Device ${e.deviceNum} is not connected"
     case _: DivisionByZeroException => "Division by zero"
     case e: DuplicateSymbolException => s"Duplicate symbol ${e.symbol}"
     case _: EndOfFileException => "Cannot read beyond the end of file"
@@ -42,6 +43,8 @@ object ErrorPopup {
     case e: WrongLineException => s"Wrong line format in line ${e.line}"
     case e: WrongOperatorException => s"Invalid command ${e.operator} in line ${e.line}"
     case e: WrongMemoryAddressException => s"Invalid memory address ${e.address}"
-    case _ => "Unexpected error"
+    case e =>
+      println(e)
+      "Unexpected error"
   }
 }

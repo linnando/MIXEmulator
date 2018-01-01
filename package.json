@@ -20,6 +20,7 @@
     "@angular/upgrade": "~2.4.10",
     "angular-in-memory-web-api": "~0.3.2",
     "bootstrap": "3.3.7",
+    "browserfs": "~1.4.3",
     "core-js": "^2.4.1",
     "express": "^4.15.3",
     "lite-server": "^2.3.0",

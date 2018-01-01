@@ -1,6 +1,6 @@
 package org.linnando.mixemulator.vm.io
 
-trait LinePrinter extends PositionalOutputDevice {
+trait LinePrinter extends LineDevice with PositionalOutputDevice {
   def newPage(): LinePrinter
 }
 

@@ -1,17 +1,14 @@
 package org.linnando.mixemulator.vm.io.file
 
-import java.io._
-
 import org.linnando.mixemulator.vm.io.LinePrinter
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.util.Success
 
 case class FileLinePrinter(filename: String,
-                           version: Int = 0,
-                           tasks: Future[Unit] = Future.successful {},
-                           isBusy: Boolean = false)
+                           version: Int,
+                           tasks: Future[Unit],
+                           isBusy: Boolean)
   extends LinePrinter with FileLineOutputDevice {
 
   override def blockSize: Int = LinePrinter.BLOCK_SIZE
@@ -23,19 +20,13 @@ case class FileLinePrinter(filename: String,
     copy(tasks = Future.successful {}, isBusy = false)
 
   override def newPage(): FileLinePrinter =
-    newVersion(tasks andThen { case Success(_) => writeNewPage() })
+    newVersion(tasks flatMap { _ => appendNewPage() })
 
-  def writeNewPage(): Unit = {
-    val oldFile = new File(s"$filename.$version")
-    val writer = new BufferedWriter(new FileWriter(s"$filename.${version + 1}"))
-    try {
-      if (oldFile.exists)
-        copyFileContent(oldFile, writer)
-      writer.write("\f")
-    }
-    finally {
-      writer.close()
-    }
-  }
+  private def appendNewPage(): Future[Unit] =
+    LineAccessFile.appendNewPage(filename, version)
+}
 
+object FileLinePrinter {
+  def create(filename: String): FileLinePrinter =
+    FileLinePrinter(filename, 0, FileLineOutputDevice.initialise(filename), isBusy = false)
 }

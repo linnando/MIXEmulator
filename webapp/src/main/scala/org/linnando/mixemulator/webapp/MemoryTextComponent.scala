@@ -2,6 +2,7 @@ package org.linnando.mixemulator.webapp
 
 import angulate2.core.{AfterViewInit, ElementRef}
 import angulate2.std._
+import rxjs.core.Subscription
 
 import scala.scalajs.js
 
@@ -10,12 +11,13 @@ import scala.scalajs.js
   templateUrl = "webapp/src/main/resources/memory-text.component.html",
   styleUrls = @@@("webapp/src/main/resources/memory-text.component.css")
 )
-class MemoryTextComponent(virtualMachineService: VirtualMachineService) extends OnInit with AfterViewInit {
+class MemoryTextComponent(virtualMachineService: VirtualMachineService) extends OnInit with AfterViewInit with OnDestroy {
   @ViewChild("scrolling")
   var scrolling: ElementRef = _
+  var stateChangeSubscription: Subscription = _
 
   override def ngOnInit(): Unit = {
-    virtualMachineService.stateChange.subscribe(_ => positionToProgramCounter())
+    stateChangeSubscription = virtualMachineService.stateChange.subscribe(_ => positionToProgramCounter())
   }
 
   override def ngAfterViewInit(): Unit = {
@@ -28,6 +30,10 @@ class MemoryTextComponent(virtualMachineService: VirtualMachineService) extends 
       val clientHeight = scrolling.nativeElement.clientHeight.asInstanceOf[Double]
       scrolling.nativeElement.scrollTop = index * scrollHeight / virtualMachineService.symbolsLength - clientHeight / 2
     case None =>
+  }
+
+  override def ngOnDestroy(): Unit = {
+    stateChangeSubscription.unsubscribe()
   }
 
   def indices: js.Array[Int] = js.Array[Int]() ++ virtualMachineService.symbolIndices

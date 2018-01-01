@@ -21,8 +21,8 @@ trait DataModel {
                    programCounter: I,
                    timeCounter: Int,
                    isHalted: Boolean,
-                   devices: IndexedSeq[(Device, Queue[I])]) extends VirtualMachineState {
-    override def get(address: Short): IOWord = memory.get(address).toIOWord
+                   devices: Map[Int, (Device, Queue[I])]) extends VirtualMachineState {
+    override def get(address: Short): IOWord = memory.getCurrent(address).toIOWord
 
     override def getA: IOWord = registers.getA.toIOWord
 
@@ -49,6 +49,8 @@ trait DataModel {
     override def getProgramCounter: Short = programCounter.toShort
 
     override def getTimeCounter: Int = timeCounter
+
+    override def getDevice(deviceNum: Int): Device = devices(deviceNum)._1
   }
 
   def getByte(value: Byte): B
@@ -101,6 +103,8 @@ trait DataModel {
     def get(address: I): W
 
     def get(address: Short): W
+
+    def getCurrent(address: Short): W
 
     def updated(address: I, value: W): MS
 

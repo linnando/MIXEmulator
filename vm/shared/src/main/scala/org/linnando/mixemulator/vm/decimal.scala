@@ -2,7 +2,10 @@ package org.linnando.mixemulator.vm
 
 import org.linnando.mixemulator.vm.Comparison.Comparison
 import org.linnando.mixemulator.vm.exceptions._
+import org.linnando.mixemulator.vm.io.Device
 import org.linnando.mixemulator.vm.io.data.IOWord
+
+import scala.collection.immutable.Queue
 
 object decimal extends ProcessingModel {
   override type RS = RegisterState
@@ -57,6 +60,9 @@ object decimal extends ProcessingModel {
 
     protected def withLiteral(value: W): VMB =
       copy(literals = literals.updated(value, literals(value) :+ counter))
+
+    override def withDevices(devices: Map[Int, Device]): DecimalVirtualMachineBuilder =
+      copy(state = state.copy(devices = devices.mapValues((_, Queue.empty))))
   }
 
   def initialState = State(
@@ -65,7 +71,7 @@ object decimal extends ProcessingModel {
     programCounter = MixIndex(0.toShort),
     timeCounter = 0,
     isHalted = false,
-    devices = IndexedSeq.empty
+    devices = Map.empty
   )
 
   override def getByte(value: Byte): B = {
@@ -172,9 +178,13 @@ object decimal extends ProcessingModel {
     override def get(address: I): W = get(address.contents)
 
     override def get(address: Short): W = {
+      if (exclusiveLocks exists { l => conflicts(l, address) }) throw new InconsistentReadException
+      getCurrent(address)
+    }
+
+    override def getCurrent(address: Short) = {
       if (address >= VirtualMachine.MEMORY_SIZE)
         throw new WrongMemoryAddressException(address)
-      if (exclusiveLocks exists { l => conflicts(l, address) }) throw new InconsistentReadException
       MixWord(contents(address))
     }
 

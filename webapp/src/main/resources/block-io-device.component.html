@@ -1,0 +1,34 @@
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div *ngIf="canUploadFile" class="form-inline">
+            <div class="form-group">
+                <label for="inputFile">Load device data from a file: </label>
+                <input type="file" id="inputFile" (change)="onFileChange($event.target.files)"
+                       placeholder="Upload file">
+            </div>
+            <button class="btn btn-primary" [disabled]="fileIsNotChosen" (click)="loadFile()">Load</button>
+            <button class="btn btn-primary" (click)="saveFile()">Save as file</button>
+        </div>
+        <div *ngIf="!canUploadFile">
+            In order to load device data from a file, please switch off the virtual machine.
+            <button class="btn btn-primary" (click)="saveFile()">Save as file</button>
+        </div>
+    </div>
+    <div class="panel-body">
+        <div class="row device-data">
+            <div *ngFor="let index of indices" class="col-sm-6 col-md-4 col-lg-3">
+                <table>
+                    <tr>
+                        <td class="index">{{index}}:</td>
+                        <td class="sign">{{cellSign(index)}}</td>
+                        <td class="byte">{{cellByte(index, 0)}}</td>
+                        <td class="byte">{{cellByte(index, 1)}}</td>
+                        <td class="byte">{{cellByte(index, 2)}}</td>
+                        <td class="byte">{{cellByte(index, 3)}}</td>
+                        <td class="byte">{{cellByte(index, 4)}}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

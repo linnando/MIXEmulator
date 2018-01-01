@@ -2,9 +2,10 @@ package org.linnando.mixemulator.vm.binaryvm.processor
 
 import org.linnando.mixemulator.vm.binary
 import org.linnando.mixemulator.vm.exceptions.{DivisionByZeroException, OverflowException}
+import org.specs2.concurrent.ExecutionEnv
 import org.specs2.mutable.Specification
 
-class ArithmeticSpec extends Specification {
+class ArithmeticSpec(implicit ee: ExecutionEnv) extends Specification {
   import binary._
   private val initialState = binary.initialState
 
@@ -16,8 +17,8 @@ class ArithmeticSpec extends Specification {
       )
       // A = 1000, I = 0, F = 0:5, C = 1 ADD
       val nextState = execute(state, MixWord(0x0fa00141))
-      nextState.registers.getA must be equalTo MixWord(0x14d860c8) // + 20 54 6 3 8
-      nextState.registers.getOV must beFalse
+      nextState.map(_.registers.getA) must beEqualTo(MixWord(0x14d860c8)).await // + 20 54 6 3 8
+      nextState.map(_.registers.getOV) must beFalse.await
     }
 
     "sum two numbers with an overflow" in {
@@ -27,8 +28,8 @@ class ArithmeticSpec extends Specification {
       )
       // A = 1000, I = 0, F = 0:5, C = 1 ADD
       val nextState = execute(state, MixWord(0x0fa00141))
-      nextState.registers.getA must be equalTo MixWord(0x00000001) // + 0 0 0 0 1
-      nextState.registers.getOV must beTrue
+      nextState.map(_.registers.getA) must beEqualTo(MixWord(0x00000001)).await // + 0 0 0 0 1
+      nextState.map(_.registers.getOV) must beTrue.await
     }
 
     "not change the overflow flag if no overflow occurs" in {
@@ -39,7 +40,7 @@ class ArithmeticSpec extends Specification {
         memory = initialState.memory.updated(MixIndex(1000), MixWord(0x00000002)) // + 0 0 0 0 2
       )
       // A = 1000, I = 0, F = 0:5, C = 1 ADD
-      execute(state, MixWord(0x0fa00141)).registers.getOV must beTrue
+      execute(state, MixWord(0x0fa00141)).map(_.registers.getOV) must beTrue.await
     }
 
     "sum a positive number and its negation to the positive zero" in {
@@ -48,7 +49,7 @@ class ArithmeticSpec extends Specification {
         memory = initialState.memory.updated(MixIndex(1000), MixWord(0x40000001)) // - 0 0 0 0 1
       )
       // A = 1000, I = 0, F = 0:5, C = 1 ADD
-      execute(state, MixWord(0x0fa00141)).registers.getA must be equalTo MixWord(0x00000000) // + 0 0 0 0 0
+      execute(state, MixWord(0x0fa00141)).map(_.registers.getA) must beEqualTo(MixWord(0x00000000)).await // + 0 0 0 0 0
     }
 
     "sum a negative number and its negation (positive) to the negative zero" in {
@@ -57,7 +58,7 @@ class ArithmeticSpec extends Specification {
         memory = initialState.memory.updated(MixIndex(1000), MixWord(0x00000001)) // + 0 0 0 0 1
       )
       // A = 1000, I = 0, F = 0:5, C = 1 ADD
-      execute(state, MixWord(0x0fa00141)).registers.getA must be equalTo MixWord(0x40000000) // - 0 0 0 0 0
+      execute(state, MixWord(0x0fa00141)).map(_.registers.getA) must beEqualTo(MixWord(0x40000000)).await // - 0 0 0 0 0
     }
   }
 
@@ -69,8 +70,8 @@ class ArithmeticSpec extends Specification {
       )
       // A = 1000, I = 0, F = 0:5, C = 2 SUB
       val nextState = execute(state, MixWord(0x0fa00142))
-      nextState.registers.getA must be equalTo MixWord(0x0bf82577) // + 11 62 2 21 55
-      nextState.registers.getOV must beFalse
+      nextState.map(_.registers.getA) must beEqualTo(MixWord(0x0bf82577)).await // + 11 62 2 21 55
+      nextState.map(_.registers.getOV) must beFalse.await
     }
 
     "subtract two numbers with an overflow" in {
@@ -80,8 +81,8 @@ class ArithmeticSpec extends Specification {
       )
       // A = 1000, I = 0, F = 0:5, C = 2 SUB
       val nextState = execute(state, MixWord(0x0fa00142))
-      nextState.registers.getA must be equalTo MixWord(0x00000001) // + 0 0 0 0 1
-      nextState.registers.getOV must beTrue
+      nextState.map(_.registers.getA) must beEqualTo(MixWord(0x00000001)).await // + 0 0 0 0 1
+      nextState.map(_.registers.getOV) must beTrue.await
     }
 
     "not change the overflow flag if no overflow occurs" in {
@@ -93,8 +94,8 @@ class ArithmeticSpec extends Specification {
       )
       // A = 1000, I = 0, F = 0:5, C = 2 SUB
       val nextState = execute(state, MixWord(0x0fa00142))
-      nextState.registers.getA must be equalTo MixWord(0x40000001) // - 0 0 0 0 1
-      nextState.registers.getOV must beTrue
+      nextState.map(_.registers.getA) must beEqualTo(MixWord(0x40000001)).await // - 0 0 0 0 1
+      nextState.map(_.registers.getOV) must beTrue.await
     }
 
     "subtract a positive number from itself to the positive zero" in {
@@ -103,7 +104,7 @@ class ArithmeticSpec extends Specification {
         memory = initialState.memory.updated(MixIndex(1000), MixWord(0x00000001)) // + 0 0 0 0 1
       )
       // A = 1000, I = 0, F = 0:5, C = 2 SUB
-      execute(state, MixWord(0x0fa00142)).registers.getA must be equalTo MixWord(0x00000000) // + 0 0 0 0 0
+      execute(state, MixWord(0x0fa00142)).map(_.registers.getA) must beEqualTo(MixWord(0x00000000)).await // + 0 0 0 0 0
     }
 
     "subtract a negative number from itself to the negative zero" in {
@@ -112,7 +113,7 @@ class ArithmeticSpec extends Specification {
         memory = initialState.memory.updated(MixIndex(1000), MixWord(0x40000001)) // - 0 0 0 0 1
       )
       // A = 1000, I = 0, F = 0:5, C = 2 SUB
-      execute(state, MixWord(0x0fa00142)).registers.getA must be equalTo MixWord(0x40000000) // - 0 0 0 0 0
+      execute(state, MixWord(0x0fa00142)).map(_.registers.getA) must beEqualTo(MixWord(0x40000000)).await // - 0 0 0 0 0
     }
   }
 
@@ -124,8 +125,8 @@ class ArithmeticSpec extends Specification {
       )
       // A = 1000, I = 0, F = 0:5, C = 3 MUL
       val nextState = execute(state, MixWord(0x0fa00143))
-      nextState.registers.getA must be equalTo MixWord(0x000420c4) // + 0 1 2 3 4
-      nextState.registers.getX must be equalTo MixWord(0x05103081) // + 5 4 3 2 1
+      nextState.map(_.registers.getA) must beEqualTo(MixWord(0x000420c4)).await // + 0 1 2 3 4
+      nextState.map(_.registers.getX) must beEqualTo(MixWord(0x05103081)).await // + 5 4 3 2 1
     }
 
     "multiply negative numbers" in {
@@ -135,8 +136,8 @@ class ArithmeticSpec extends Specification {
       )
       // A = 1000, I = 0, F = 0:5, C = 3 MUL
       val nextState = execute(state, MixWord(0x0fa00143))
-      nextState.registers.getA must be equalTo MixWord(0x019000e0) // + 1 36 0 3 32
-      nextState.registers.getX must be equalTo MixWord(0x08000000) // + 8 0 0 0 0
+      nextState.map(_.registers.getA) must beEqualTo(MixWord(0x019000e0)).await // + 1 36 0 3 32
+      nextState.map(_.registers.getX) must beEqualTo(MixWord(0x08000000)).await // + 8 0 0 0 0
     }
 
     "multiply numbers of different signs" in {
@@ -146,8 +147,8 @@ class ArithmeticSpec extends Specification {
       )
       // A = 1000, I = 0, F = 1:1, C = 3 MUL
       val nextState = execute(state, MixWord(0x0fa00243))
-      nextState.registers.getA must be equalTo MixWord(0x40000000) // - 0 0 0 0 0
-      nextState.registers.getX must be equalTo MixWord(0x400000e0) // - 0 0 0 3 32
+      nextState.map(_.registers.getA) must beEqualTo(MixWord(0x40000000)).await // - 0 0 0 0 0
+      nextState.map(_.registers.getX) must beEqualTo(MixWord(0x400000e0)).await // - 0 0 0 3 32
     }
   }
 
@@ -161,8 +162,8 @@ class ArithmeticSpec extends Specification {
       )
       // A = 1000, I = 0, F = 0:5, C = 4 DIV
       val nextState = execute(state, MixWord(0x0fa00144))
-      nextState.registers.getA must be equalTo MixWord(0x00000005) // + 0 0 0 0 5
-      nextState.registers.getX must be equalTo MixWord(0x00000002) // + 0 0 0 0 2
+      nextState.map(_.registers.getA) must beEqualTo(MixWord(0x00000005)).await // + 0 0 0 0 5
+      nextState.map(_.registers.getX) must beEqualTo(MixWord(0x00000002)).await // + 0 0 0 0 2
     }
 
     "divide negative numbers" in {
@@ -174,8 +175,8 @@ class ArithmeticSpec extends Specification {
       )
       // A = 1000, I = 0, F = 0:5, C = 4 DIV
       val nextState = execute(state, MixWord(0x0fa00144))
-      nextState.registers.getA must be equalTo MixWord(0x00269801) // + 0 9 41 32 1
-      nextState.registers.getX must be equalTo MixWord(0x40000041) // - 0 0 0 1 1
+      nextState.map(_.registers.getA) must beEqualTo(MixWord(0x00269801)).await // + 0 9 41 32 1
+      nextState.map(_.registers.getX) must beEqualTo(MixWord(0x40000041)).await // - 0 0 0 1 1
     }
 
     "divide a negative number by a positive one" in {
@@ -187,8 +188,8 @@ class ArithmeticSpec extends Specification {
       )
       // A = 1000, I = 0, F = 0:5, C = 4 DIV
       val nextState = execute(state, MixWord(0x0fa00144))
-      nextState.registers.getA must be equalTo MixWord(0x40269801) // - 0 9 41 32 1
-      nextState.registers.getX must be equalTo MixWord(0x40000041) // - 0 0 0 1 1
+      nextState.map(_.registers.getA) must beEqualTo(MixWord(0x40269801)).await // - 0 9 41 32 1
+      nextState.map(_.registers.getX) must beEqualTo(MixWord(0x40000041)).await // - 0 0 0 1 1
     }
 
     "throw an exception on division by zero" in {
@@ -199,7 +200,7 @@ class ArithmeticSpec extends Specification {
         memory = initialState.memory.updated(MixIndex(1000), MixWord(0x00000000)) // + 0 0 0 0 0
       )
       // A = 1000, I = 0, F = 0:5, C = 4 DIV
-      execute(state, MixWord(0x0fa00144)) must throwA[DivisionByZeroException]
+      execute(state, MixWord(0x0fa00144)) must throwA[DivisionByZeroException].await
     }
 
     "throw an exception if the dividend is too big" in {
@@ -210,7 +211,7 @@ class ArithmeticSpec extends Specification {
         memory = initialState.memory.updated(MixIndex(1000), MixWord(0x00000001)) // + 0 0 0 0 1
       )
       // A = 1000, I = 0, F = 0:5, C = 4 DIV
-      execute(state, MixWord(0x0fa00144)) must throwAn[OverflowException]
+      execute(state, MixWord(0x0fa00144)) must throwAn[OverflowException].await
     }
   }
 }

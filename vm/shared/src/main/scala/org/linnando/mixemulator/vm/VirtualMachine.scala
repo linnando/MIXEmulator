@@ -1,5 +1,7 @@
 package org.linnando.mixemulator.vm
 
+import scala.concurrent.Future
+
 trait VirtualMachine {
   def currentState: VirtualMachineState
 
@@ -7,9 +9,9 @@ trait VirtualMachine {
 
   def canMoveForward: Boolean
 
-  def stepForward(): Unit
+  def stepForward(): Future[Unit]
 
-  def runForward(): Unit
+  def runForward(): Future[Unit]
 
   def toggleBreakpoint(address: Short): Unit
 

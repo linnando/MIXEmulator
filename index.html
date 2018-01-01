@@ -9,6 +9,7 @@
     <script src="https://code.jquery.com/jquery-1.12.0.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
     <script src="https://use.fontawesome.com/f6b86da23f.js"></script>
+    <script src="lib/browserfs/browserfs.min.js"></script>
     <!-- Polyfill for older browsers -->
     <script src="node_modules/core-js/client/shim.min.js"></script>
     <script src="node_modules/zone.js/dist/zone.js"></script>
@@ -16,6 +17,25 @@
     <script src="node_modules/systemjs/dist/system.src.js"></script>
     <!-- 2. Configure SystemJS -->
     <script src="systemjs-fullopt.config.js"></script>
+    <script>
+        // Installs globals onto window:
+        // * Buffer
+        // * require (monkey-patches if already defined)
+        // * process
+        // You can pass in an arbitrary object if you do not wish to pollute
+        // the global namespace.
+        BrowserFS.install(window);
+        // Configures BrowserFS to use the LocalStorage file system.
+        BrowserFS.configure({
+            fs: "LocalStorage"
+        }, function(e) {
+            if (e) {
+                // An error happened!
+                throw e;
+            }
+            // Otherwise, BrowserFS is ready-to-use!
+        });
+    </script>
     <script>
         System.import('app').catch(function(err){ console.error(err); });
     </script>
