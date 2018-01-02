@@ -1,6 +1,6 @@
 # MIX Emulator
 
-MIX Emulator is a web-based emulator of [MIX](https://en.wikipedia.org/wiki/MIX), a mythical computer
+MIX Emulator is a web-based emulator of [MIX](https://en.wikipedia.org/wiki/MIX), the mythical computer
 invented by Donald Knuth for his book series
 [&quot;The Art of Computer Programming&quot;](http://www-cs-faculty.stanford.edu/~knuth/taocp.html). The emulator
 supports assembling and executing programs for MIX, inspecting memory and register contents, working with (virtual)

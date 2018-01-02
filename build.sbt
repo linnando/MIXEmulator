@@ -2,8 +2,6 @@ name := "MIX Emulator"
 
 scalaVersion in ThisBuild := "2.11.11"
 
-resolvers += Resolver.sonatypeRepo("releases")
-
 lazy val asm = crossProject
   .dependsOn(vm)
   .settings(
@@ -38,6 +36,7 @@ lazy val vm = crossProject
     )
   )
   .jsSettings(
+    resolvers += Resolver.sonatypeRepo("releases"),
     libraryDependencies ++= Seq(
       "io.scalajs" %%% "nodejs-lts" % "0.4.2"
     )
@@ -54,8 +53,10 @@ lazy val webapp = project
     name := "webapp",
     organization := "org.linnando",
     version := "0.1-SNAPSHOT",
+    resolvers += "amateras-repo" at "http://amateras.sourceforge.jp/mvn/",
     libraryDependencies ++= Seq(
-      "com.github.karasiq" %%% "scalajs-bootstrap" % "2.1.4"
+      "com.github.karasiq" %%% "scalajs-bootstrap" % "2.1.4",
+      "com.scalawarrior" %%% "scalajs-ace" % "0.0.4"
     ),
     ngBootstrap := Some("org.linnando.mixemulator.webapp.AppModule")
   )
