@@ -15,4 +15,6 @@ case class MockLinePrinter(page: Int = 0) extends LinePrinter {
   override def isBusy: Boolean = ???
 
   override def flush(): Future[(Device, Seq[IndexedSeq[IOWord]])] = ???
+
+  override def data: Future[IndexedSeq[String]] = ???
 }

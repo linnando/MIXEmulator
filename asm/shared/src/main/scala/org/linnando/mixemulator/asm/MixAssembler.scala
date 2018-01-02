@@ -8,9 +8,14 @@ import scala.util.matching.Regex
 case class MixAssembler(builder: VirtualMachineBuilder,
                         symbolsBeforeCounter: List[(Option[Short], Option[Int])] = List.empty,
                         symbolsAfterCounter: List[(Option[Short], Option[Int])] = List.tabulate(VirtualMachine.MEMORY_SIZE)(i => (Some(i.toShort), None))) {
-  def withLine(lineNumber: Int, line: String): MixAssembler = MixAssembler.commentLinePrefix.findPrefixOf(line) match {
-    case Some(_) => sequential(lineNumber, builder)
-    case None => withOpLine(lineNumber: Int, line: String)
+  def withLine(lineNumber: Int, line: String): MixAssembler = {
+    val normalisedLine =
+      if (line.length < 80) line + " " * (80 - line.length)
+      else line.substring(0, 80)
+    MixAssembler.commentLinePrefix.findPrefixOf(normalisedLine) match {
+      case Some(_) => sequential(lineNumber, builder)
+      case None => withOpLine(lineNumber, normalisedLine)
+    }
   }
 
   private def sequential(lineNumber: Int, nextBuilderState: VirtualMachineBuilder) = {
@@ -89,7 +94,7 @@ case class MixAssembler(builder: VirtualMachineBuilder,
       throw new WrongOperatorException(operator, lineNumber)
     val command = MixAssembler.commands(operator)
     val (aPart, indexPart, fPart) =
-      if (addressPart == "") (null, null, null)
+      if (addressPart.trim == "") (null, null, null)
       else MixAssembler.addressPart.findPrefixMatchOf(addressPart) match {
         case Some(m) => splitOpAddress(m.group(1), lineNumber)
         case None => throw new WrongAddressPartException(addressPart, lineNumber)

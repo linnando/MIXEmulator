@@ -85,11 +85,6 @@ class MixAssemblerSpec extends Specification {
       nextState.symbolsAfterCounter.head must be equalTo(Some(1), None)
     }
 
-    "throw an exception without a value of a character constant" in {
-      assembler.withLine(1, " ALF ") must throwA[WrongAddressPartException]
-      assembler.withLine(1, "ABC ALF ") must throwA[WrongAddressPartException]
-    }
-
     "translate a command" in {
       val nextState = assembler.withLine(1, " LDA 2000")
       nextState.builder match {
