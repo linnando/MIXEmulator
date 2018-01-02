@@ -6,9 +6,12 @@
                 mythical computer invented by Donald Knuth for his book series <a
                     href="http://www-cs-faculty.stanford.edu/~knuth/taocp.html">&quot;The Art of Computer Programming&quot;</a>.
                 The emulator supports assembling and executing programs for MIX, inspecting memory and register
-                contents, working with (virtual) peripheral devices, traversing execution flow in both forward and
-                backward direction, and checking correct synchronisation of input/output operations. Programs may be
-                executed in either the binary or the decimal mode (which differ in the byte size).
+                contents, working with (virtual) peripheral devices, and traversing execution flow in forward and
+                backward direction. Programs may be executed in either the binary or the decimal mode (which differ in
+                the byte size). Working with devices includes checking correct synchronisation of input/output
+                operations: the emulator fails when the result of an operation is undetermined (e.g., on an attempt to
+                write data to the memory block that is sent to a device without ensuring that the output operation has
+                completed).
             </p>
             <p>
                 MIX opportunities that are not supported currently include the &quot;Go&quot; button, floating-point
@@ -28,6 +31,17 @@
                     href="https://github.com/linnando/MIXEmulator">GitHub</a>. If you have found a bug, please submit an
                 issue <a href="https://github.com/linnando/MIXEmulator/issues">here</a>.
             </p>
+            <p>
+                If you like the emulator, you can support the author through <a
+                    href="http://paypal.me/linnando">PayPal</a>. If the emulator is useful in your research, consider
+                please referencing the following paper:
+            </p>
+            <div class="well well-sm">
+                Batdalov, R., Ņikiforova, O. Implementation of a MIX Emulator: A Case Study of the Scala Programming
+                Language Facilities. <em>Applied Computer Systems</em>, 2017, 22, pp.47-53. ISSN 2255-8683. e-ISSN
+                2255-8691. Available from: <a
+                    href="http://dx.doi.org/10.1515/acss-2017-0017">doi:10.1515/acss-2017-0017</a>
+            </div>
         </div>
     </div>
 </div>
