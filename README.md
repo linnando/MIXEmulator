@@ -21,3 +21,13 @@ useful in your research, consider please referencing the following paper:
 > Batdalov, R., Ņikiforova, O. Implementation of a MIX Emulator: A Case Study of the Scala Programming Language
 > Facilities. *Applied Computer Systems*, 2017, 22, pp.47-53. ISSN 2255-8683. e-ISSN 2255-8691. Available from:
 > [doi:10.1515/acss-2017-0017](http://dx.doi.org/10.1515/acss-2017-0017)
+
+## Acknowledgment
+
+MIX Emulator is powered by [Scala](http://scala-lang.org), [Scala.js](http://www.scala-js.org/),
+[Angular](https://angular.io/), [Angulate2](https://github.com/jokade/angulate2), [Bootstrap](http://getbootstrap.com/),
+[Scala.js Bootstrap](https://github.com/Karasiq/scalajs-bootstrap), [Ace](https://ace.c9.io/),
+[Scala.js Ace](https://github.com/scalawarrior/scalajs-ace), [BrowserFS](https://github.com/jvilk/BrowserFS),
+[ScalaJs.io](https://github.com/scalajs-io/nodejs), [Font Awesome](http://fontawesome.io/), and
+[Specs2](https://etorreborre.github.io/specs2/). The author also thanks [JetBrains](https://www.jetbrains.com/) for the
+provided educational IntelliJ IDEA licence.
