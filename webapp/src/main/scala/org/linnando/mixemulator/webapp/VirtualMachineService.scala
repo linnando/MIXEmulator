@@ -15,13 +15,13 @@ import scala.concurrent.Future
 @Injectable()
 class VirtualMachineService {
   var text: String =
-    "START      OUT  HELLO(18)\n" +
-    "           JBUS *\n" +
-    "           HLT\n" +
-    "HELLO      ALF  HELLO\n" +
-    "           ALF  , WOR\n" +
-    "           ALF  LD   \n" +
-    "           END START"
+    """START      OUT  HELLO(18)
+           JBUS *
+           HLT
+HELLO      ALF  HELLO
+           ALF  , WOR
+           ALF  LD
+           END START"""
 
   val stateChange: Subject[Unit] = new Subject()
 
