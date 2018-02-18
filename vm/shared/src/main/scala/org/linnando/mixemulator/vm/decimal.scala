@@ -44,8 +44,9 @@ object decimal extends ProcessingModel {
       copy(counter = address.toIndex)
 
     protected def withValue(value: W): VMB = {
-      if (counter.contents >= VirtualMachine.MEMORY_SIZE)
-        throw new WrongMemoryAddressException(counter.contents)
+      val index = counter.toShort
+      if (index < 0 || index >= VirtualMachine.MEMORY_SIZE)
+        throw new WrongMemoryAddressException(index)
       copy(
         state = state.copy(memory = state.memory.updated(counter, value)),
         counter = counter.next
@@ -175,42 +176,45 @@ object decimal extends ProcessingModel {
   }
 
   case class MemoryState(contents: Vector[Long], sharedLocks: List[(I, Int, Int)], exclusiveLocks: List[(I, Int, Int)]) extends AbstractMemoryState {
-    override def get(address: I): W = get(address.contents)
+    override def get(address: I): W = get(address.toShort)
 
     override def get(address: Short): W = {
       if (exclusiveLocks exists { l => conflicts(l, address) }) throw new InconsistentReadException
       getCurrent(address)
     }
 
-    override def getCurrent(address: Short) = {
-      if (address >= VirtualMachine.MEMORY_SIZE)
+    override def getCurrent(address: Short): MixWord = {
+      if (address < 0 || address >= VirtualMachine.MEMORY_SIZE)
         throw new WrongMemoryAddressException(address)
       MixWord(contents(address))
     }
 
     private def conflicts(lock: (I, Int, Int), address: Short, size: Int = 1) =
-      address < lock._1.contents + lock._2 && lock._1.contents < address + size
+      address < lock._1.toShort + lock._2 && lock._1.toShort < address + size
 
     override def updated(address: I, value: W): MS = {
-      if (address.contents >= VirtualMachine.MEMORY_SIZE)
-        throw new WrongMemoryAddressException(address.contents)
-      if (sharedLocks exists { l => conflicts(l, address.contents) }) throw new InconsistentReadException
-      if (exclusiveLocks exists { l => conflicts(l, address.contents) }) throw new WriteConflictException
-      copy(contents = contents.updated(address.contents, value.contents))
+      val index = address.toShort
+      if (index < 0 || index >= VirtualMachine.MEMORY_SIZE)
+        throw new WrongMemoryAddressException(index)
+      if (sharedLocks exists { l => conflicts(l, index) }) throw new InconsistentReadException
+      if (exclusiveLocks exists { l => conflicts(l, index) }) throw new WriteConflictException
+      copy(contents = contents.updated(index, value.contents))
     }
 
     override def withSharedLock(address: I, size: Int, deviceNum: Int): MS = {
-      if (address.contents + size > VirtualMachine.MEMORY_SIZE)
-        throw new WrongMemoryAddressException(address.contents)
-      if (exclusiveLocks exists { l => conflicts(l, address.contents, size) }) throw new InconsistentReadException
+      val index = address.toShort
+      if (index < 0 || index + size > VirtualMachine.MEMORY_SIZE)
+        throw new WrongMemoryAddressException(index)
+      if (exclusiveLocks exists { l => conflicts(l, index, size) }) throw new InconsistentReadException
       copy(sharedLocks = (address, size, deviceNum) :: sharedLocks)
     }
 
     override def withExclusiveLock(address: I, size: Int, deviceNum: Int): MS = {
-      if (address.contents + size > VirtualMachine.MEMORY_SIZE)
-        throw new WrongMemoryAddressException(address.contents)
-      if (sharedLocks exists { l => conflicts(l, address.contents, size) }) throw new InconsistentReadException
-      if (exclusiveLocks exists { l => conflicts(l, address.contents, size) }) throw new WriteConflictException
+      val index = address.toShort
+      if (index < 0 || index + size > VirtualMachine.MEMORY_SIZE)
+        throw new WrongMemoryAddressException(index)
+      if (sharedLocks exists { l => conflicts(l, index, size) }) throw new InconsistentReadException
+      if (exclusiveLocks exists { l => conflicts(l, index, size) }) throw new WriteConflictException
       copy(exclusiveLocks = (address, size, deviceNum) :: exclusiveLocks)
     }
 
@@ -303,10 +307,13 @@ object decimal extends ProcessingModel {
     }
 
     override def next: I = {
-      if (isNegative) throw new Error
-      val nextIndex = contents + 1
-      if (nextIndex >= 10000) throw new OverflowException
-      MixIndex(nextIndex.toShort)
+      if (isNegative && contents != 10000) throw new Error
+      if (contents == 10000) MixIndex(1)
+      else {
+        val nextIndex = contents + 1
+        if (nextIndex >= 10000) throw new OverflowException
+        MixIndex(nextIndex.toShort)
+      }
     }
 
     override def toShort: Short =

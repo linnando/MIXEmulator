@@ -106,10 +106,10 @@ abstract class ProcessingModel extends DataModel with Processor {
         throw new InvalidExpressionException(expression)
       case VirtualMachineBuilder.localBackReference(id) => symbols.get(s"${id}H") match {
         case Some(value) => value
-        case None => throw new UndefinedSymbolException(expression)
+        case None => throw new UndefinedSymbolException(s"${id}H")
       }
-      case VirtualMachineBuilder.localForwardReference(_*) =>
-        throw new UndefinedSymbolException(expression)
+      case VirtualMachineBuilder.localForwardReference(id) =>
+        throw new UndefinedSymbolException(s"${id}H")
       case VirtualMachineBuilder.numberOrSymbol(_*) => symbols.get(expression) match {
         case Some(value) => value
         case None => throw new UndefinedSymbolException(expression)
@@ -126,7 +126,7 @@ abstract class ProcessingModel extends DataModel with Processor {
 
     override def withOrig(wValue: String): VMB = {
       val address = evaluateWValue(wValue)
-      if (address.isNegative || (address <=> getWord(VirtualMachine.MEMORY_SIZE)) != Comparison.LESS)
+      if ((address <=> getWord(0L)) == Comparison.LESS || (address <=> getWord(VirtualMachine.MEMORY_SIZE)) != Comparison.LESS)
         throw new WrongMemoryAddressException(address.toLong)
       withChangedCounter(address)
     }
