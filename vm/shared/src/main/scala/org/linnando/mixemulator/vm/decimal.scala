@@ -47,6 +47,7 @@ object decimal extends ProcessingModel {
       val index = counter.toShort
       if (index < 0 || index >= VirtualMachine.MEMORY_SIZE)
         throw new WrongMemoryAddressException(index)
+      state.memory.updated(counter, value)
       copy(
         state = state.copy(memory = state.memory.updated(counter, value)),
         counter = counter.next
@@ -307,11 +308,11 @@ object decimal extends ProcessingModel {
     }
 
     override def next: I = {
-      if (isNegative && contents != 10000) throw new Error
-      if (contents == 10000) MixIndex(1)
+      if (isNegative && contents != 0x4000) throw new Error
+      if (contents == 0x4000) MixIndex(1)
       else {
         val nextIndex = contents + 1
-        if (nextIndex >= 10000) throw new OverflowException
+        if (nextIndex >= 0x4000) throw new OverflowException
         MixIndex(nextIndex.toShort)
       }
     }

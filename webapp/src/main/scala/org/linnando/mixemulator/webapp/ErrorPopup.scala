@@ -1,5 +1,7 @@
 package org.linnando.mixemulator.webapp
 
+import java.util.concurrent.ExecutionException
+
 import com.karasiq.bootstrap.Bootstrap.default._
 import org.linnando.mixemulator.asm.exceptions._
 import org.linnando.mixemulator.vm.exceptions._
@@ -43,6 +45,9 @@ object ErrorPopup {
     case e: WrongLineException => s"Wrong line format in line ${e.line}"
     case e: WrongOperatorException => s"Invalid command ${e.operator} in line ${e.line}"
     case e: WrongMemoryAddressException => s"Invalid memory address ${e.address}"
+    case e: ExecutionException =>
+      println(e.getCause)
+      "Unexpected error"
     case e =>
       println(e)
       "Unexpected error"
