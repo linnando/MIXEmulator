@@ -28,6 +28,20 @@ class VirtualMachineComponent(virtualMachineService: VirtualMachineService) {
     }
   }
 
+  def go(): Unit = {
+    val init = (mode, tracking) match {
+      case ("binary", false) => virtualMachineService.goBinaryNonTracking()
+      case ("binary", true) => virtualMachineService.goBinaryTracking()
+      case ("decimal", false) => virtualMachineService.goDecimalNonTracking()
+      case ("decimal", true) => virtualMachineService.goDecimalTracking()
+      case (_, _) => throw new Error
+    }
+    init onComplete {
+      case Success(_) => ()
+      case Failure(e) => ErrorPopup.show(e)
+    }
+  }
+
   def switchOff(): Unit = virtualMachineService.switchOffMachine()
 
   def canMoveForward: Boolean = virtualMachineService.canMoveForward

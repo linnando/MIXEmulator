@@ -2,17 +2,17 @@ package org.linnando.mixemulator.vm.io.file
 
 import io.scalajs.nodejs.buffer.Buffer
 import io.scalajs.nodejs.fs.{FileInputOptions, Fs}
+import org.linnando.mixemulator.vm.exceptions.EndOfFileException
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 object LineAccessFile {
-  // TODO Implement without reading the whole file
   def readLine(filename: String, position: Long): Future[Array[Char]] =
     Fs.readFileFuture(filename, new FileInputOptions(encoding = "utf8")).map(data => {
-      val contents = data.asInstanceOf[String]
-      val end = contents.indexOf('\n', position.toInt)
-      contents.substring(position.toInt, end).toCharArray
+      val lines = data.asInstanceOf[String].split("\n")
+      if (position < lines.length) lines(position.toInt).toCharArray
+      else throw new EndOfFileException
     })
 
   def appendLine(filename: String, version: Int, chars: Array[Char]): Future[Unit] = {

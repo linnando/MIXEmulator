@@ -35,6 +35,7 @@ object ErrorPopup {
     case e: UndefinedSymbolException => s"Symbol ${e.symbol} is not defined"
     case _: UnpredictableExecutionFlowException => "Execution sequence is unpredictable"
     case e: UnsupportedCharacterException => s"Character ${e.char} is not supported by MIX"
+    case e: UnsupportedPunchedCardCharacterException => s"Character ${e.char} is not representable on punched cards"
     case _: WriteConflictException => "Cannot write to memory as a device input operation is not synchronised"
     case e: WrongAddressPartException => s"Invalid address part ${e.addressPart} in line ${e.line}"
     case e: WrongCharacterCodeException => s"Code ${e.code} does not correspond to a character"

@@ -10,6 +10,7 @@
                 <button type="button" class="btn" [ngClass]="{'btn-success': !tracking, 'btn-default': tracking}" (click)="tracking = false">Without tracking</button>
             </div>
             <button class="btn btn-primary" (click)="assemble()">Assemble</button>
+            <button *ngIf="!isActive" class="btn btn-secondary" (click)="go()">Go</button>
             <button *ngIf="isActive" class="btn btn-danger" (click)="switchOff()">Switch off</button>
         </div>
         <div class="col-xs-4">

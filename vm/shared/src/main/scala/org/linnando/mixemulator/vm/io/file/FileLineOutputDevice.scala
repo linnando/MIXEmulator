@@ -22,7 +22,7 @@ trait FileLineOutputDevice extends LineDevice with PositionalOutputDevice {
     newVersion(tasks flatMap { _ => appendLine(chars) })
   }
 
-  private def appendLine(chars: Array[Char]): Future[Unit] =
+  protected def appendLine(chars: Array[Char]): Future[Unit] =
     LineAccessFile.appendLine(filename, version, chars)
 
   def newVersion(tasks: Future[Unit]): FileLineOutputDevice

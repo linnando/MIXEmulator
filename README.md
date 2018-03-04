@@ -10,8 +10,7 @@ synchronisation of input/output operations: the emulator fails when the result o
 an attempt to write data to the memory block that is sent to a device without ensuring that the output operation has
 completed).
 
-MIX opportunities that are not supported currently include the &quot;Go&quot; button, floating-point operations and
-other extensions.
+The terminal device and floating-point operations are not supported currently.
 
 A working copy of the emulator is available at [http://www.mix-emulator.org](http://www.mix-emulator.org).
 

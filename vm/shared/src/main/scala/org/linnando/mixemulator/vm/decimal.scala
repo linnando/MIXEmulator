@@ -6,6 +6,8 @@ import org.linnando.mixemulator.vm.io.Device
 import org.linnando.mixemulator.vm.io.data.IOWord
 
 import scala.collection.immutable.Queue
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 object decimal extends ProcessingModel {
   override type RS = RegisterState
@@ -75,6 +77,16 @@ object decimal extends ProcessingModel {
     isHalted = false,
     devices = Map.empty
   )
+
+  def go(devices: Map[Int, Device], deviceNum: Int): Future[VirtualMachine] = {
+    val state = initialState.copy(devices = devices.mapValues((_, Queue.empty)))
+    go(state, deviceNum).map(new VirtualMachineImpl(_))
+  }
+
+  def goTracking(devices: Map[Int, Device], deviceNum: Int): Future[VirtualMachine] = {
+    val state = initialState.copy(devices = devices.mapValues((_, Queue.empty)))
+    go(state, deviceNum).map(new TrackingVirtualMachineImpl(_))
+  }
 
   override def getByte(value: Byte): B = {
     if (value < 0 || value >= BYTE_SIZE)

@@ -3,9 +3,9 @@ package org.linnando.mixemulator.webapp
 import angulate2.std._
 import org.linnando.mixemulator.asm.{MixAssembler, MixDisassembler}
 import org.linnando.mixemulator.vm._
-import org.linnando.mixemulator.vm.io.{BlockDevice, Device, LineDevice}
 import org.linnando.mixemulator.vm.io.data.IOWord
 import org.linnando.mixemulator.vm.io.file._
+import org.linnando.mixemulator.vm.io.{BlockDevice, Device, LineDevice}
 import rxjs.Subject
 
 import scala.collection.immutable.SortedMap
@@ -16,7 +16,7 @@ import scala.concurrent.Future
 class VirtualMachineService {
   var text: String =
     """START      OUT  HELLO(18)
-           JBUS *
+           JBUS *(18)
            HLT
 HELLO      ALF  HELLO
            ALF  , WOR
@@ -67,7 +67,7 @@ HELLO      ALF  HELLO
     val builder = decimal.createVirtualMachineBuilder()
       .withDevices(VirtualMachineService.devices.mapValues(_._2()))
     saveAssembly(MixAssembler.translateNonTracking(builder, lines))
-    disassembler = new MixDisassembler(binary)
+    disassembler = new MixDisassembler(decimal)
   }
 
   def assembleDecimalTracking(): Future[Unit] = Future {
@@ -75,7 +75,47 @@ HELLO      ALF  HELLO
     val builder = decimal.createVirtualMachineBuilder()
       .withDevices(VirtualMachineService.devices.mapValues(_._2()))
     saveAssembly(MixAssembler.translateTracking(builder, lines))
-    disassembler = new MixDisassembler(binary)
+    disassembler = new MixDisassembler(decimal)
+  }
+
+  def goBinaryNonTracking(): Future[Unit] = {
+    val devices = VirtualMachineService.devices.mapValues(_._2())
+    binary.go(devices, VirtualMachineService.goDevice) map { machine =>
+      _machine = Some(machine)
+      _symbols = Vector.tabulate(VirtualMachine.MEMORY_SIZE)(i => (Some(i.toShort), None))
+      _addressSymbols = Vector.range(0, VirtualMachine.MEMORY_SIZE)
+      disassembler = new MixDisassembler(binary)
+    }
+  }
+
+  def goBinaryTracking(): Future[Unit] = {
+    val devices = VirtualMachineService.devices.mapValues(_._2())
+    binary.goTracking(devices, VirtualMachineService.goDevice) map { machine =>
+      _machine = Some(machine)
+      _symbols = Vector.tabulate(VirtualMachine.MEMORY_SIZE)(i => (Some(i.toShort), None))
+      _addressSymbols = Vector.range(0, VirtualMachine.MEMORY_SIZE)
+      disassembler = new MixDisassembler(binary)
+    }
+  }
+
+  def goDecimalNonTracking(): Future[Unit] = {
+    val devices = VirtualMachineService.devices.mapValues(_._2())
+    decimal.go(devices, VirtualMachineService.goDevice) map { machine =>
+      _machine = Some(machine)
+      _symbols = Vector.tabulate(VirtualMachine.MEMORY_SIZE)(i => (Some(i.toShort), None))
+      _addressSymbols = Vector.range(0, VirtualMachine.MEMORY_SIZE)
+      disassembler = new MixDisassembler(decimal)
+    }
+  }
+
+  def goDecimalTracking(): Future[Unit] = {
+    val devices = VirtualMachineService.devices.mapValues(_._2())
+    decimal.goTracking(devices, VirtualMachineService.goDevice) map { machine =>
+      _machine = Some(machine)
+      _symbols = Vector.tabulate(VirtualMachine.MEMORY_SIZE)(i => (Some(i.toShort), None))
+      _addressSymbols = Vector.range(0, VirtualMachine.MEMORY_SIZE)
+      disassembler = new MixDisassembler(decimal)
+    }
   }
 
   def switchOffMachine(): Unit = {
@@ -198,6 +238,8 @@ HELLO      ALF  HELLO
 }
 
 object VirtualMachineService {
+  private val goDevice = 16
+
   private val devices: Map[Int, (String, () => Device)] = SortedMap(
     0 -> ("Tape Unit 0", () => FileTapeUnit.create("device0")),
     1 -> ("Tape Unit 1", () => FileTapeUnit.create("device1")),

@@ -14,8 +14,7 @@
                 completed).
             </p>
             <p>
-                MIX opportunities that are not supported currently include the &quot;Go&quot; button, floating-point
-                operations and other extensions.
+                The terminal device and floating-point operations are not supported currently.
             </p>
             <p>
                 In order to use the emulator, enter the program text on the &quot;Program editor&quot; tab, then switch
@@ -26,6 +25,18 @@
                 execution flow. The &quot;Devices&quot; tab allows inspecting device data, downloading them as files or
                 uploading files for using as input data. The device data are kept in the browser local storage.
             </p>
+            <p>
+                Another possible option is using an assembled program on punched cards with your own program loader (for
+                example, to do exercise 1.3.1-26). If you want to do this, load a file containing punched cards data (in
+                the character code) to device 16, switch to the &quot;Virtual machine&quot; tab and click the
+                &quot;Go&quot; button. Please note that characters &#x03a3;, &#x03a0;, =, <, >, @, ;, :, and ' cannot be
+                represented on punched cards. A macron (&macr;, U+0305) <em>after</em> a digit subtracts 20 from the
+                character code (for example, if a punched card contains characters 0&macr;, the corresponding byte will
+                have value 10 instead of 30). Of course, combining diacritics would be better to use, but it is not
+                rendered well with monospace fonts:-(. A sample "Hello, World!" program on a punched card could look
+                like:
+            </p>
+                <pre> C Q7 A Q4   BEHELLO, W6¯RLD</pre>
             <p>
                 The source code of the emulator is available on <a
                     href="https://github.com/linnando/MIXEmulator">GitHub</a>. If you have found a bug, please submit an

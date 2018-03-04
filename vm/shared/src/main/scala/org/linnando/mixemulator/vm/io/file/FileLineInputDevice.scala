@@ -18,9 +18,13 @@ trait FileLineInputDevice extends LineDevice with PositionalInputDevice {
     readLine().map(words => prev.enqueue(words))
   })
 
-  private def readLine(): Future[IndexedSeq[IOWord]] = {
-    val eventualChars: Future[Array[Char]] = LineAccessFile.readLine(filename, pos * (5 * blockSize + 1))
-    eventualChars.map(chars => (0 until 5 * blockSize by 5).map(i => IOWord((i until i + 5).map(chars))))
+  protected def readLine(): Future[IndexedSeq[IOWord]] = {
+    val eventualChars: Future[Array[Char]] = LineAccessFile.readLine(filename, pos)
+    eventualChars.map(chars =>
+      (0 until blockSize).map(i =>
+        IOWord((5 * i until 5 * (i + 1)).map(j => if (j < chars.length) chars(j) else ' '))
+      )
+    )
   }
 
   def withTasks(tasks: Future[Queue[IndexedSeq[IOWord]]]): FileLineInputDevice

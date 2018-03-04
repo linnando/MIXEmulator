@@ -12,11 +12,9 @@ object LineAccessFile {
   def readLine(filename: String, position: Long): Future[Array[Char]] = Future {
     val file = new BufferedReader(new FileReader(filename))
     try {
-      file.skip(position)
-      val line = file.readLine()
-      if (line == null)
-        throw new EndOfFileException
-      line.toCharArray
+      val line = file.lines().skip(position).findFirst()
+      if (line.isPresent) line.get().toCharArray
+      else throw new EndOfFileException
     }
     finally {
       file.close()

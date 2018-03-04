@@ -48,6 +48,31 @@ trait Processor {
       execute(state, command)
     }
 
+  def go(state: State, deviceNum: Int): Future[State] = state.devices.get(deviceNum) match {
+    case None => Future.failed(new DeviceNotConnectedException(deviceNum))
+    case Some(device) =>
+      if (device._2.nonEmpty) Future.failed(new Error)
+      val deviceInProgress = device._1 match {
+        case d: PositionalInputDevice => d.read()
+        case d: RandomAccessIODevice => d.read(0L)
+        case _ => return Future.failed(new UnsupportedOperationException)
+      }
+      deviceInProgress.flush() map { flushedDevice =>
+        val block = flushedDevice._2.head
+        val updatedRegisters = state.registers.updatedJ(getIndex(0))
+        val updatedMemory = block.indices.foldLeft(state.memory) { (ms, i) =>
+          ms.updated(getIndex(i.toShort), getWord(block(i)))
+        }
+        val updatedDevices = state.devices.updated(deviceNum, (flushedDevice._1, Queue.empty))
+        state.copy(
+          registers = updatedRegisters,
+          memory = updatedMemory,
+          programCounter = getIndex(0),
+          devices = updatedDevices
+        )
+      }
+  }
+
   def execute(state: State, command: W): Future[State] = {
     val opCode = command.getOpCode
     commands(opCode.toInt)(state, command)
@@ -152,7 +177,9 @@ trait Processor {
   }
 
   // C = 05, F = 2
-  def hlt(state: State, command: W): Future[State] = Future { state.copy(isHalted = true) }
+  def hlt(state: State, command: W): Future[State] = Future {
+    state.copy(isHalted = true)
+  }
 
   // C = 06
   def c6(state: State, command: W): Future[State] = {
