@@ -9,10 +9,16 @@ class MixDisassembler(model: ProcessingModel) {
   def disassembleLine(ioWord: IOWord): String = {
     val Seq(byte0, byte1, byte2, byte3, byte4) = ioWord.bytes
     val sign = if (ioWord.negative) "-" else ""
-    val addressPart = (byte0 * BYTE_SIZE + byte1).toString
-    val indexPart = if (byte2 > 0) s",$byte2" else ""
-    val (operator, fieldSpec) = MixDisassembler.commands(byte4)(byte3)
-    s"           $operator $sign$addressPart$indexPart$fieldSpec"
+    val command = MixDisassembler.commands(byte4)
+    if (command.contains(byte3)) {
+      val addressPart = (byte0.toInt * BYTE_SIZE + byte1).toString
+      val indexPart = if (byte2 > 0) s",$byte2" else ""
+      val (operator, fieldSpec) = command(byte3)
+      s"           $operator $sign$addressPart$indexPart$fieldSpec"
+    } else {
+      val value = ((((byte0.toInt * BYTE_SIZE + byte1) * BYTE_SIZE + byte2) * BYTE_SIZE + byte3) * BYTE_SIZE + byte4).toString
+      s"           CON $sign$value"
+    }
   }
 }
 
