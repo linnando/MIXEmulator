@@ -3,6 +3,7 @@ package org.linnando.mixemulator.vm.io.mock
 import org.linnando.mixemulator.vm.io.data.IOWord
 import org.linnando.mixemulator.vm.io.{Device, DiskUnit, RandomAccessIODevice}
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 case class MockDiskUnit(position: Long = 0) extends DiskUnit {
@@ -16,5 +17,7 @@ case class MockDiskUnit(position: Long = 0) extends DiskUnit {
 
   override def isBusy: Boolean = ???
 
-  override def flush(): Future[(Device, Seq[IndexedSeq[IOWord]])] = ???
+  override def flush(): Future[(Device, Option[IndexedSeq[IOWord]])] = Future {
+    (this, None)
+  }
 }

@@ -9,8 +9,6 @@ import org.specs2.concurrent.ExecutionEnv
 import org.specs2.matcher.ContentMatchers
 import org.specs2.mutable.Specification
 
-import scala.collection.immutable.Queue
-
 class FilePaperTapeSpec(implicit ee: ExecutionEnv) extends Specification with ContentMatchers {
   val line0 = "0123456789012345678901234567890123456789012345678901234567890123456789"
   val words0 = IndexedSeq(
@@ -48,7 +46,7 @@ class FilePaperTapeSpec(implicit ee: ExecutionEnv) extends Specification with Co
     IOWord(Seq('0', '1', '2', '3', '4'))
   )
 
-  "file emulator of a card reader" should {
+  "file emulator of a paper tape" should {
     "create a device with correct parameters" in {
       val filename = "papertape0"
       val device = FilePaperTape.create(filename, "")
@@ -63,19 +61,34 @@ class FilePaperTapeSpec(implicit ee: ExecutionEnv) extends Specification with Co
       val filename = "papertape1"
       val file = new File(filename)
       val device = FilePaperTape.create(filename, s"$line0\n$line1\n")
-      val busyState = device.read().read()
+      val busyState = device.read()
       busyState.isBusy must beTrue
-      busyState.pos must be equalTo 2L
+      busyState.pos must be equalTo 1L
       val finalState = busyState.flush()
       finalState.map(_._1.isBusy) must beFalse.await
+      finalState.map(_._1.pos) must beEqualTo(1L).await
+      finalState.map(_._2) must beSome(words0).await
+      file must haveSameLinesAs(Seq(line0, line1))
+      file.delete()
+    }
+
+    "input multiple lines from a file" in {
+      val filename = "papertape2"
+      val file = new File(filename)
+      val device = FilePaperTape.create(filename, s"$line0\n$line1\n")
+      val busyState = device.read().flush().map(_._1.read())
+      busyState.map(_.isBusy) must beTrue.await
+      busyState.map(_.pos) must beEqualTo(2L).await
+      val finalState = busyState.flatMap(_.flush())
+      finalState.map(_._1.isBusy) must beFalse.await
       finalState.map(_._1.pos) must beEqualTo(2L).await
-      finalState.map(_._2) must beEqualTo(Queue(words0, words1)).await
+      finalState.map(_._2) must beSome(words1).await
       file must haveSameLinesAs(Seq(line0, line1))
       file.delete()
     }
 
     "throw an exception when the file end is reached" in {
-      val filename = "papertape2"
+      val filename = "papertape3"
       val file = new File(filename)
       val device = FilePaperTape.create(filename, "")
       val busyState = device.read()
@@ -86,18 +99,18 @@ class FilePaperTapeSpec(implicit ee: ExecutionEnv) extends Specification with Co
     }
 
     "reset the reading position" in {
-      val filename = "papertape3"
+      val filename = "papertape4"
       val file = new File(filename)
       val device = FilePaperTape.create(filename, s"$line0\n")
-      val busyState = device.read() match {
+      val busyState = device.read().flush().map(_._1 match {
         case d: FilePaperTape => d.reset().read()
-      }
-      busyState.isBusy must beTrue
-      busyState.pos must be equalTo 1L
-      val finalState = busyState.flush()
+      })
+      busyState.map(_.isBusy) must beTrue.await
+      busyState.map(_.pos) must beEqualTo(1L).await
+      val finalState = busyState.flatMap(_.flush())
       finalState.map(_._1.isBusy) must beFalse.await
       finalState.map(_._1.pos) must beEqualTo(1L).await
-      finalState.map(_._2) must beEqualTo(Queue(words0, words0)).await
+      finalState.map(_._2) must beSome(words0).await
       file must haveSameLinesAs(Seq(line0))
       file.delete()
     }

@@ -3,14 +3,11 @@ package org.linnando.mixemulator.vm.io.file
 import java.io.{File, FileInputStream, FileOutputStream}
 import java.nio.ByteBuffer
 
-import org.linnando.mixemulator.vm.exceptions.EndOfFileException
 import org.linnando.mixemulator.vm.io.TapeUnit
 import org.linnando.mixemulator.vm.io.data.IOWord
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.matcher.FileMatchers
 import org.specs2.mutable.Specification
-
-import scala.collection.immutable.Queue
 
 class FileTapeUnitSpec(implicit ee: ExecutionEnv) extends Specification with FileMatchers {
   private val bytes0 = (0 until 500).map(i => (i % 64).toByte)
@@ -23,7 +20,7 @@ class FileTapeUnitSpec(implicit ee: ExecutionEnv) extends Specification with Fil
 
   "file emulator of a tape unit" should {
     "create a device with correct parameters" in {
-      val filename = "disk0"
+      val filename = "tape0"
       val device = FileTapeUnit.create(filename)
       device.blockSize must be equalTo TapeUnit.BLOCK_SIZE
       device.filename must be equalTo filename
@@ -35,7 +32,7 @@ class FileTapeUnitSpec(implicit ee: ExecutionEnv) extends Specification with Fil
     }
 
     "output data to a file" in {
-      val filename = "disk1"
+      val filename = "tape1"
       val device = FileTapeUnit.create(filename)
       val busyState = device.write(words0).write(words1)
       busyState.version must be equalTo 2
@@ -45,7 +42,7 @@ class FileTapeUnitSpec(implicit ee: ExecutionEnv) extends Specification with Fil
       finalState.map(_._1.version) must beEqualTo(2).await
       finalState.map(_._1.isBusy) must beFalse.await
       finalState.map(_._1.pos) must beEqualTo(2L).await
-      finalState.map(_._2.length) must beEqualTo(0).await
+      finalState.map(_._2) must beNone.await
       val file1 = new File(s"$filename/1")
       file1 must exist
       val stream1 = new FileInputStream(file1).getChannel
@@ -65,7 +62,7 @@ class FileTapeUnitSpec(implicit ee: ExecutionEnv) extends Specification with Fil
     }
 
     "allow changing position in the file" in {
-      val filename = "disk2"
+      val filename = "tape2"
       val device = FileTapeUnit.create(filename)
       val busyState = device.write(words0).write(words1) match {
         case d: FileTapeUnit => d.positioned(-1L).write(words0)
@@ -77,7 +74,7 @@ class FileTapeUnitSpec(implicit ee: ExecutionEnv) extends Specification with Fil
       finalState.map(_._1.version) must beEqualTo(3).await
       finalState.map(_._1.isBusy) must beFalse.await
       finalState.map(_._1.pos) must beEqualTo(2L).await
-      finalState.map(_._2.length) must beEqualTo(0).await
+      finalState.map(_._2) must beNone.await
       val file1 = new File(s"$filename/1")
       file1 must exist
       val stream1 = new FileInputStream(file1).getChannel
@@ -106,7 +103,7 @@ class FileTapeUnitSpec(implicit ee: ExecutionEnv) extends Specification with Fil
     }
 
     "rewind to the beginning when position is zero" in {
-      val filename = "disk3"
+      val filename = "tape3"
       val device = FileTapeUnit.create(filename)
       val busyState = device.write(words0).write(words1) match {
         case d: FileTapeUnit => d.positioned(0).write(words1)
@@ -118,7 +115,7 @@ class FileTapeUnitSpec(implicit ee: ExecutionEnv) extends Specification with Fil
       finalState.map(_._1.version) must beEqualTo(3).await
       finalState.map(_._1.isBusy) must beFalse.await
       finalState.map(_._1.pos) must beEqualTo(1L).await
-      finalState.map(_._2.length) must beEqualTo(0).await
+      finalState.map(_._2) must beNone.await
       val file1 = new File(s"$filename/1")
       file1 must exist
       val stream1 = new FileInputStream(file1).getChannel
@@ -147,7 +144,7 @@ class FileTapeUnitSpec(implicit ee: ExecutionEnv) extends Specification with Fil
     }
 
     "read previously written data" in {
-      val filename = "disk4"
+      val filename = "tape4"
       val device = FileTapeUnit.create(filename)
       val busyState = device.write(words0) match {
         case d: FileTapeUnit => d.positioned(-1L).read()
@@ -159,14 +156,14 @@ class FileTapeUnitSpec(implicit ee: ExecutionEnv) extends Specification with Fil
       finalState.map(_._1.version) must beEqualTo(1).await
       finalState.map(_._1.isBusy) must beFalse.await
       finalState.map(_._1.pos) must beEqualTo(1L).await
-      finalState.map(_._2) must beEqualTo(Queue(words0)).await
+      finalState.map(_._2) must beSome(words0).await
       new File(s"$filename/0").delete()
       new File(s"$filename/1").delete()
       new File(filename).delete()
     }
 
     "read zeroes on read beyond the end of file" in {
-      val filename = "disk5"
+      val filename = "tape5"
       val directory = new File(filename)
       directory.mkdirs()
       val file = new File(s"$filename/0")
@@ -179,7 +176,8 @@ class FileTapeUnitSpec(implicit ee: ExecutionEnv) extends Specification with Fil
       val finalState = busyState.flush()
       finalState.map(_._1.version) must beEqualTo(0).await
       finalState.map(_._1.isBusy) must beFalse.await
-      finalState.map(_._2) must beEqualTo(Queue((0 until 100).map(_ => IOWord(negative = false, Seq(0, 0, 0, 0, 0))))).await
+      val expected: IndexedSeq[IOWord] = (0 until 100).map(_ => IOWord(negative = false, Seq(0, 0, 0, 0, 0)))
+      finalState.map(_._2) must beSome(expected).await
       file.delete()
       directory.delete()
     }

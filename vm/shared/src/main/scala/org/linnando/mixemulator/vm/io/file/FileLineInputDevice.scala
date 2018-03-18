@@ -3,7 +3,6 @@ package org.linnando.mixemulator.vm.io.file
 import org.linnando.mixemulator.vm.io.{LineDevice, PositionalInputDevice}
 import org.linnando.mixemulator.vm.io.data.IOWord
 
-import scala.collection.immutable.Queue
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -12,10 +11,11 @@ trait FileLineInputDevice extends LineDevice with PositionalInputDevice {
 
   def pos: Long
 
-  def tasks: Future[Queue[IndexedSeq[IOWord]]]
+  def task: Future[Option[IndexedSeq[IOWord]]]
 
-  def read(): FileLineInputDevice = withTasks(tasks flatMap { prev =>
-    readLine().map(words => prev.enqueue(words))
+  def read(): FileLineInputDevice = withTask(task flatMap {
+    case None => readLine()
+    case Some(_) => throw new Error
   })
 
   protected def readLine(): Future[IndexedSeq[IOWord]] = {
@@ -27,12 +27,12 @@ trait FileLineInputDevice extends LineDevice with PositionalInputDevice {
     )
   }
 
-  def withTasks(tasks: Future[Queue[IndexedSeq[IOWord]]]): FileLineInputDevice
+  def withTask(task: Future[IndexedSeq[IOWord]]): FileLineInputDevice
 
-  override def flush(): Future[(FileLineInputDevice, Queue[IndexedSeq[IOWord]])] =
-    tasks.map((withoutTasks, _))
+  override def flush(): Future[(FileLineInputDevice, Option[IndexedSeq[IOWord]])] =
+    task.map((withoutTask, _))
 
-  def withoutTasks: FileLineInputDevice
+  def withoutTask: FileLineInputDevice
 
   override def data: Future[IndexedSeq[String]] =
     LineAccessFile.getData(filename).map((contents: String) => contents.split("\n"))

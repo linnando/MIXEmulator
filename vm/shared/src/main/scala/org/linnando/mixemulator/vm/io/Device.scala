@@ -7,7 +7,7 @@ import scala.concurrent.Future
 trait Device {
   def blockSize: Int
   def isBusy: Boolean
-  def flush(): Future[(Device, Seq[IndexedSeq[IOWord]])]
+  def flush(): Future[(Device, Option[IndexedSeq[IOWord]])]
 }
 
 trait LineDevice extends Device {

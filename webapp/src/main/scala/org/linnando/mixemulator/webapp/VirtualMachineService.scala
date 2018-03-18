@@ -219,7 +219,7 @@ HELLO      ALF  HELLO
       case 20 => FilePaperTape.create("device20", data)
       case _ => throw new Error
     }
-    device.tasks.map(_ => ())
+    device.task.map(_ => ())
   }
 
   def blockDeviceData(deviceNum: Int): Future[IndexedSeq[IOWord]] = device(deviceNum) match {
@@ -233,7 +233,7 @@ HELLO      ALF  HELLO
       case i if i >= 8 && i < 16 => FileDiskUnit.create(s"device$i", data)
       case _ => throw new Error
     }
-    device.tasks.map(_ => ())
+    device.task.map(_ => ())
   }
 }
 

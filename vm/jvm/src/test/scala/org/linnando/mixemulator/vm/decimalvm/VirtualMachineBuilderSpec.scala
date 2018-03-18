@@ -92,10 +92,10 @@ class VirtualMachineBuilderSpec extends Specification {
     "throw an exception when an undefined symbol is used in an expression" in {
       val builder = decimal.createVirtualMachineBuilder()
       builder.withWValueSymbol("ABC", "2B-1") must throwAn[UndefinedSymbolException].like {
-        case e: UndefinedSymbolException => e.symbol must be equalTo "2B"
+        case e: UndefinedSymbolException => e.symbol must be equalTo "2H"
       }
       builder.withWValueSymbol("ABC", "2*2F") must throwAn[UndefinedSymbolException].like {
-        case e: UndefinedSymbolException => e.symbol must be equalTo "2F"
+        case e: UndefinedSymbolException => e.symbol must be equalTo "2H"
       }
       builder.withWValueSymbol("ABC", "DEF+5") must throwAn[UndefinedSymbolException].like {
         case e: UndefinedSymbolException => e.symbol must be equalTo "DEF"

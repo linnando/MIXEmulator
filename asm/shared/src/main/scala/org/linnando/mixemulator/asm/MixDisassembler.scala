@@ -3,22 +3,23 @@ package org.linnando.mixemulator.asm
 import org.linnando.mixemulator.vm.ProcessingModel
 import org.linnando.mixemulator.vm.io.data.IOWord
 
+import scala.util.Try
+
 class MixDisassembler(model: ProcessingModel) {
   private val BYTE_SIZE = model.BYTE_SIZE
 
   def disassembleLine(ioWord: IOWord): String = {
     val Seq(byte0, byte1, byte2, byte3, byte4) = ioWord.bytes
     val sign = if (ioWord.negative) "-" else ""
-    val command = MixDisassembler.commands(byte4)
-    if (command.contains(byte3)) {
-      val addressPart = (byte0.toInt * BYTE_SIZE + byte1).toString
+    Try({
+      val (operator, fieldSpec) = MixDisassembler.commands(byte4)(byte3)
       val indexPart = if (byte2 > 0) s",$byte2" else ""
-      val (operator, fieldSpec) = command(byte3)
+      val addressPart = (byte0.toInt * BYTE_SIZE + byte1).toString
       s"           $operator $sign$addressPart$indexPart$fieldSpec"
-    } else {
+    }).getOrElse({
       val value = ((((byte0.toInt * BYTE_SIZE + byte1) * BYTE_SIZE + byte2) * BYTE_SIZE + byte3) * BYTE_SIZE + byte4).toString
-      s"           CON $sign$value"
-    }
+      s"           CON  $sign$value"
+    })
   }
 }
 

@@ -2,6 +2,7 @@ package org.linnando.mixemulator.vm
 
 import org.linnando.mixemulator.vm.exceptions.{DeviceNotConnectedException, ForwardFromTerminalStateException, UnpredictableExecutionFlowException, WrongMemoryAddressException}
 import org.linnando.mixemulator.vm.io._
+import org.linnando.mixemulator.vm.io.data.IOWord
 
 import scala.collection.immutable.Queue
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -57,13 +58,12 @@ trait Processor {
         case d: RandomAccessIODevice => d.read(0L)
         case _ => return Future.failed(new UnsupportedOperationException)
       }
-      deviceInProgress.flush() map { flushedDevice =>
-        val block = flushedDevice._2.head
+      deviceInProgress.flush() map { case (flushedDevice, Some(block)) =>
         val updatedRegisters = state.registers.updatedJ(getIndex(0))
         val updatedMemory = block.indices.foldLeft(state.memory) { (ms, i) =>
           ms.updated(getIndex(i.toShort), getWord(block(i)))
         }
-        val updatedDevices = state.devices.updated(deviceNum, (flushedDevice._1, Queue.empty))
+        val updatedDevices = state.devices.updated(deviceNum, (flushedDevice, None))
         state.copy(
           registers = updatedRegisters,
           memory = updatedMemory,
@@ -545,108 +545,110 @@ trait Processor {
 
   // C = 34
   def jbus(state: State, command: W): Future[State] = {
+    val address = getIndexedAddress(state, command)
     val deviceNum = command.getFieldSpec.toInt
     state.devices.get(deviceNum) match {
       case None => Future.failed(new DeviceNotConnectedException(deviceNum))
       case Some(device) =>
-        if (device._1.isBusy) {
-          val address = getIndexedAddress(state, command)
-          if (address == state.programCounter) device._1.flush() map { flushedDevice =>
-            val readBlocks = flushedDevice._2 zip device._2
-            val updatedMemory = readBlocks.foldLeft(state.memory.withoutLocks(deviceNum)) { (ms, block) =>
-              block._1.indices.foldLeft(ms) { (s, i) => s.updated(block._2 + i, getWord(block._1(i))) }
-            }
-            val updatedDevice = (flushedDevice._1, Queue.empty)
+        if (!device._1.isBusy) nop(state)
+        else if (address == state.programCounter)
+          device._1.flush() map { case (flushedDevice, block) =>
+            val updatedMemory = memoryWithBlock(state.memory.withoutLocks(deviceNum), device._2, block)
             state.copy(
               memory = updatedMemory,
               programCounter = state.programCounter.next,
               timeCounter = state.timeCounter + 1,
-              devices = state.devices.updated(deviceNum, updatedDevice)
+              devices = state.devices.updated(deviceNum, (flushedDevice, None))
             )
           }
-          else Future.failed(new UnpredictableExecutionFlowException)
-        }
-        else nop(state)
+        else Future.failed(new UnpredictableExecutionFlowException)
     }
   }
 
+  private def memoryWithBlock(memory: MS, destination: Option[I], block: Option[IndexedSeq[IOWord]]) =
+    block match {
+      case None => memory
+      case Some(ioWords) =>
+        ioWords.indices.foldLeft(memory) { (ms, i) =>
+          ms.updated(destination.get + i, getWord(ioWords(i)))
+        }
+    }
+
   // C = 35
-  def ioc(state: State, command: W): Future[State] = Future {
-    val indexedAddress = getIndexedAddress(state, command)
+  def ioc(state: State, command: W): Future[State] = {
+    val address = getIndexedAddress(state, command)
     val deviceNum = command.getFieldSpec.toInt
     state.devices.get(deviceNum) match {
-      case None => throw new DeviceNotConnectedException(deviceNum)
-      case Some(device) =>
-        val updatedDevice = (
-          device._1 match {
-            case d: TapeUnit => d.positioned(indexedAddress.toWord.toLong)
-            case d: DiskUnit =>
-              if (indexedAddress.toShort == 0) d.positioned(state.registers.getX.toLong)
-              else throw new WrongMemoryAddressException(indexedAddress.toShort)
-            case d: LinePrinter =>
-              if (indexedAddress.toShort == 0) d.newPage()
-              else throw new WrongMemoryAddressException(indexedAddress.toShort)
-            case d: PaperTape =>
-              if (indexedAddress.toShort == 0) d.reset()
-              else throw new WrongMemoryAddressException(indexedAddress.toShort)
-            case _ => throw new UnsupportedOperationException
-          },
-          device._2
-        )
+      case None => Future.failed(new DeviceNotConnectedException(deviceNum))
+      case Some(device) => device._1.flush() map { case (flushedDevice, block) =>
+        val updatedMemory = memoryWithBlock(state.memory.withoutLocks(deviceNum), device._2, block)
+        val updatedDevice = flushedDevice match {
+          case d: TapeUnit => d.positioned(address.toWord.toLong)
+          case d: DiskUnit =>
+            if (address.toShort == 0) d.positioned(state.registers.getX.toLong)
+            else throw new WrongMemoryAddressException(address.toShort)
+          case d: LinePrinter =>
+            if (address.toShort == 0) d.newPage()
+            else throw new WrongMemoryAddressException(address.toShort)
+          case d: PaperTape =>
+            if (address.toShort == 0) d.reset()
+            else throw new WrongMemoryAddressException(address.toShort)
+          case _ => throw new UnsupportedOperationException
+        }
         state.copy(
-          devices = state.devices.updated(deviceNum, updatedDevice),
+          memory = updatedMemory,
+          devices = state.devices.updated(deviceNum, (updatedDevice, None)),
           programCounter = state.programCounter.next,
           timeCounter = state.timeCounter + 1
         )
+      }
     }
   }
 
   // C = 36
-  def in(state: State, command: W): Future[State] = Future {
+  def in(state: State, command: W): Future[State] = {
     val deviceNum = command.getFieldSpec.toInt
     val destination = getIndexedAddress(state, command)
     state.devices.get(deviceNum) match {
-      case None => throw new DeviceNotConnectedException(deviceNum)
-      case Some(device) =>
-        val updatedDevice = (
-          device._1 match {
-            case d: PositionalInputDevice => d.read()
-            case d: RandomAccessIODevice => d.read(state.registers.getX.toLong)
-            case _ => throw new UnsupportedOperationException
-          },
-          device._2.enqueue(destination)
-        )
+      case None => Future.failed(new DeviceNotConnectedException(deviceNum))
+      case Some(device) => device._1.flush() map { case (flushedDevice, block) =>
+        val updatedMemory = memoryWithBlock(state.memory.withoutLocks(deviceNum), device._2, block)
+        val updatedDevice = flushedDevice match {
+          case d: PositionalInputDevice => d.read()
+          case d: RandomAccessIODevice => d.read(state.registers.getX.toLong)
+          case _ => throw new UnsupportedOperationException
+        }
         state.copy(
-          memory = state.memory.withExclusiveLock(destination, device._1.blockSize, deviceNum),
-          devices = state.devices.updated(deviceNum, updatedDevice),
+          memory = updatedMemory.withExclusiveLock(destination, device._1.blockSize, deviceNum),
+          devices = state.devices.updated(deviceNum, (updatedDevice, Some(destination))),
           programCounter = state.programCounter.next,
           timeCounter = state.timeCounter + 1
         )
+      }
     }
   }
 
   // C = 37
-  def out(state: State, command: W): Future[State] = Future {
+  def out(state: State, command: W): Future[State] = {
     val deviceNum = command.getFieldSpec.toInt
     val source = getIndexedAddress(state, command)
     state.devices.get(deviceNum) match {
-      case None => throw new DeviceNotConnectedException(deviceNum)
-      case Some(device) =>
-        val block = (0 until device._1.blockSize) map { i => state.memory.get(source + i).toIOWord }
-        val updatedDevice = (
-          device._1 match {
-            case d: PositionalOutputDevice => d.write(block)
-            case d: RandomAccessIODevice => d.write(state.registers.getX.toLong, block)
-            case _ => throw new UnsupportedOperationException
-          },
-          device._2
-        )
+      case None => Future.failed(new DeviceNotConnectedException(deviceNum))
+      case Some(device) => device._1.flush() map { case (flushedDevice, block) =>
+        val updatedMemory = memoryWithBlock(state.memory.withoutLocks(deviceNum), device._2, block)
+        val newBlock = (0 until device._1.blockSize) map { i => state.memory.get(source + i).toIOWord }
+        val updatedDevice = flushedDevice match {
+          case d: PositionalOutputDevice => d.write(newBlock)
+          case d: RandomAccessIODevice => d.write(state.registers.getX.toLong, newBlock)
+          case _ => throw new UnsupportedOperationException
+        }
         state.copy(
-          memory = state.memory.withSharedLock(source, device._1.blockSize, deviceNum),
-          devices = state.devices.updated(deviceNum, updatedDevice),
+          memory = updatedMemory.withSharedLock(source, device._1.blockSize, deviceNum),
+          devices = state.devices.updated(deviceNum, (updatedDevice, None)),
           programCounter = state.programCounter.next,
           timeCounter = state.timeCounter + 1
         )
+      }
     }
   }
 

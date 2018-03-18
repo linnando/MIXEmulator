@@ -16,10 +16,9 @@ case class MockPositionalOutputDevice(counter: Int = 0,
 
   override def isBusy: Boolean = busy
 
-  override def flush(): Future[(Device, Seq[IndexedSeq[IOWord]])] = Future { (
-    copy(busy = false),
-    Seq.empty
-  ) }
+  override def flush(): Future[(Device, Option[IndexedSeq[IOWord]])] = Future {
+    (copy(busy = false), None)
+  }
 }
 
 object MockPositionalOutputDevice {

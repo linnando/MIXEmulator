@@ -9,8 +9,6 @@ import org.specs2.concurrent.ExecutionEnv
 import org.specs2.matcher.FileMatchers
 import org.specs2.mutable.Specification
 
-import scala.collection.immutable.Queue
-
 class FileDiskUnitSpec(implicit ee: ExecutionEnv) extends Specification with FileMatchers {
   private val bytes0 = (0 until 500).map(i => (i % 64).toByte)
   private val words0 = IndexedSeq.tabulate(100)(i =>
@@ -41,7 +39,7 @@ class FileDiskUnitSpec(implicit ee: ExecutionEnv) extends Specification with Fil
       val finalState = busyState.flush()
       finalState.map(_._1.version) must beEqualTo(2).await
       finalState.map(_._1.isBusy) must beFalse.await
-      finalState.map(_._2.length) must beEqualTo(0).await
+      finalState.map(_._2) must beNone.await
       val file1 = new File(s"$filename/1")
       file1 must exist
       val stream1 = new FileInputStream(file1).getChannel
@@ -69,7 +67,7 @@ class FileDiskUnitSpec(implicit ee: ExecutionEnv) extends Specification with Fil
       val finalState = busyState.flush()
       finalState.map(_._1.version) must beEqualTo(2).await
       finalState.map(_._1.isBusy) must beFalse.await
-      finalState.map(_._2.length) must beEqualTo(0).await
+      finalState.map(_._2) must beNone.await
       val file1 = new File(s"$filename/1")
       file1 must exist
       val stream1 = new FileInputStream(file1).getChannel
@@ -92,13 +90,13 @@ class FileDiskUnitSpec(implicit ee: ExecutionEnv) extends Specification with Fil
     "read previously written data" in {
       val filename = "disk3"
       val device = FileDiskUnit.create(filename)
-      val busyState = device.write(0L, words0).write(1L, words1).read(1L).read(0L)
+      val busyState = device.write(0L, words0).write(1L, words1).read(1L)
       busyState.version must be equalTo 2
       busyState.isBusy must beTrue
       val finalState = busyState.flush()
       finalState.map(_._1.version) must beEqualTo(2).await
       finalState.map(_._1.isBusy) must beFalse.await
-      finalState.map(_._2) must beEqualTo(Queue(words1, words0)).await
+      finalState.map(_._2) must beSome(words1).await
       new File(s"$filename/0").delete()
       new File(s"$filename/1").delete()
       new File(s"$filename/2").delete()
@@ -119,7 +117,8 @@ class FileDiskUnitSpec(implicit ee: ExecutionEnv) extends Specification with Fil
       val finalState = busyState.flush()
       finalState.map(_._1.version) must beEqualTo(0).await
       finalState.map(_._1.isBusy) must beFalse.await
-      finalState.map(_._2) must beEqualTo(Queue((0 until 100).map(_ => IOWord(negative = false, Seq(0, 0, 0, 0, 0))))).await
+      val expected: IndexedSeq[IOWord] = (0 until 100).map(_ => IOWord(negative = false, Seq(0, 0, 0, 0, 0)))
+      finalState.map(_._2) must beSome(expected).await
       file.delete()
       directory.delete()
     }

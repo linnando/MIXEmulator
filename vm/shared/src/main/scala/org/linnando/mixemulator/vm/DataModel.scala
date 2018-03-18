@@ -21,7 +21,7 @@ trait DataModel {
                    programCounter: I,
                    timeCounter: Int,
                    isHalted: Boolean,
-                   devices: Map[Int, (Device, Queue[I])]) extends VirtualMachineState {
+                   devices: Map[Int, (Device, Option[I])]) extends VirtualMachineState {
     override def get(address: Short): IOWord = memory.getCurrent(address).toIOWord
 
     override def getA: IOWord = registers.getA.toIOWord

@@ -3,7 +3,6 @@ package org.linnando.mixemulator.vm.io.file
 import org.linnando.mixemulator.vm.io.BlockDevice
 import org.linnando.mixemulator.vm.io.data.IOWord
 
-import scala.collection.immutable.Queue
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -12,7 +11,7 @@ trait FileBlockIODevice extends BlockDevice {
 
   def version: Int
 
-  def tasks: Future[Queue[IndexedSeq[IOWord]]]
+  def task: Future[Option[IndexedSeq[IOWord]]]
 
   protected def readBlock(pos: Long): Future[IndexedSeq[IOWord]] = {
     val eventualBytes: Future[Array[Byte]] = BlockAccessFile.readBlock(filename, version, 5 * pos * blockSize, 5 * blockSize)

@@ -8,8 +8,9 @@ import scala.concurrent.Future
 
 case class MockRandomAccessIODevice(position: Long = 0L,
                                     block: IndexedSeq[IOWord] = IndexedSeq.empty,
-                                    busy: Boolean = false) extends RandomAccessIODevice {
-  override def read(pos: Long): RandomAccessIODevice = copy(position = pos, busy = true)
+                                    busy: Boolean = false,
+                                    reading: Boolean = false) extends RandomAccessIODevice {
+  override def read(pos: Long): RandomAccessIODevice = copy(position = pos, busy = true, reading = true)
 
   override def write(pos: Long, words: IndexedSeq[IOWord]): RandomAccessIODevice =
     copy(position = pos, block = words, busy = true)
@@ -18,10 +19,12 @@ case class MockRandomAccessIODevice(position: Long = 0L,
 
   override def isBusy: Boolean = busy
 
-  override def flush(): Future[(Device, Seq[IndexedSeq[IOWord]])] = Future { (
-    copy(busy = false),
-    Seq(IndexedSeq.fill(blockSize)(IOWord(negative = false, Seq(1, 1, 1, 1, 1))))
-  ) }
+  override def flush(): Future[(Device, Option[IndexedSeq[IOWord]])] = Future {
+    if (reading) {
+      val ioWords = IndexedSeq.fill(blockSize)(IOWord(negative = false, Seq(1, 1, 1, 1, 1)))
+      (copy(busy = false, reading = false), Some(ioWords))
+    } else (copy(busy = false), None)
+  }
 }
 
 object MockRandomAccessIODevice {

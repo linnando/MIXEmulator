@@ -27,8 +27,8 @@ trait FileLineOutputDevice extends LineDevice with PositionalOutputDevice {
 
   def newVersion(tasks: Future[Unit]): FileLineOutputDevice
 
-  override def flush(): Future[(FileLineOutputDevice, Seq[IndexedSeq[IOWord]])] =
-    tasks.map(_ => (withoutTasks, Seq.empty))
+  override def flush(): Future[(FileLineOutputDevice, Option[IndexedSeq[IOWord]])] =
+    tasks.map(_ => (withoutTasks, None))
 
   def withoutTasks: FileLineOutputDevice
 

@@ -13,10 +13,12 @@ case class MockPositionalInputDevice(counter: Int = 0, busy: Boolean = false) ex
 
   override def isBusy: Boolean = busy
 
-  override def flush(): Future[(Device, Seq[IndexedSeq[IOWord]])] = Future { (
-    copy(busy = false),
-    Seq(IndexedSeq.fill(blockSize)(IOWord(negative = false, Seq(1, 1, 1, 1, 1))))
-  ) }
+  override def flush(): Future[(Device, Option[IndexedSeq[IOWord]])] = Future {
+    if (isBusy) {
+      val ioWords = IndexedSeq.fill(blockSize)(IOWord(negative = false, Seq(1, 1, 1, 1, 1)))
+      (copy(busy = false), Some(ioWords))
+    } else (this, None)
+  }
 }
 
 object MockPositionalInputDevice {

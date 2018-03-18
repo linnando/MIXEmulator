@@ -6,8 +6,6 @@ import org.linnando.mixemulator.vm.io.mock._
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.mutable.Specification
 
-import scala.collection.immutable.Queue
-
 class IOSpec(implicit ee: ExecutionEnv) extends Specification {
 
   import decimal._
@@ -16,13 +14,13 @@ class IOSpec(implicit ee: ExecutionEnv) extends Specification {
   private val state = initialState.copy(
     registers = initialState.registers.updatedX(MixWord(2000L)),
     devices = initialState.devices ++ Seq(
-      0 -> (MockPositionalInputDevice(), Queue.empty),
-      1 -> (MockPositionalOutputDevice(), Queue.empty),
-      2 -> (MockRandomAccessIODevice(), Queue.empty),
-      3 -> (MockTapeUnit(), Queue.empty),
-      4 -> (MockDiskUnit(), Queue.empty),
-      5 -> (MockLinePrinter(), Queue.empty),
-      6 -> (MockPaperTape(), Queue.empty)
+      0 -> (MockPositionalInputDevice(), None),
+      1 -> (MockPositionalOutputDevice(), None),
+      2 -> (MockRandomAccessIODevice(), None),
+      3 -> (MockTapeUnit(), None),
+      4 -> (MockDiskUnit(), None),
+      5 -> (MockLinePrinter(), None),
+      6 -> (MockPaperTape(), None)
     )
   )
 
@@ -36,7 +34,7 @@ class IOSpec(implicit ee: ExecutionEnv) extends Specification {
         case d: MockPositionalInputDevice => d.counter
         case _ => throw new Error
       }) must beGreaterThan(0).await
-      device.map(_._2) must contain(MixIndex(1000)).await
+      device.map(_._2) must beSome(MixIndex(1000)).await
     }
 
     "throw an exception for a positional output device" in {
@@ -53,7 +51,7 @@ class IOSpec(implicit ee: ExecutionEnv) extends Specification {
         case d: MockRandomAccessIODevice => d.position
         case _ => throw new Error
       }) must beEqualTo(2000).await
-      device.map(_._2) must contain(MixIndex(1000)).await
+      device.map(_._2) must beSome(MixIndex(1000)).await
     }
 
     "throw an exception if no device is connected" in {
@@ -83,7 +81,7 @@ class IOSpec(implicit ee: ExecutionEnv) extends Specification {
         case d: MockPositionalOutputDevice => d.block
         case _ => throw new Error
       }) must not be empty.await
-      device.map(_._2.length) must beEqualTo(0).await
+      device.map(_._2) must beNone.await
     }
 
     "call write for a random access device" in {
@@ -93,7 +91,7 @@ class IOSpec(implicit ee: ExecutionEnv) extends Specification {
       val device = nextState.map(_.devices(2))
       device.map(_._1 match { case d: MockRandomAccessIODevice => d.position }) must beEqualTo(2000).await
       device.map(_._1 match { case d: MockRandomAccessIODevice => d.block }) must not be empty.await
-      device.map(_._2.length) must beEqualTo(0).await
+      device.map(_._2) must beNone.await
     }
 
     "throw an exception if no device is connected" in {
@@ -119,7 +117,7 @@ class IOSpec(implicit ee: ExecutionEnv) extends Specification {
       val nextState = execute(state, MixWord(10000335L))
       val device = nextState.map(_.devices(3))
       device.map(_._1 match { case d: MockTapeUnit => d.position }) must beEqualTo(10).await
-      device.map(_._2.length) must beEqualTo(0).await
+      device.map(_._2) must beNone.await
     }
 
     "position a disk unit" in {
@@ -127,7 +125,7 @@ class IOSpec(implicit ee: ExecutionEnv) extends Specification {
       val nextState = execute(state, MixWord(435L))
       val device = nextState.map(_.devices(4))
       device.map(_._1 match { case d: MockDiskUnit => d.position }) must beEqualTo(2000).await
-      device.map(_._2.length) must beEqualTo(0).await
+      device.map(_._2) must beNone.await
     }
 
     "throw an exception if M != 0 for a disk unit" in {
@@ -140,7 +138,7 @@ class IOSpec(implicit ee: ExecutionEnv) extends Specification {
       val nextState = execute(state, MixWord(535L))
       val device = nextState.map(_.devices(5))
       device.map(_._1 match { case d: MockLinePrinter => d.page }) must beGreaterThan(0).await
-      device.map(_._2.length) must beEqualTo(0).await
+      device.map(_._2) must beNone.await
     }
 
     "throw an exception if M != 0 for a line printer" in {
@@ -153,7 +151,7 @@ class IOSpec(implicit ee: ExecutionEnv) extends Specification {
       val nextState = execute(state, MixWord(635L))
       val device = nextState.map(_.devices(6))
       device.map(_._1 match { case d: MockPaperTape => d.counter }) must beGreaterThan(0).await
-      device.map(_._2.length) must beEqualTo(0).await
+      device.map(_._2) must beNone.await
     }
 
     "throw an exception if M != 0 for a paper tape" in {

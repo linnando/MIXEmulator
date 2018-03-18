@@ -70,7 +70,7 @@ class FileCardPunchSpec(implicit ee: ExecutionEnv) extends Specification with Fi
       val finalState = busyState.flush()
       finalState.map(_._1.version) must beEqualTo(2).await
       finalState.map(_._1.isBusy) must beFalse.await
-      finalState.map(_._2.length) must beEqualTo(0).await
+      finalState.map(_._2) must beNone.await
       val file1 = new File(s"$filename/1")
       file1 must exist
       file1 must haveSameLinesAs(Seq(line0))

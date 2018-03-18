@@ -5,7 +5,6 @@ import org.linnando.mixemulator.vm.exceptions._
 import org.linnando.mixemulator.vm.io.Device
 import org.linnando.mixemulator.vm.io.data.IOWord
 
-import scala.collection.immutable.Queue
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -66,7 +65,7 @@ object decimal extends ProcessingModel {
       copy(literals = literals.updated(value, literals(value) :+ counter))
 
     override def withDevices(devices: Map[Int, Device]): DecimalVirtualMachineBuilder =
-      copy(state = state.copy(devices = devices.mapValues((_, Queue.empty))))
+      copy(state = state.copy(devices = devices.mapValues((_, None))))
   }
 
   def initialState = State(
@@ -79,12 +78,12 @@ object decimal extends ProcessingModel {
   )
 
   def go(devices: Map[Int, Device], deviceNum: Int): Future[VirtualMachine] = {
-    val state = initialState.copy(devices = devices.mapValues((_, Queue.empty)))
+    val state = initialState.copy(devices = devices.mapValues((_, None)))
     go(state, deviceNum).map(new VirtualMachineImpl(_))
   }
 
   def goTracking(devices: Map[Int, Device], deviceNum: Int): Future[VirtualMachine] = {
-    val state = initialState.copy(devices = devices.mapValues((_, Queue.empty)))
+    val state = initialState.copy(devices = devices.mapValues((_, None)))
     go(state, deviceNum).map(new TrackingVirtualMachineImpl(_))
   }
 
@@ -324,7 +323,7 @@ object decimal extends ProcessingModel {
       if (contents == 0x4000) MixIndex(1)
       else {
         val nextIndex = contents + 1
-        if (nextIndex >= 0x4000) throw new OverflowException
+        if (nextIndex >= 10000) throw new OverflowException
         MixIndex(nextIndex.toShort)
       }
     }
