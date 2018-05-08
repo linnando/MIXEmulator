@@ -14,11 +14,11 @@ case class FileDiskUnit(filename: String,
 
   override def blockSize: Int = DiskUnit.BLOCK_SIZE
 
-  override def withTask(tasks: Future[Option[IndexedSeq[IOWord]]]): FileDiskUnit =
-    copy(task = tasks, isBusy = true)
+  override def withTask(task: Future[Option[IndexedSeq[IOWord]]]): FileDiskUnit =
+    copy(task = task, isBusy = true)
 
-  override def newVersion(tasks: Future[Option[IndexedSeq[IOWord]]]): FileDiskUnit =
-    copy(version = version + 1, task = tasks, isBusy = true)
+  override def newVersion(task: Future[Option[IndexedSeq[IOWord]]]): FileDiskUnit =
+    copy(version = version + 1, task = task, isBusy = true)
 
   override def withoutTask: FileDiskUnit =
     copy(task = Future.successful(None), isBusy = false)

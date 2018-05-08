@@ -72,6 +72,12 @@ object BlockAccessFile {
     }
   }
 
+  def getVersions(filename: String): Future[Iterable[String]] = Future {
+    val directory = new File(filename)
+    directory.mkdirs()
+    directory.listFiles().map(_.getName)
+  }
+
   def save(filename: String, data: Array[Byte]): Future[Unit] = ???
 
   def getData(filename: String, version: Int): Future[Array[Byte]] = ???

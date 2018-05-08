@@ -33,11 +33,11 @@ object LineAccessFile {
     } yield ()
 
   private def appendString(filename: String, str: String): Future[Unit] = {
-    Fs.openFuture(filename, "a").flatMap(dest =>
+    Fs.openFuture(filename, "a").flatMap(dest => {
       Fs.writeFuture(dest, str).map(_ => ()) andThen {
         case _ => Fs.closeFuture(dest)
       }
-    )
+    })
   }
 
   def appendNewPage(filename: String, version: Int): Future[Unit] = {
@@ -62,11 +62,14 @@ object LineAccessFile {
   def initialiseVersioned(filename: String): Future[Unit] = {
     for {
       _ <- ensureDeviceDirectoryExists(filename)
-      versions <- Fs.readdirFuture(s"/$filename")
+      versions <- getVersions(filename)
       _ <- Fs.writeFileFuture(s"/$filename/0", "")
       _ <- unlinkVersions(filename, versions.filter(_ != "0"))
     } yield ()
   }
+
+  def getVersions(filename: String): Future[Iterable[String]] =
+    Fs.readdirFuture(s"/$filename").map(_.toArray[String])
 
   private def ensureDeviceDirectoryExists(filename: String): Future[Unit] =
     for {

@@ -52,9 +52,12 @@ object BlockAccessFile {
   def initialiseWithCurrentVersion(filename: String): Future[Unit] =
     for {
       _ <- ensureDeviceDirectoryExists(filename)
-      versions <- Fs.readdirFuture(s"/$filename")
+      versions <- getVersions(filename)
       _ <- saveInitialVersionOnly(filename, versions)
     } yield ()
+
+  def getVersions(filename: String): Future[Iterable[String]] =
+    Fs.readdirFuture(s"/$filename").map(_.toArray[String])
 
   private def ensureDeviceDirectoryExists(filename: String): Future[Unit] =
     for {
@@ -64,7 +67,7 @@ object BlockAccessFile {
       _ <- if (exists && isDirectory) Future {} else Fs.mkdirFuture(s"/$filename")
     } yield ()
 
-  private def saveInitialVersionOnly(filename: String, versions: Iterable[String]): Future[Unit] = {
+  private def saveInitialVersionOnly(filename: String, versions: Iterable[String]): Future[Unit] =
     if (versions.isEmpty) {
       val buffer = Buffer.alloc(0)
       Fs.writeFileFuture(s"/$filename/0", buffer)
@@ -76,7 +79,6 @@ object BlockAccessFile {
         _ <- unlinkVersions(filename, versions.filter(version => version != "0" && version != currentVersion.toString))
       } yield ()
     }
-  }
 
   private def unlinkVersions(filename: String, versions: Iterable[String]): Future[Unit] = {
     val futures = versions.map(version => Fs.unlinkFuture(s"/$filename/$version"))

@@ -34,8 +34,10 @@ trait FileLineInputDevice extends LineDevice with PositionalInputDevice {
 
   def withoutTask: FileLineInputDevice
 
-  override def data: Future[IndexedSeq[String]] =
-    LineAccessFile.getData(filename).map((contents: String) => contents.split("\n"))
+  override def data: Future[IndexedSeq[String]] = for {
+    _ <- task
+    contents: String <- LineAccessFile.getData(filename)
+  } yield contents.split("\n")
 }
 
 object FileLineInputDevice {
@@ -44,4 +46,8 @@ object FileLineInputDevice {
 
   def save(filename: String, data: String): Future[Unit] =
     LineAccessFile.saveNonVersioned(filename, data)
+
+  def getCurrentData(filename: String): Future[IndexedSeq[String]] = for {
+    contents: String <- LineAccessFile.getData(filename)
+  } yield contents.split("\n")
 }

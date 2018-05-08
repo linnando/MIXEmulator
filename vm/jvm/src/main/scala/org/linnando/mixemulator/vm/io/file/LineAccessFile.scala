@@ -87,6 +87,12 @@ object LineAccessFile {
     }
   }
 
+  def getVersions(filename: String): Future[Iterable[String]] = Future {
+    val directory = new File(filename)
+    directory.mkdirs()
+    directory.listFiles().map(_.getName)
+  }
+
   def getData(filename: String): Future[String] = ???
 
   def getData(filename: String, version: Int): Future[String] = ???

@@ -58,18 +58,20 @@ trait Processor {
         case d: RandomAccessIODevice => d.read(0L)
         case _ => return Future.failed(new UnsupportedOperationException)
       }
-      deviceInProgress.flush() map { case (flushedDevice, Some(block)) =>
-        val updatedRegisters = state.registers.updatedJ(getIndex(0))
-        val updatedMemory = block.indices.foldLeft(state.memory) { (ms, i) =>
-          ms.updated(getIndex(i.toShort), getWord(block(i)))
-        }
-        val updatedDevices = state.devices.updated(deviceNum, (flushedDevice, None))
-        state.copy(
-          registers = updatedRegisters,
-          memory = updatedMemory,
-          programCounter = getIndex(0),
-          devices = updatedDevices
-        )
+      deviceInProgress.flush() map {
+        case (flushedDevice, Some(block)) =>
+          val updatedRegisters = state.registers.updatedJ(getIndex(0))
+          val updatedMemory = block.indices.foldLeft(state.memory) { (ms, i) =>
+            ms.updated(getIndex(i.toShort), getWord(block(i)))
+          }
+          val updatedDevices = state.devices.updated(deviceNum, (flushedDevice, None))
+          state.copy(
+            registers = updatedRegisters,
+            memory = updatedMemory,
+            programCounter = getIndex(0),
+            devices = updatedDevices
+          )
+        case (_, None) => throw new Error
       }
   }
 

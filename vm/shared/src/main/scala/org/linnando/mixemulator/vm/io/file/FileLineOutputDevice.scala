@@ -32,11 +32,19 @@ trait FileLineOutputDevice extends LineDevice with PositionalOutputDevice {
 
   def withoutTasks: FileLineOutputDevice
 
-  override def data: Future[IndexedSeq[String]] =
-    LineAccessFile.getData(filename, version).map((contents: String) => contents.split("\n"))
+  override def data: Future[IndexedSeq[String]] = for {
+    _ <- tasks
+    contents: String <- LineAccessFile.getData(filename, version)
+  } yield contents.split("\n")
 }
 
 object FileLineOutputDevice {
   def initialise(filename: String): Future[Unit] =
     LineAccessFile.initialiseVersioned(filename)
+
+  def getCurrentData(filename: String): Future[IndexedSeq[String]] = for {
+    versions: Iterable[String] <- LineAccessFile.getVersions(filename)
+    versionNumbers = versions.map(_.toInt)
+    contents: String <- LineAccessFile.getData(filename, versionNumbers.max)
+  } yield contents.split("\n")
 }

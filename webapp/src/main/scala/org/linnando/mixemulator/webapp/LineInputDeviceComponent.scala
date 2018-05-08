@@ -45,7 +45,7 @@ class LineInputDeviceComponent(virtualMachineService: VirtualMachineService) ext
       reader.onload = (event: UIEvent) => {
         val target = event.target.asInstanceOf[js.Dynamic]
         val fileData = target.result.asInstanceOf[String]
-        virtualMachineService.saveLineDevice(deviceNum, fileData) onComplete {
+        VirtualMachineService.saveLineDevice(deviceNum, fileData) onComplete {
           case Success(_) => fetchDeviceData()
           case Failure(e) => ErrorPopup.show(e)
         }
