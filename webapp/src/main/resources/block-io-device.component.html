@@ -1,5 +1,5 @@
-<div class="panel panel-default">
-    <div class="panel-heading">
+<div class="card">
+    <div class="card-header">
         <div *ngIf="canUploadFile" class="form-inline">
             <div class="form-group">
                 <label for="inputFile">Load device data from a file: </label>
@@ -14,9 +14,9 @@
             <button class="btn btn-primary" (click)="saveFile()">Save as file</button>
         </div>
     </div>
-    <div class="panel-body">
+    <div class="card-body">
         <div class="row device-data">
-            <div *ngFor="let index of indices" class="col-sm-6 col-md-4 col-lg-3">
+            <div *ngFor="let index of indices" class="col-md-6 col-lg-4 col-xl-3">
                 <table>
                     <tr>
                         <td class="index">{{index}}:</td>

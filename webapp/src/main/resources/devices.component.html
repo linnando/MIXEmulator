@@ -1,6 +1,6 @@
 <div class="container">
     <div class="row">
-        <div class="col-sm-4 col-md-3 col-lg-2">
+        <div class="col-md-4 col-lg-3 col-xl-2">
             <div class="list-group">
                 <a *ngFor="let deviceNumber of deviceNumbers" href="javascript:void(0)" class="list-group-item"
                    [class.active]="selectedDevice === deviceNumber" (click)="selectedDevice = deviceNumber">
@@ -8,7 +8,7 @@
                 </a>
             </div>
         </div>
-        <div class="col-sm-8 col-md-9 col-lg-10">
+        <div class="col-md-8 col-lg-9 col-xl-10">
             <block-io-device *ngIf="selectedDevice === 0" [deviceNum]="0"></block-io-device>
             <block-io-device *ngIf="selectedDevice === 1" [deviceNum]="1"></block-io-device>
             <block-io-device *ngIf="selectedDevice === 2" [deviceNum]="2"></block-io-device>

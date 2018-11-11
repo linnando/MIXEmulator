@@ -1,5 +1,5 @@
-<div class="panel panel-default">
-    <div class="panel-heading">
+<div class="card">
+    <div class="card-header">
         <div *ngIf="canUploadFile" class="form-inline">
             <div class="form-group">
                 <label for="inputFile">Load device data from a file: </label>
@@ -14,7 +14,7 @@
             <button class="btn btn-primary" (click)="saveFile()">Save as file</button>
         </div>
     </div>
-    <div class="panel-body">
+    <div class="card-body">
         <div *ngFor="let line of lines" class="line">{{line}}</div>
     </div>
 </div>

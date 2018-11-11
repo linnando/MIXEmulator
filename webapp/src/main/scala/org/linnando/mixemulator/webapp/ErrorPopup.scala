@@ -2,7 +2,7 @@ package org.linnando.mixemulator.webapp
 
 import java.util.concurrent.ExecutionException
 
-import com.karasiq.bootstrap.Bootstrap.default._
+import com.karasiq.bootstrap4.Bootstrap.default._
 import org.linnando.mixemulator.asm.exceptions._
 import org.linnando.mixemulator.vm.exceptions._
 

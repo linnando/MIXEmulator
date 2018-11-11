@@ -1,35 +1,35 @@
 <div class="container">
     <div class="row control-row">
-        <div class="col-xs-8">
+        <div class="col-sm-8">
             <div class="btn-group" role="group" aria-label="Virtual machine mode">
-                <button type="button" class="btn" [ngClass]="{'btn-success': mode === 'binary', 'btn-default': mode !== 'binary'}" (click)="mode = 'binary'">Binary</button>
-                <button type="button" class="btn" [ngClass]="{'btn-success': mode === 'decimal', 'btn-default': mode !== 'decimal'}" (click)="mode = 'decimal'">Decimal</button>
+                <button type="button" class="btn btn-sm" [ngClass]="{'btn-success': mode === 'binary', 'btn-outline-secondary': mode !== 'binary'}" (click)="mode = 'binary'">Binary</button>
+                <button type="button" class="btn btn-sm" [ngClass]="{'btn-success': mode === 'decimal', 'btn-outline-secondary': mode !== 'decimal'}" (click)="mode = 'decimal'">Decimal</button>
             </div>
             <div class="btn-group" role="group" aria-label="Tracking mode">
-                <button type="button" class="btn" [ngClass]="{'btn-success': tracking, 'btn-default': !tracking}" (click)="tracking = true">With tracking</button>
-                <button type="button" class="btn" [ngClass]="{'btn-success': !tracking, 'btn-default': tracking}" (click)="tracking = false">Without tracking</button>
+                <button type="button" class="btn btn-sm" [ngClass]="{'btn-success': tracking, 'btn-outline-secondary': !tracking}" (click)="tracking = true">With tracking</button>
+                <button type="button" class="btn btn-sm" [ngClass]="{'btn-success': !tracking, 'btn-outline-secondary': tracking}" (click)="tracking = false">Without tracking</button>
             </div>
-            <button class="btn btn-primary" (click)="assemble()">Assemble</button>
-            <button *ngIf="!isActive" class="btn btn-secondary" (click)="go()">Go</button>
-            <button *ngIf="isActive" class="btn btn-danger" (click)="switchOff()">Switch off</button>
+            <button class="btn btn-sm btn-primary" (click)="assemble()">Assemble</button>
+            <button *ngIf="!isActive" class="btn btn-sm btn-secondary" (click)="go()">Go</button>
+            <button *ngIf="isActive" class="btn btn-sm btn-danger" (click)="switchOff()">Switch off</button>
         </div>
-        <div class="col-xs-4">
-            <button class="btn btn-default" (click)="runBack()" [disabled]="!canMoveBack"><i class="fa fa-fast-backward" aria-hidden="true"></i></button>
-            <button class="btn btn-default" (click)="stepBack()" [disabled]="!canMoveBack"><i class="fa fa-step-backward" aria-hidden="true"></i></button>
-            <button class="btn btn-default" (click)="stepForward()" [disabled]="!canMoveForward"><i class="fa fa-step-forward" aria-hidden="true"></i></button>
-            <button class="btn btn-default" (click)="runForward()" [disabled]="!canMoveForward"><i class="fa fa-fast-forward" aria-hidden="true"></i></button>
+        <div class="col-sm-4">
+            <button class="btn btn-secondary" (click)="runBack()" [disabled]="!canMoveBack"><i class="fas fa-fast-backward" aria-hidden="true"></i></button>
+            <button class="btn btn-secondary" (click)="stepBack()" [disabled]="!canMoveBack"><i class="fas fa-step-backward" aria-hidden="true"></i></button>
+            <button class="btn btn-secondary" (click)="stepForward()" [disabled]="!canMoveForward"><i class="fas fa-step-forward" aria-hidden="true"></i></button>
+            <button class="btn btn-secondary" (click)="runForward()" [disabled]="!canMoveForward"><i class="fas fa-fast-forward" aria-hidden="true"></i></button>
         </div>
     </div>
     <div *ngIf="isActive" class="row view-row">
-        <div class="col-xs-6 registers">
+        <div class="col-sm-6 registers">
             <registers></registers>
         </div>
-        <div class="col-xs-6 memory">
+        <div class="col-sm-6 memory">
             <memory-data></memory-data>
         </div>
     </div>
     <div *ngIf="isActive" class="row code-row">
-        <div class="col-xs-12">
+        <div class="col-12">
             <memory-text></memory-text>
         </div>
     </div>

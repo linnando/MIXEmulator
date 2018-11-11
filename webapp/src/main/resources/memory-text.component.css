@@ -52,6 +52,7 @@ td.line-number {
 }
 
 td.line {
+    line-height: 0.5;
     white-space: pre;
 }
 

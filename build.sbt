@@ -12,8 +12,8 @@ lazy val asm = crossProject
   .jvmSettings(
     scalacOptions in Test ++= Seq("-Yrangepos"),
     libraryDependencies ++= Seq(
-      "org.specs2" %% "specs2-core" % "3.9.2" % "test",
-      "org.specs2" %% "specs2-matcher-extra" % "3.9.2" % "test"
+      "org.specs2" %% "specs2-core" % "4.3.4" % "test",
+      "org.specs2" %% "specs2-matcher-extra" % "4.3.4" % "test"
     )
   )
   .jsSettings()
@@ -31,8 +31,8 @@ lazy val vm = crossProject
   .jvmSettings(
     scalacOptions in Test ++= Seq("-Yrangepos"),
     libraryDependencies ++= Seq(
-      "org.specs2" %% "specs2-core" % "3.9.2" % "test",
-      "org.specs2" %% "specs2-matcher-extra" % "3.9.2" % "test"
+      "org.specs2" %% "specs2-core" % "4.3.4" % "test",
+      "org.specs2" %% "specs2-matcher-extra" % "4.3.4" % "test"
     )
   )
   .jsSettings(
@@ -55,7 +55,7 @@ lazy val webapp = project
     version := "0.1-SNAPSHOT",
     resolvers += "amateras-repo" at "http://amateras.sourceforge.jp/mvn/",
     libraryDependencies ++= Seq(
-      "com.github.karasiq" %%% "scalajs-bootstrap" % "2.1.4",
+      "com.github.karasiq" %%% "scalajs-bootstrap-v4" % "2.3.4",
       "com.scalawarrior" %%% "scalajs-ace" % "0.0.4"
     ),
     ngBootstrap := Some("org.linnando.mixemulator.webapp.AppModule")
