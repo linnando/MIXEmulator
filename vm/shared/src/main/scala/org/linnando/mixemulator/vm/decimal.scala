@@ -77,12 +77,12 @@ object decimal extends ProcessingModel {
     devices = Map.empty
   )
 
-  def go(devices: Map[Int, Device], deviceNum: Int): Future[VirtualMachine] = {
+  override def goNonTracking(devices: Map[Int, Device], deviceNum: Int): Future[VirtualMachine] = {
     val state = initialState.copy(devices = devices.mapValues((_, None)))
     go(state, deviceNum).map(new VirtualMachineImpl(_))
   }
 
-  def goTracking(devices: Map[Int, Device], deviceNum: Int): Future[VirtualMachine] = {
+  override def goTracking(devices: Map[Int, Device], deviceNum: Int): Future[VirtualMachine] = {
     val state = initialState.copy(devices = devices.mapValues((_, None)))
     go(state, deviceNum).map(new TrackingVirtualMachineImpl(_))
   }

@@ -6,12 +6,12 @@
                 <input type="file" id="inputFile" (change)="onFileChange($event.target.files)"
                        placeholder="Upload file">
             </div>
-            <button class="btn btn-primary" [disabled]="fileIsNotChosen" (click)="loadFile()">Load</button>
-            <button class="btn btn-primary" (click)="saveFile()">Save as file</button>
+            <button class="btn btn-sm btn-primary" [disabled]="fileIsNotChosen" (click)="loadFile()">Load</button>
+            <button class="btn btn-sm btn-primary" (click)="saveFile()">Save as file</button>
         </div>
         <div *ngIf="!canUploadFile">
             In order to load device data from a file, please switch off the virtual machine.
-            <button class="btn btn-primary" (click)="saveFile()">Save as file</button>
+            <button class="btn btn-sm btn-primary" (click)="saveFile()">Save as file</button>
         </div>
     </div>
     <div class="card-body">

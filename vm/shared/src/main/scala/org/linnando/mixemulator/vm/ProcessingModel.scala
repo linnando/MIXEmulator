@@ -3,6 +3,7 @@ package org.linnando.mixemulator.vm
 import java.util
 
 import org.linnando.mixemulator.vm.exceptions._
+import org.linnando.mixemulator.vm.io.Device
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -11,6 +12,10 @@ abstract class ProcessingModel extends DataModel with Processor {
   type VMB <: AbstractVirtualMachineBuilder
 
   def createVirtualMachineBuilder(): VirtualMachineBuilder
+
+  def goNonTracking(devices: Map[Int, Device], deviceNum: Int): Future[VirtualMachine]
+
+  def goTracking(devices: Map[Int, Device], deviceNum: Int): Future[VirtualMachine]
 
   abstract class AbstractVirtualMachineBuilder extends VirtualMachineBuilder {
     def state: State

@@ -22,6 +22,8 @@ HELLO      ALF  HELLO
            ALF  , WOR
            ALF  LD
            END START"""
+  var mode = "binary"
+  var tracking = true
 
   val stateChange: Subject[Unit] = new Subject()
 
@@ -35,86 +37,41 @@ HELLO      ALF  HELLO
 
   private var disassembler: MixDisassembler = _
 
-  def assembleBinaryNonTracking(): Future[Unit] = Future {
+  def assemble(): Future[Unit] = Future {
     lines = text.split("\n").toVector
-    val builder = binary.createVirtualMachineBuilder()
+    val processingModel = mode match {
+      case "binary" => binary
+      case "decimal" => decimal
+    }
+    val builder = processingModel.createVirtualMachineBuilder()
       .withDevices(VirtualMachineService.createDevices())
-    saveAssembly(MixAssembler.translateNonTracking(builder, lines))
-    disassembler = new MixDisassembler(binary)
-  }
-
-  private def saveAssembly(assembly: (VirtualMachine, List[(Option[Short], Option[Int])])): Unit = {
+    val assembly =
+      if (tracking) MixAssembler.translateTracking(builder, lines)
+      else MixAssembler.translateNonTracking(builder, lines)
     _machine = Some(assembly._1)
     _symbols = assembly._2.toVector
     _addressSymbols = _symbols.indices.foldLeft(Vector.fill(VirtualMachine.MEMORY_SIZE)(0)) { (s, index) =>
-      _symbols(index) match {
-        case (Some(address), _) => s.updated(address, index)
-        case (None, _) => s
-      }
+      val address = _symbols(index)._1
+      if (address.isEmpty) s
+      else s.updated(address.get, index)
     }
+    disassembler = new MixDisassembler(processingModel)
   }
 
-  def assembleBinaryTracking(): Future[Unit] = Future {
-    lines = text.split("\n").toVector
-    val builder = binary.createVirtualMachineBuilder()
-      .withDevices(VirtualMachineService.createDevices())
-    saveAssembly(MixAssembler.translateTracking(builder, lines))
-    disassembler = new MixDisassembler(binary)
-  }
-
-  def assembleDecimalNonTracking(): Future[Unit] = Future {
-    lines = text.split("\n").toVector
-    val builder = decimal.createVirtualMachineBuilder()
-      .withDevices(VirtualMachineService.createDevices())
-    saveAssembly(MixAssembler.translateNonTracking(builder, lines))
-    disassembler = new MixDisassembler(decimal)
-  }
-
-  def assembleDecimalTracking(): Future[Unit] = Future {
-    lines = text.split("\n").toVector
-    val builder = decimal.createVirtualMachineBuilder()
-      .withDevices(VirtualMachineService.createDevices())
-    saveAssembly(MixAssembler.translateTracking(builder, lines))
-    disassembler = new MixDisassembler(decimal)
-  }
-
-  def goBinaryNonTracking(): Future[Unit] = {
+  def go(): Future[Unit] = {
     val devices = VirtualMachineService.createDevices()
-    binary.go(devices, VirtualMachineService.goDevice) map { machine =>
+    val processingModel = mode match {
+      case "binary" => binary
+      case "decimal" => decimal
+    }
+    val eventualMachine =
+      if (tracking) processingModel.goTracking(devices, VirtualMachineService.goDevice)
+      else processingModel.goNonTracking(devices, VirtualMachineService.goDevice)
+    eventualMachine map { machine =>
       _machine = Some(machine)
       _symbols = Vector.tabulate(VirtualMachine.MEMORY_SIZE)(i => (Some(i.toShort), None))
       _addressSymbols = Vector.range(0, VirtualMachine.MEMORY_SIZE)
-      disassembler = new MixDisassembler(binary)
-    }
-  }
-
-  def goBinaryTracking(): Future[Unit] = {
-    val devices = VirtualMachineService.createDevices()
-    binary.goTracking(devices, VirtualMachineService.goDevice) map { machine =>
-      _machine = Some(machine)
-      _symbols = Vector.tabulate(VirtualMachine.MEMORY_SIZE)(i => (Some(i.toShort), None))
-      _addressSymbols = Vector.range(0, VirtualMachine.MEMORY_SIZE)
-      disassembler = new MixDisassembler(binary)
-    }
-  }
-
-  def goDecimalNonTracking(): Future[Unit] = {
-    val devices = VirtualMachineService.createDevices()
-    decimal.go(devices, VirtualMachineService.goDevice) map { machine =>
-      _machine = Some(machine)
-      _symbols = Vector.tabulate(VirtualMachine.MEMORY_SIZE)(i => (Some(i.toShort), None))
-      _addressSymbols = Vector.range(0, VirtualMachine.MEMORY_SIZE)
-      disassembler = new MixDisassembler(decimal)
-    }
-  }
-
-  def goDecimalTracking(): Future[Unit] = {
-    val devices = VirtualMachineService.createDevices()
-    decimal.goTracking(devices, VirtualMachineService.goDevice) map { machine =>
-      _machine = Some(machine)
-      _symbols = Vector.tabulate(VirtualMachine.MEMORY_SIZE)(i => (Some(i.toShort), None))
-      _addressSymbols = Vector.range(0, VirtualMachine.MEMORY_SIZE)
-      disassembler = new MixDisassembler(decimal)
+      disassembler = new MixDisassembler(processingModel)
     }
   }
 
@@ -211,10 +168,11 @@ HELLO      ALF  HELLO
   private def device(deviceNum: Int): Option[Device] =
     _machine.map(_.currentState.getDevice(deviceNum))
 
-  def lineDeviceData(deviceNum: Int): Future[IndexedSeq[String]] = device(deviceNum) match {
-    case Some(d: LineDevice) => d.data
-    case _ => VirtualMachineService.getLineDeviceData(deviceNum)
-  }
+  def lineDeviceData(deviceNum: Int): Future[IndexedSeq[String]] =    device(deviceNum) match {
+      case Some(d: LineDevice) => d.data
+      case _ => VirtualMachineService.getLineDeviceData(deviceNum)
+    }
+
 }
 
 object VirtualMachineService {
@@ -281,10 +239,10 @@ object VirtualMachineService {
   }
 
   def getLineDeviceData(deviceNum: Int): Future[IndexedSeq[String]] = deviceNum match {
-    case 16 => FileLineOutputDevice.getCurrentData("device16")
-    case 17 => FileLineInputDevice.getCurrentData("device17")
-    case 18 => FileLineInputDevice.getCurrentData("device18")
-    case 20 => FileLineOutputDevice.getCurrentData("device20")
+    case 16 => FileLineInputDevice.getCurrentData("device16")
+    case 17 => FileLineOutputDevice.getCurrentData("device17")
+    case 18 => FileLineOutputDevice.getCurrentData("device18")
+    case 20 => FileLineInputDevice.getCurrentData("device20")
     case _ => throw new Error
   }
 

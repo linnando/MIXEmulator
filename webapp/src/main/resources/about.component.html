@@ -17,24 +17,24 @@
                 The terminal device and floating-point operations are not supported currently.
             </p>
             <p>
-                In order to use the emulator, enter the program text on the &quot;Program editor&quot; tab, then switch
-                to the &quot;Virtual machine&quot; tab, choose the desired mode of operation and assemble the program.
-                After that, you will be able to execute the program either step by step or until the end/next breakpoint
-                is reached. Breakpoints may be set by double-clicking a program line on the &quot;Virtual machine&quot;
-                tab (not in the editor currently). If you select the tracking mode, you can also move backwards in the
-                execution flow. The &quot;Devices&quot; tab allows inspecting device data, downloading them as files or
-                uploading files for using as input data. The device data are kept in the browser local storage.
+                In order to use the emulator, enter the program text on the &quot;Program editor&quot; tab, choose the
+                desired mode of operation and assemble the program. The emulator will switch to the &quot;Virtual
+                machine&quot; tab. From there, you will be able to execute the program either step by step or until the
+                end/next breakpoint is reached. Breakpoints may be set by double-clicking a program line on the
+                &quot;Virtual machine&quot; tab (not in the editor currently). If you select the tracking mode, you can
+                also move backwards in the execution flow. The &quot;Devices&quot; tab allows inspecting device data,
+                downloading them as files or uploading files for using as input data. The device data are kept in the
+                browser local storage.
             </p>
             <p>
                 Another possible option is using an assembled program on punched cards with your own program loader (for
                 example, to do exercise 1.3.1-26). If you want to do this, load a file containing punched cards data (in
-                the character code) to device 16, switch to the &quot;Virtual machine&quot; tab and click the
-                &quot;Go&quot; button. Please note that characters &#x03a3;, &#x03a0;, =, <, >, @, ;, :, and ' cannot be
-                represented on punched cards. A macron (&macr;, U+0305) <em>after</em> a digit subtracts 20 from the
-                character code (for example, if a punched card contains characters 0&macr;, the corresponding byte will
-                have value 10 instead of 30). Of course, combining diacritics would be better to use, but it is not
-                rendered well with monospace fonts:-(. A sample "Hello, World!" program on a punched card could look
-                like:
+                the character code) to device 16 and click the &quot;Go&quot; button. Please note that characters
+                &#x03a3;, &#x03a0;, =, <, >, @, ;, :, and ' cannot be represented on punched cards. A macron (&macr;,
+                U+0305) <em>after</em> a digit subtracts 20 from the character code (for example, if a punched card
+                contains characters 0&macr;, the corresponding byte will have value 10 instead of 30). Of course,
+                combining diacritics would be better to use, but it is not rendered well with monospace fonts:-(. A
+                sample &quot;Hello, World!&quot; program on a punched card could look like:
             </p>
             <div class="card">
                 <div class="card-body">
