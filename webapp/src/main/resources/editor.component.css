@@ -1,5 +1,7 @@
 .program-text {
     width: 100%;
+    height: -moz-calc(100vh - 190px);
+    height: -webkit-calc(100vh - 190px);
     height: calc(100vh - 190px);
     font-family: monospace;
 }

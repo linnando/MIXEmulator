@@ -1,5 +1,7 @@
 div.device-data {
     overflow-x: auto;
+    height: -moz-calc(100% - 190px);
+    height: -webkit-calc(100% - 190px);
     height: calc(100% - 190px);
     font-family: monospace;
 }
@@ -7,6 +9,8 @@ div.device-data {
 table {
     width: 220px;
     position: relative;
+    left: -moz-calc(50% - 110px);
+    left: -webkit-calc(50% - 110px);
     left: calc(50% - 110px);
     font-size: 14px;
 }

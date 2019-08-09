@@ -6,6 +6,8 @@ div.registers {
 table {
     width: 232px;
     position: relative;
+    left: -moz-calc(50% - 116px);
+    left: -webkit-calc(50% - 116px);
     left: calc(50% - 116px);
     font-size: 14px;
 }

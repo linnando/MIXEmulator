@@ -7,5 +7,7 @@
 }
 
 .code-row {
+    height: -moz-calc(100% - 386px);
+    height: -webkit-calc(100% - 386px);
     height: calc(100% - 386px);
 }

@@ -6,6 +6,8 @@ div.memory-text {
 
 table {
     position: relative;
+    left: -moz-calc(25% - 130px);
+    left: -webkit-calc(25% - 130px);
     left: calc(25% - 130px);
     font-size: 14px;
 }

@@ -7,6 +7,8 @@ div.memory-data {
 table {
     width: 220px;
     position: relative;
+    left: -moz-calc(50% - 110px);
+    left: -webkit-calc(50% - 110px);
     left: calc(50% - 110px);
     font-size: 14px;
 }
