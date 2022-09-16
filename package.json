@@ -21,7 +21,7 @@
     "@angular/platform-server": "^4.0.0",
     "@angular/router": "^4.0.0",
     "angular-in-memory-web-api": "^0.3.1",
-    "bootstrap": "3.3.7",
+    "bootstrap": "3.4.1",
     "browserfs": "~1.4.3",
     "core-js": "^2.4.1",
     "express": "^4.15.3",
