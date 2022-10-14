@@ -5,8 +5,8 @@
     "start": "node server.js"
   },
   "engines": {
-    "node": "6.11.0",
-    "npm": "3.10.10"
+    "node": "16.18.1",
+    "npm": "8.19.3"
   },
   "dependencies": {
     "@angular/animations": "^4.0.0",
