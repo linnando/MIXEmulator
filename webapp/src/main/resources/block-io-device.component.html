@@ -1,17 +1,14 @@
 <div class="card">
     <div class="card-header">
-        <div *ngIf="canUploadFile" class="form-inline">
-            <div class="form-group">
-                <label for="inputFile">Load device data from a file: </label>
-                <input type="file" id="inputFile" (change)="onFileChange($event.target.files)"
-                       placeholder="Upload file">
-            </div>
-            <button class="btn btn-sm btn-primary" [disabled]="fileIsNotChosen" (click)="loadFile()">Load</button>
-            <button class="btn btn-sm btn-primary" (click)="saveFile()">Save as file</button>
-        </div>
-        <div *ngIf="!canUploadFile">
-            In order to load device data from a file, please switch off the virtual machine.
-            <button class="btn btn-sm btn-primary" (click)="saveFile()">Save as file</button>
+        <div class="form-inline">
+            <span class="d-inline-block" tabindex="0" data-toggle="tooltip"
+                  [title]="canUploadFile ? 'Upload device data' : 'In order to upload a file, please switch off the virtual machine'">
+                <button class="btn btn-sm btn-primary" (click)="startFileUpload()" [disabled]="!canUploadFile"><i
+                        class="fas fa-upload"></i></button>
+            </span>
+            <input type="file" id="inputFile" (change)="uploadFile($event.target.files)">
+            <button class="btn btn-sm btn-primary" data-toggle="tooltip" title="Save device data"
+                    (click)="downloadFile()"><i class="fas fa-download"></i></button>
         </div>
     </div>
     <div class="card-body">

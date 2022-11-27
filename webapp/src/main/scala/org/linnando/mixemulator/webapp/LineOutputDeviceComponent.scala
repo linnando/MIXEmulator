@@ -35,7 +35,7 @@ class LineOutputDeviceComponent(virtualMachineService: VirtualMachineService) ex
     stateChangeSubscription.unsubscribe()
   }
 
-  def saveFile(): Unit = {
+  def downloadFile(): Unit = {
     val blobParts = lines.map(_ + "\n").asInstanceOf[js.Array[js.Any]]
     val options = js.Dynamic.literal("type" -> "text/plain").asInstanceOf[BlobPropertyBag]
     val blob = new Blob(blobParts, options)

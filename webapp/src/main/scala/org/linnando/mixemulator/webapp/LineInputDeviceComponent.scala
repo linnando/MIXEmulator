@@ -2,8 +2,9 @@ package org.linnando.mixemulator.webapp
 
 import angulate2.router.Router
 import angulate2.std._
+import org.scalajs.dom
 import org.scalajs.dom.raw.{Blob, BlobPropertyBag, FileReader, URL}
-import org.scalajs.dom.{File, FileList, UIEvent}
+import org.scalajs.dom.{FileList, UIEvent, html}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.scalajs.js
@@ -18,7 +19,6 @@ class LineInputDeviceComponent(router: Router, virtualMachineService: VirtualMac
   @Input() var deviceNum: Int = _
   @Input() var hasGoButton = false
   var lines: js.Array[String] = js.Array()
-  var inputFile: Option[File] = None
 
   override def ngOnInit(): Unit = {
     fetchDeviceData()
@@ -31,14 +31,13 @@ class LineInputDeviceComponent(router: Router, virtualMachineService: VirtualMac
 
   def canUploadFile: Boolean = !virtualMachineService.isActive
 
-  def onFileChange(files: FileList): Unit =
-    if (files.length > 0) inputFile = Some(files(0))
-    else inputFile = None
+  def startFileUpload(): Unit = {
+    dom.document.getElementById("inputFile").asInstanceOf[html.Input].click()
+  }
 
-  def fileIsNotChosen: Boolean = inputFile.isEmpty
-
-  def loadFile(): Unit = inputFile match {
-    case Some(file) =>
+  def uploadFile(files: FileList): Unit =
+    if (files.length > 0) {
+      val file = files(0)
       val reader = new FileReader()
       reader.onload = (event: UIEvent) => {
         val target = event.target.asInstanceOf[js.Dynamic]
@@ -49,11 +48,9 @@ class LineInputDeviceComponent(router: Router, virtualMachineService: VirtualMac
         }
       }
       reader.readAsText(file)
-    case None =>
-      throw new Error
-  }
+    }
 
-  def saveFile(): Unit = {
+  def downloadFile(): Unit = {
     val blobParts = lines.map(_ + "\n").asInstanceOf[js.Array[js.Any]]
     val options = js.Dynamic.literal("type" -> "text/plain").asInstanceOf[BlobPropertyBag]
     val blob = new Blob(blobParts, options)

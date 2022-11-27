@@ -1,3 +1,7 @@
 div.line {
     font-family: monospace;
 }
+
+#inputFile {
+    display: none;
+}

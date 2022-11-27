@@ -1,3 +1,7 @@
+#inputFile {
+    display: none;
+}
+
 .program-text {
     width: 100%;
     height: -moz-calc(100vh - 190px);

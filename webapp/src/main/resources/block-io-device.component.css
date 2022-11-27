@@ -6,6 +6,10 @@ div.device-data {
     font-family: monospace;
 }
 
+#inputFile {
+    display: none;
+}
+
 table {
     width: 220px;
     position: relative;
