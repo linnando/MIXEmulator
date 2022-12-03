@@ -39,7 +39,6 @@ object ErrorPopup {
     case _: WriteConflictException => "Cannot write to memory as a device input operation is not synchronised"
     case e: WrongAddressPartException => s"Invalid address part ${e.addressPart} in line ${e.line}"
     case e: WrongCharacterCodeException => s"Code ${e.code} does not correspond to a character"
-    case e: WrongComputedMemoryAddressException => s"Invalid memory address ${e.address} in line ${e.line}"
     case e: WrongFieldSpecException => s"Invalid field specification ${e.fieldSpec}"
     case e: WrongIndexSpecException => s"Invalid index specification ${e.indexSpec}"
     case e: WrongLabelException => s"Invalid label ${e.label}"

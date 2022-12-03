@@ -4,8 +4,6 @@ import org.linnando.mixemulator.vm.Comparison.Comparison
 import org.linnando.mixemulator.vm.io.Device
 import org.linnando.mixemulator.vm.io.data.IOWord
 
-import scala.collection.immutable.Queue
-
 trait DataModel {
   type RS <: AbstractRegisterState
   type MS <: AbstractMemoryState
