@@ -217,7 +217,7 @@ abstract class ProcessingModel extends DataModel with Processor {
 
     override def currentState: State = _currentState
 
-    override def breakpoints: Set[Short] = _breakpoints
+    override def breakpointAt(address: Short): Boolean = _breakpoints.contains(address)
 
     override def canMoveForward: Boolean = !_currentState.isHalted
 
@@ -249,7 +249,7 @@ abstract class ProcessingModel extends DataModel with Processor {
 
     override def currentState: State = _currentState
 
-    override def breakpoints: Set[Short] = _breakpoints
+    override def breakpointAt(address: Short): Boolean = _breakpoints.contains(address)
 
     override def canMoveForward: Boolean = stateIterator.hasNext || !_currentState.isHalted
 

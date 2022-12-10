@@ -132,7 +132,7 @@ HELLO      ALF  HELLO
 
   def addressAt(index: Int): Option[Short] = _symbols(index)._1
 
-  def breakpointAt(index: Int): Option[Boolean] = _machine.map(m => addressAt(index).exists(m.breakpoints))
+  def breakpointAt(index: Int): Option[Boolean] = _machine.map(m => addressAt(index).exists(m.breakpointAt))
 
   def cellContent(index: Int): Option[IOWord] = {
     val address = addressAt(index)

@@ -13,10 +13,12 @@ class VirtualMachineSpec(implicit ee: ExecutionEnv) extends Specification {
         .withFinalSection("", "3000")
         .build
       machine.toggleBreakpoint(3010)
+      machine.breakpointAt(3010) must beTrue
+      machine.breakpointAt(3020) must beFalse
+      machine.toggleBreakpoint(3010)
       machine.toggleBreakpoint(3020)
-      machine.breakpoints must be equalTo Set(3010, 3020)
-      machine.toggleBreakpoint(3010.toShort)
-      machine.breakpoints must be equalTo Set(3020)
+      machine.breakpointAt(3010) must beFalse
+      machine.breakpointAt(3020) must beTrue
     }
 
     "go one step forward" in {
@@ -103,10 +105,12 @@ class VirtualMachineSpec(implicit ee: ExecutionEnv) extends Specification {
         .withFinalSection("", "3000")
         .buildTracking
       machine.toggleBreakpoint(3010)
-      machine.toggleBreakpoint(3020)
-      machine.breakpoints must be equalTo Set(3010, 3020)
+      machine.breakpointAt(3010) must beTrue
+      machine.breakpointAt(3020) must beFalse
       machine.toggleBreakpoint(3010)
-      machine.breakpoints must be equalTo Set(3020)
+      machine.toggleBreakpoint(3020)
+      machine.breakpointAt(3010) must beFalse
+      machine.breakpointAt(3020) must beTrue
     }
 
     "go one step forward" in {

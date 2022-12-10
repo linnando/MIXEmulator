@@ -5,7 +5,7 @@ import scala.concurrent.Future
 trait VirtualMachine {
   def currentState: VirtualMachineState
 
-  def breakpoints: Set[Short]
+  def breakpointAt(address: Short): Boolean
 
   def canMoveForward: Boolean
 
