@@ -1,6 +1,5 @@
 package org.linnando.mixemulator.vm
 
-import org.linnando.mixemulator.vm.Comparison.Comparison
 import org.linnando.mixemulator.vm.io.Device
 import org.linnando.mixemulator.vm.io.data.IOWord
 
@@ -27,7 +26,7 @@ trait VirtualMachineState {
 
   def getOV: Boolean
 
-  def getCMP: Comparison
+  def getCMP: Comparison.Value
 
   def getProgramCounter: Short
 

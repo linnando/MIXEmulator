@@ -1,6 +1,5 @@
 package org.linnando.mixemulator.vm
 
-import org.linnando.mixemulator.vm.Comparison.Comparison
 import org.linnando.mixemulator.vm.io.Device
 import org.linnando.mixemulator.vm.io.data.IOWord
 
@@ -42,7 +41,7 @@ trait DataModel {
 
     override def getOV: Boolean = registers.getOV
 
-    override def getCMP: Comparison = registers.getCMP
+    override def getCMP: Comparison.Value = registers.getCMP
 
     override def getProgramCounter: Short = programCounter.toShort
 
@@ -78,7 +77,7 @@ trait DataModel {
 
     def getOV: Boolean
 
-    def getCMP: Comparison
+    def getCMP: Comparison.Value
 
     def updatedA(value: W): RS
 
@@ -94,7 +93,7 @@ trait DataModel {
 
     def updatedOV(value: Boolean): RS
 
-    def updatedCMP(value: Comparison): RS
+    def updatedCMP(value: Comparison.Value): RS
   }
 
   trait AbstractMemoryState {
@@ -134,7 +133,7 @@ trait DataModel {
 
     def -(subtrahend: I): I
 
-    def <=>(other: W): Comparison
+    def <=>(other: W): Comparison.Value
 
     def next: I
 
@@ -176,7 +175,7 @@ trait DataModel {
 
     def :*(other: W): W
 
-    def <=>(other: W): Comparison
+    def <=>(other: W): Comparison.Value
 
     def <<(n: I): W
 

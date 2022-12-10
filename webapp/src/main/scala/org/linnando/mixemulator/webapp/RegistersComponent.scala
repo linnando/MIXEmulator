@@ -1,7 +1,6 @@
 package org.linnando.mixemulator.webapp
 
 import angulate2.std._
-import org.linnando.mixemulator.vm.Comparison
 import org.linnando.mixemulator.vm.io.data.IOWord
 
 @Component(
@@ -32,11 +31,7 @@ class RegistersComponent(virtualMachineService: VirtualMachineService) {
 
   def overflow: Boolean = machineState.exists(_.getOV)
 
-  def comparison: Int = machineState.map(_.getCMP match {
-    case Comparison.LESS => -1
-    case Comparison.EQUAL => 0
-    case Comparison.GREATER => 1
-  }).getOrElse(0)
+  def comparison: Int = machineState.map(_.getCMP.signum).getOrElse(0)
 
   def timeElapsed: Int = machineState.map(_.getTimeCounter).getOrElse(0)
 

@@ -1,6 +1,5 @@
 package org.linnando.mixemulator.vm
 
-import org.linnando.mixemulator.vm.Comparison.Comparison
 import org.linnando.mixemulator.vm.exceptions._
 import org.linnando.mixemulator.vm.io.Device
 import org.linnando.mixemulator.vm.io.data.IOWord
@@ -132,7 +131,7 @@ object decimal extends ProcessingModel {
     MixWord(value)
   }
 
-  case class RegisterState(a: Long, x: Long, i: Vector[Short], j: Short, ov: Boolean, cmp: Comparison)
+  case class RegisterState(a: Long, x: Long, i: Vector[Short], j: Short, ov: Boolean, cmp: Comparison.Value)
     extends AbstractRegisterState {
     override def getA: W = MixWord(a)
 
@@ -151,7 +150,7 @@ object decimal extends ProcessingModel {
 
     override def getOV: Boolean = ov
 
-    override def getCMP: Comparison = cmp
+    override def getCMP: Comparison.Value = cmp
 
     override def updatedA(value: W): RS = copy(a = value.contents)
 
@@ -173,7 +172,7 @@ object decimal extends ProcessingModel {
 
     override def updatedOV(value: Boolean): RS = copy(ov = value)
 
-    override def updatedCMP(value: Comparison): RS = copy(cmp = value)
+    override def updatedCMP(value: Comparison.Value): RS = copy(cmp = value)
   }
 
   object RegisterState {
@@ -307,7 +306,7 @@ object decimal extends ProcessingModel {
         MixIndex((contents & 0x4000 | abs).toShort)
       }
 
-    override def <=>(other: W): Comparison = {
+    override def <=>(other: W): Comparison.Value = {
       if (((contents & 0x4000).toLong << 20) == (other.contents & 0x400000000L))
         if ((contents & 0x3fff) == (other.contents & 0x3ffffffffL)) Comparison.EQUAL
         else if (isPositive && (contents & 0x3fff) > (other.contents & 0x3ffffffffL)) Comparison.GREATER
@@ -459,7 +458,7 @@ object decimal extends ProcessingModel {
       (shiftedLeft + other)._2
     }
 
-    override def <=>(other: W): Comparison =
+    override def <=>(other: W): Comparison.Value =
       if ((contents & 0x400000000L) == (other.contents & 0x400000000L))
         if ((contents & 0x3ffffffffL) == (other.contents & 0x3ffffffffL)) Comparison.EQUAL
         else if (isPositive && (contents & 0x3ffffffffL) > (other.contents & 0x3ffffffffL)) Comparison.GREATER
