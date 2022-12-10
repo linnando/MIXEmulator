@@ -23,6 +23,7 @@ lazy val asmJVM = asm.jvm
 lazy val asmJS = asm.js
 
 lazy val vm = crossProject
+  .enablePlugins(ScalaJSPlugin)
   .settings(
     name := "vm",
     organization := "org.linnando",

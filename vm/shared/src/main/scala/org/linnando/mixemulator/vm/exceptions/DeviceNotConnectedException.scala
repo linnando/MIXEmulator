@@ -1,4 +1,9 @@
 package org.linnando.mixemulator.vm.exceptions
 
-class DeviceNotConnectedException(val deviceNum: Int) extends Exception {
+import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
+
+@JSExportTopLevel("DeviceNotConnectedException")
+class DeviceNotConnectedException(@JSExport val deviceNum: Int) extends Exception {
+  @JSExport
+  def tag: String = getClass.getSimpleName
 }

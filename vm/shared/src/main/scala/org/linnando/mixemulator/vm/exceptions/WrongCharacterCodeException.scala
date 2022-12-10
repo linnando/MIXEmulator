@@ -1,4 +1,9 @@
 package org.linnando.mixemulator.vm.exceptions
 
-class WrongCharacterCodeException(val code: Byte) extends Exception {
+import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
+
+@JSExportTopLevel("WrongCharacterCodeException")
+class WrongCharacterCodeException(@JSExport val code: Byte) extends Exception {
+  @JSExport
+  def tag: String = getClass.getSimpleName
 }

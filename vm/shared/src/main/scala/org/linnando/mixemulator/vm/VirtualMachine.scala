@@ -1,6 +1,7 @@
 package org.linnando.mixemulator.vm
 
 import scala.concurrent.Future
+import scala.scalajs.js.annotation.JSExportTopLevel
 
 trait VirtualMachine {
   def currentState: VirtualMachineState
@@ -19,6 +20,7 @@ trait VirtualMachine {
 }
 
 object VirtualMachine {
+  @JSExportTopLevel("MEMORY_SIZE")
   val MEMORY_SIZE: Short = 4000
 
   val CHARACTERS: Array[Char] = Array(

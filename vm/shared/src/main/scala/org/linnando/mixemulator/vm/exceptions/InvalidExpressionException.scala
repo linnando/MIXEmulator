@@ -1,4 +1,9 @@
 package org.linnando.mixemulator.vm.exceptions
 
-class InvalidExpressionException(val expression: String) extends Exception {
+import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
+
+@JSExportTopLevel("InvalidExpressionException")
+class InvalidExpressionException(@JSExport val expression: String) extends Exception {
+  @JSExport
+  def tag: String = getClass.getSimpleName
 }

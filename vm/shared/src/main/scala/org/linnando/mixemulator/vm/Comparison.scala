@@ -1,7 +1,10 @@
 package org.linnando.mixemulator.vm
 
+import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
+
 object Comparison extends Enumeration {
-  protected case class ComparisonVal(signum: Int) extends super.Val {}
+  @JSExportTopLevel("Comparison")
+  protected case class ComparisonVal(@JSExport signum: Int) extends super.Val {}
   import scala.language.implicitConversions
   implicit def valueToComparisonVal(x: Value): ComparisonVal = x.asInstanceOf[ComparisonVal]
 

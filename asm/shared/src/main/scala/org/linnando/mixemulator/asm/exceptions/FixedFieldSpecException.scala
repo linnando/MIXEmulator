@@ -1,4 +1,9 @@
 package org.linnando.mixemulator.asm.exceptions
 
-class FixedFieldSpecException(val operator: String, val line: Int) extends Exception {
+import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
+
+@JSExportTopLevel("FixedFieldSpecException")
+class FixedFieldSpecException(@JSExport val operator: String, @JSExport val line: Int) extends Exception {
+  @JSExport
+  def tag: String = getClass.getSimpleName
 }

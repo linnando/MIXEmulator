@@ -1,4 +1,9 @@
 package org.linnando.mixemulator.vm.exceptions
 
-class UndefinedSymbolException(val symbol: String) extends Exception {
+import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
+
+@JSExportTopLevel("UndefinedSymbolException")
+class UndefinedSymbolException(@JSExport val symbol: String) extends Exception {
+  @JSExport
+  def tag: String = getClass.getSimpleName
 }

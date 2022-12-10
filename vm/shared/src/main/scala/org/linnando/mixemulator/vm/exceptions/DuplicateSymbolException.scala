@@ -1,4 +1,9 @@
 package org.linnando.mixemulator.vm.exceptions
 
-class DuplicateSymbolException(val symbol: String) extends Exception {
+import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
+
+@JSExportTopLevel("DuplicateSymbolException")
+class DuplicateSymbolException(@JSExport val symbol: String) extends Exception {
+  @JSExport
+  def tag: String = getClass.getSimpleName
 }

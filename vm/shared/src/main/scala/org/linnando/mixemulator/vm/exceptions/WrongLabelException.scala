@@ -1,4 +1,9 @@
 package org.linnando.mixemulator.vm.exceptions
 
-class WrongLabelException(val label: String) extends Exception {
+import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
+
+@JSExportTopLevel("WrongLabelException")
+class WrongLabelException(@JSExport val label: String) extends Exception {
+  @JSExport
+  def tag: String = getClass.getSimpleName
 }

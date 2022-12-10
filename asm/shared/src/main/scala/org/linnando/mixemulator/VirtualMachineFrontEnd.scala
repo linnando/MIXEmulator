@@ -8,7 +8,11 @@ import org.linnando.mixemulator.vm.{TrackingVirtualMachine, VirtualMachine, Virt
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.scalajs.js
+import scala.scalajs.js.JSConverters._
+import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 
+@JSExportTopLevel("VirtualMachineFrontEnd")
 class VirtualMachineFrontEnd(machine: VirtualMachine,
                              lines: IndexedSeq[String],
                              symbols: IndexedSeq[(Option[Short], Option[Int])],
@@ -22,42 +26,71 @@ class VirtualMachineFrontEnd(machine: VirtualMachine,
 
   def currentState: VirtualMachineState = machine.currentState
 
+  @JSExport("currentState")
+  def currentStateJs: VirtualMachineStateJs = new VirtualMachineStateJs(currentState)
+
+  @JSExport
   def canMoveForward: Boolean = machine.canMoveForward
 
   def stepForward(): Future[Unit] = machine.stepForward()
 
+  @JSExport("stepForward")
+  def stepForwardJs(): js.Promise[Unit] = stepForward().toJSPromise
+
   def runForward(): Future[Unit] = machine.runForward()
 
+  @JSExport("runForward")
+  def runForwardJs(): js.Promise[Unit] = runForward().toJSPromise
+
+  @JSExport
   def canMoveBack: Boolean = machine match {
     case m: TrackingVirtualMachine => m.canMoveBack
     case _ => false
   }
 
+  @JSExport
   def stepBack(): Unit = machine match {
     case m: TrackingVirtualMachine => m.stepBack()
     case _ => throw new Error
   }
 
+  @JSExport
   def runBack(): Unit = machine match {
     case m: TrackingVirtualMachine => m.runBack()
     case _ => throw new Error
   }
 
+  @JSExport
   def symbolsLength: Int = symbols.length
 
   def symbolIndices: Range = symbols.indices
 
+  @JSExport("symbolIndices")
+  def symbolIndicesJs: js.Array[Int] = symbolIndices.toJSArray
+
+  @JSExport
   def programCounterIndex: Int = addressSymbols(currentState.getProgramCounter)
 
+  @JSExport
   def toggleBreakpointAt(index: Int): Unit = addressAt(index).foreach(machine.toggleBreakpoint)
 
   def addressAt(index: Int): Option[Short] = symbols(index)._1
 
+  @JSExport("addressAt")
+  def addressAtJs(index: Int): js.UndefOr[Short] = addressAt(index).orUndefined
+
+  @JSExport
   def breakpointAt(index: Int): Boolean = addressAt(index).exists(machine.breakpointAt)
 
   def cellContent(index: Int): Option[IOWord] = addressAt(index).map(currentState.get)
 
+  @JSExport("cellContent")
+  def cellContentJs(index: Int): js.UndefOr[IOWord] = cellContent(index).orUndefined
+
   def lineNumberAt(index: Int): Option[Int] = symbols(index)._2
+
+  @JSExport("lineNumberAt")
+  def lineNumberAtJs(index: Int): js.UndefOr[Int] = lineNumberAt(index).orUndefined
 
   def lineAt(index: Int): Option[String] = {
     val (address, lineNumber) = symbols(index)
@@ -69,6 +102,10 @@ class VirtualMachineFrontEnd(machine: VirtualMachine,
     )
   }
 
+  @JSExport("lineAt")
+  def lineAtJs(index: Int): js.UndefOr[String] = lineAt(index).orUndefined
+
+  @JSExport
   def lineIsModifiedAt(index: Int): Boolean = addressAt(index).exists(machine.isModified)
 
   def blockDeviceData(deviceNum: Int): Future[IndexedSeq[IOWord]] = device(deviceNum) match {
@@ -76,6 +113,7 @@ class VirtualMachineFrontEnd(machine: VirtualMachine,
     case _ => throw new Error
   }
 
+  @JSExport("blockDeviceData")
   def blockDeviceDataJs(deviceNum: Int): js.Promise[js.Array[IOWord]] =
     blockDeviceData(deviceNum).map(_.toJSArray).toJSPromise
 
@@ -85,8 +123,13 @@ class VirtualMachineFrontEnd(machine: VirtualMachine,
     case d: LineDevice => d.data
     case _ => throw new Error
   }
+
+  @JSExport("lineDeviceData")
+  def lineDeviceDataJs(deviceNum: Int): js.Promise[js.Array[String]] =
+    lineDeviceData(deviceNum).map(_.toJSArray).toJSPromise
 }
 
+@JSExportTopLevel("VirtualMachineFrontEnd$")
 object VirtualMachineFrontEnd {
   def createBinaryTracking(lines: Seq[String]): VirtualMachineFrontEnd = {
     val builder = binary.createVirtualMachineBuilder()
@@ -95,12 +138,19 @@ object VirtualMachineFrontEnd {
     new VirtualMachineFrontEnd(assembly._1, lines.toVector, assembly._2.toVector, new MixDisassembler(binary))
   }
 
+  @JSExport("createBinaryTracking")
+  def createBinaryTrackingJs(lines: js.Array[String]): VirtualMachineFrontEnd = createBinaryTracking(lines.toSeq)
+
   def createBinaryNonTracking(lines: Seq[String]): VirtualMachineFrontEnd = {
     val builder = binary.createVirtualMachineBuilder()
       .withDevices(createDevices())
     val assembly = MixAssembler.translateNonTracking(builder, lines)
     new VirtualMachineFrontEnd(assembly._1, lines.toVector, assembly._2.toVector, new MixDisassembler(binary))
   }
+
+  @JSExport("createBinaryNonTracking")
+  def createBinaryNonTrackingJs(lines: js.Array[String]): VirtualMachineFrontEnd =
+    createBinaryNonTracking(lines.toSeq)
 
   def createDecimalTracking(lines: Seq[String]): VirtualMachineFrontEnd = {
     val builder = decimal.createVirtualMachineBuilder()
@@ -109,12 +159,19 @@ object VirtualMachineFrontEnd {
     new VirtualMachineFrontEnd(assembly._1, lines.toVector, assembly._2.toVector, new MixDisassembler(decimal))
   }
 
+  @JSExport("createDecimalTracking")
+  def createDecimalTrackingJs(lines: js.Array[String]): VirtualMachineFrontEnd = createDecimalTracking(lines.toSeq)
+
   def createDecimalNonTracking(lines: Seq[String]): VirtualMachineFrontEnd = {
     val builder = decimal.createVirtualMachineBuilder()
       .withDevices(createDevices())
     val assembly = MixAssembler.translateNonTracking(builder, lines)
     new VirtualMachineFrontEnd(assembly._1, lines.toVector, assembly._2.toVector, new MixDisassembler(decimal))
   }
+
+  @JSExport("createDecimalNonTracking")
+  def createDecimalNonTrackingJs(lines: js.Array[String]): VirtualMachineFrontEnd =
+    createDecimalNonTracking(lines.toSeq)
 
   def goBinaryTracking(): Future[VirtualMachineFrontEnd] = {
     val devices = createDevices()
@@ -128,6 +185,9 @@ object VirtualMachineFrontEnd {
     }
   }
 
+  @JSExport("goBinaryTracking")
+  def goBinaryTrackingJs(): js.Promise[VirtualMachineFrontEnd] = goBinaryTracking().toJSPromise
+
   def goBinaryNonTracking(): Future[VirtualMachineFrontEnd] = {
     val devices = createDevices()
     binary.goNonTracking(devices, goDevice) map { machine =>
@@ -139,6 +199,9 @@ object VirtualMachineFrontEnd {
       )
     }
   }
+
+  @JSExport("goBinaryNonTracking")
+  def goBinaryNonTrackingJs(): js.Promise[VirtualMachineFrontEnd] = goBinaryNonTracking().toJSPromise
 
   def goDecimalTracking(): Future[VirtualMachineFrontEnd] = {
     val devices = createDevices()
@@ -152,6 +215,9 @@ object VirtualMachineFrontEnd {
     }
   }
 
+  @JSExport("goDecimalTracking")
+  def goDecimalTrackingJs(): js.Promise[VirtualMachineFrontEnd] = goDecimalTracking().toJSPromise
+
   def goDecimalNonTracking(): Future[VirtualMachineFrontEnd] = {
     val devices = createDevices()
     decimal.goNonTracking(devices, goDevice) map { machine =>
@@ -163,6 +229,9 @@ object VirtualMachineFrontEnd {
       )
     }
   }
+
+  @JSExport("goDecimalNonTracking")
+  def goDecimalNonTrackingJs(): js.Promise[VirtualMachineFrontEnd] = goDecimalNonTracking().toJSPromise
 
   private val goDevice = 16
 
@@ -194,6 +263,10 @@ object VirtualMachineFrontEnd {
     case _ => throw new Error
   }
 
+  @JSExport("getBlockDeviceData")
+  def getBlockDeviceDataJs(deviceNum: Int): js.Promise[js.Array[IOWord]] =
+    getBlockDeviceData(deviceNum).map(_.toJSArray).toJSPromise
+
   def saveBlockDevice(deviceNum: Int, data: Array[Byte]): Future[Unit] = {
     val device = deviceNum match {
       case i if i >= 0 && i < 8 => FileTapeUnit.create(s"device$i", data)
@@ -203,6 +276,10 @@ object VirtualMachineFrontEnd {
     device.task.map(_ => ())
   }
 
+  @JSExport("saveBlockDevice")
+  def saveBlockDeviceJs(deviceNum: Int, data: js.Array[Byte]): js.Promise[Unit] =
+    saveBlockDevice(deviceNum, data.toArray).toJSPromise
+
   def getLineDeviceData(deviceNum: Int): Future[IndexedSeq[String]] = deviceNum match {
     case 16 => FileLineInputDevice.getCurrentData("device16")
     case 17 => FileLineOutputDevice.getCurrentData("device17")
@@ -210,6 +287,10 @@ object VirtualMachineFrontEnd {
     case 20 => FileLineInputDevice.getCurrentData("device20")
     case _ => throw new Error
   }
+
+  @JSExport("getLineDeviceData")
+  def getLineDeviceDataJs(deviceNum: Int): js.Promise[js.Array[String]] =
+    getLineDeviceData(deviceNum).map(_.toJSArray).toJSPromise
 
   def saveLineDevice(deviceNum: Int, data: String): Future[Unit] = {
     val device = deviceNum match {
@@ -219,4 +300,8 @@ object VirtualMachineFrontEnd {
     }
     device.task.map(_ => ())
   }
+
+  @JSExport("saveLineDevice")
+  def saveLineDeviceJs(deviceNum: Int, data: String): js.Promise[Unit] =
+    saveLineDevice(deviceNum, data).toJSPromise
 }

@@ -1,4 +1,9 @@
 package org.linnando.mixemulator.asm.exceptions
 
-class WrongOperatorException(val operator: String, val line: Int) extends Exception {
+import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
+
+@JSExportTopLevel("WrongOperatorException")
+class WrongOperatorException(@JSExport val operator: String, @JSExport val line: Int) extends Exception {
+  @JSExport
+  def tag: String = getClass.getSimpleName
 }
