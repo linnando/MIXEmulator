@@ -10,6 +10,8 @@ import org.specs2.matcher.ContentMatchers
 import org.specs2.mutable.Specification
 
 class FilePaperTapeSpec(implicit ee: ExecutionEnv) extends Specification with ContentMatchers {
+  private val lowLevelOps: LineAccessFileInputOps = LineAccessFileInputOps.create()
+
   val line0 = "0123456789012345678901234567890123456789012345678901234567890123456789"
   val words0 = IndexedSeq(
     IOWord(Seq('0', '1', '2', '3', '4')),
@@ -49,7 +51,7 @@ class FilePaperTapeSpec(implicit ee: ExecutionEnv) extends Specification with Co
   "file emulator of a paper tape" should {
     "create a device with correct parameters" in {
       val filename = "papertape0"
-      val device = FilePaperTape.create(filename, "")
+      val device = FilePaperTape.create(filename, "", lowLevelOps)
       device.blockSize must be equalTo PaperTape.BLOCK_SIZE
       device.filename must be equalTo filename
       device.isBusy must beFalse
@@ -60,7 +62,7 @@ class FilePaperTapeSpec(implicit ee: ExecutionEnv) extends Specification with Co
     "input data from a file" in {
       val filename = "papertape1"
       val file = new File(filename)
-      val device = FilePaperTape.create(filename, s"$line0\n$line1\n")
+      val device = FilePaperTape.create(filename, s"$line0\n$line1\n", lowLevelOps)
       val busyState = device.read()
       busyState.isBusy must beTrue
       busyState.pos must be equalTo 1L
@@ -75,7 +77,7 @@ class FilePaperTapeSpec(implicit ee: ExecutionEnv) extends Specification with Co
     "input multiple lines from a file" in {
       val filename = "papertape2"
       val file = new File(filename)
-      val device = FilePaperTape.create(filename, s"$line0\n$line1\n")
+      val device = FilePaperTape.create(filename, s"$line0\n$line1\n", lowLevelOps)
       val busyState = device.read().flush().map(_._1.read())
       busyState.map(_.isBusy) must beTrue.await
       busyState.map(_.pos) must beEqualTo(2L).await
@@ -90,7 +92,7 @@ class FilePaperTapeSpec(implicit ee: ExecutionEnv) extends Specification with Co
     "throw an exception when the file end is reached" in {
       val filename = "papertape3"
       val file = new File(filename)
-      val device = FilePaperTape.create(filename, "")
+      val device = FilePaperTape.create(filename, "", lowLevelOps)
       val busyState = device.read()
       busyState.isBusy must beTrue
       busyState.pos must be equalTo 1L
@@ -101,7 +103,7 @@ class FilePaperTapeSpec(implicit ee: ExecutionEnv) extends Specification with Co
     "reset the reading position" in {
       val filename = "papertape4"
       val file = new File(filename)
-      val device = FilePaperTape.create(filename, s"$line0\n")
+      val device = FilePaperTape.create(filename, s"$line0\n", lowLevelOps)
       val busyState = device.read().flush().map(_._1 match {
         case d: FilePaperTape => d.reset().read()
       })

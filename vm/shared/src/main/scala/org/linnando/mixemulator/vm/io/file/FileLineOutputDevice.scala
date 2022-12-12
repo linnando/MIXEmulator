@@ -23,7 +23,9 @@ trait FileLineOutputDevice extends LineDevice with PositionalOutputDevice {
   }
 
   protected def appendLine(chars: Array[Char]): Future[Unit] =
-    LineAccessFile.appendLine(filename, version, chars)
+    lowLevelOps.appendLine(filename, version, chars)
+
+  def lowLevelOps: LineAccessFileOutputOps
 
   def newVersion(tasks: Future[Unit]): FileLineOutputDevice
 
@@ -34,17 +36,12 @@ trait FileLineOutputDevice extends LineDevice with PositionalOutputDevice {
 
   override def data: Future[IndexedSeq[String]] = for {
     _ <- tasks
-    contents: String <- LineAccessFile.getData(filename, version)
+    contents: String <- lowLevelOps.getData(filename, version)
   } yield contents.split("\n")
 }
 
 object FileLineOutputDevice {
-  def initialise(filename: String): Future[Unit] =
-    LineAccessFile.initialiseVersioned(filename)
-
-  def getCurrentData(filename: String): Future[IndexedSeq[String]] = for {
-    versions: Iterable[String] <- LineAccessFile.getVersions(filename)
-    versionNumbers = versions.map(_.toInt)
-    contents: String <- LineAccessFile.getData(filename, versionNumbers.max)
-  } yield contents.split("\n")
+  def getCurrentData(filename: String, lowLevelOps: LineAccessFileOutputOps): Future[IndexedSeq[String]] = {
+    lowLevelOps.getCurrentData(filename).map(_.split("\n"))
+  }
 }

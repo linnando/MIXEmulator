@@ -9,6 +9,8 @@ import org.specs2.matcher.{ContentMatchers, FileMatchers}
 import org.specs2.mutable.Specification
 
 class FileCardPunchSpec(implicit ee: ExecutionEnv) extends Specification with FileMatchers with ContentMatchers {
+  private val lowLevelOps: LineAccessFileOutputOps = LineAccessFileOutputOps.create()
+
   val line0 = "01234567890123456789012345678901234567890123456789012345678901234567890123456789"
   val words0 = IndexedSeq(
     IOWord(Seq('0', '1', '2', '3', '4')),
@@ -52,7 +54,7 @@ class FileCardPunchSpec(implicit ee: ExecutionEnv) extends Specification with Fi
   "file emulator of a card punch" should {
     "create a device with correct parameters" in {
       val filename = "cardpunch0"
-      val device = FileCardPunch.create(filename)
+      val device = FileCardPunch.create(filename, lowLevelOps)
       device.blockSize must be equalTo CardPunch.BLOCK_SIZE
       device.filename must be equalTo filename
       device.version must be equalTo 0
@@ -63,7 +65,7 @@ class FileCardPunchSpec(implicit ee: ExecutionEnv) extends Specification with Fi
 
     "output data to a file" in {
       val filename = "cardpunch1"
-      val device = FileCardPunch.create(filename)
+      val device = FileCardPunch.create(filename, lowLevelOps)
       val busyState = device.write(words0).write(words1)
       busyState.version must be equalTo 2
       busyState.isBusy must beTrue

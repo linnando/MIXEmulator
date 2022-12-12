@@ -10,7 +10,8 @@ case class FileTapeUnit(filename: String,
                         version: Int,
                         task: Future[Option[IndexedSeq[IOWord]]],
                         isBusy: Boolean,
-                        pos: Long)
+                        pos: Long,
+                        lowLevelOps: BlockAccessFileOps)
   extends TapeUnit with FileSequentialBlockIODevice {
 
   override def blockSize: Int = TapeUnit.BLOCK_SIZE
@@ -30,9 +31,9 @@ case class FileTapeUnit(filename: String,
 }
 
 object FileTapeUnit {
-  def create(filename: String): FileTapeUnit =
-    FileTapeUnit(filename, 0, FileBlockIODevice.initialise(filename).map(_ => None), isBusy = false, 0L)
+  def create(filename: String, lowLevelOps: BlockAccessFileOps): FileTapeUnit =
+    FileTapeUnit(filename, 0, lowLevelOps.initialiseWithCurrentVersion(filename).map(_ => None), isBusy = false, 0L, lowLevelOps)
 
-  def create(filename: String, data: Array[Byte]): FileTapeUnit =
-    FileTapeUnit(filename, 0, FileBlockIODevice.save(filename, data).map(_ => None), isBusy = false, 0L)
+  def create(filename: String, data: Array[Byte], lowLevelOps: BlockAccessFileOps): FileTapeUnit =
+    FileTapeUnit(filename, 0, lowLevelOps.save(filename, data).map(_ => None), isBusy = false, 0L, lowLevelOps)
 }

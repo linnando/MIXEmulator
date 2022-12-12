@@ -1,7 +1,7 @@
 package org.linnando.mixemulator.webapp
 
 import angulate2.std._
-import org.linnando.mixemulator.VirtualMachineFrontEnd
+import org.linnando.mixemulator.{DevicesFrontEnd, VirtualMachineFrontEnd}
 import org.linnando.mixemulator.vm.VirtualMachineState
 import org.linnando.mixemulator.vm.io.data.IOWord
 import rxjs.Subject
@@ -26,17 +26,21 @@ HELLO      ALF  HELLO
   val stateChange: Subject[Unit] = new Subject()
 
   private var maybeMachine: Option[VirtualMachineFrontEnd] = None
+  private val devicesFrontEnd = new DevicesFrontEnd(
+    new BlockAccessFileOpsImpl,
+    new LineAccessFileInputOpsImpl,
+    new LineAccessFileOutputOpsImpl)
 
   def assemble(): Future[Unit] = Future {
     val lines = text.split("\n").toVector
     maybeMachine = Some(
       mode match {
         case "binary" =>
-          if (tracking) VirtualMachineFrontEnd.createBinaryTracking(lines)
-          else VirtualMachineFrontEnd.createBinaryNonTracking(lines)
+          if (tracking) VirtualMachineFrontEnd.createBinaryTracking(lines, devicesFrontEnd)
+          else VirtualMachineFrontEnd.createBinaryNonTracking(lines, devicesFrontEnd)
         case "decimal" =>
-          if (tracking) VirtualMachineFrontEnd.createDecimalTracking(lines)
-          else VirtualMachineFrontEnd.createDecimalNonTracking(lines)
+          if (tracking) VirtualMachineFrontEnd.createDecimalTracking(lines, devicesFrontEnd)
+          else VirtualMachineFrontEnd.createDecimalNonTracking(lines, devicesFrontEnd)
       }
     )
   }
@@ -45,11 +49,11 @@ HELLO      ALF  HELLO
     val eventualMachine: Future[VirtualMachineFrontEnd] = {
       mode match {
         case "binary" =>
-          if (tracking) VirtualMachineFrontEnd.goBinaryTracking()
-          else VirtualMachineFrontEnd.goBinaryNonTracking()
+          if (tracking) VirtualMachineFrontEnd.goBinaryTracking(devicesFrontEnd)
+          else VirtualMachineFrontEnd.goBinaryNonTracking(devicesFrontEnd)
         case "decimal" =>
-          if (tracking) VirtualMachineFrontEnd.goDecimalTracking()
-          else VirtualMachineFrontEnd.goDecimalNonTracking()
+          if (tracking) VirtualMachineFrontEnd.goDecimalTracking(devicesFrontEnd)
+          else VirtualMachineFrontEnd.goDecimalNonTracking(devicesFrontEnd)
       }
     }
     eventualMachine map { machine =>
@@ -108,10 +112,16 @@ HELLO      ALF  HELLO
   def deviceName(deviceNum: Int): String = VirtualMachineService.deviceNames(deviceNum)
 
   def blockDeviceData(deviceNum: Int): Future[IndexedSeq[IOWord]] =
-    maybeMachine.map(_.blockDeviceData(deviceNum)).getOrElse(VirtualMachineFrontEnd.getBlockDeviceData(deviceNum))
+    maybeMachine.map(_.blockDeviceData(deviceNum)).getOrElse(devicesFrontEnd.getBlockDeviceData(deviceNum))
+
+  def saveBlockDevice(deviceNum: Int, data: Array[Byte]): Future[Unit] =
+    devicesFrontEnd.saveBlockDevice(deviceNum, data)
 
   def lineDeviceData(deviceNum: Int): Future[IndexedSeq[String]] =
-    maybeMachine.map(_.lineDeviceData(deviceNum)).getOrElse(VirtualMachineFrontEnd.getLineDeviceData(deviceNum))
+    maybeMachine.map(_.lineDeviceData(deviceNum)).getOrElse(devicesFrontEnd.getLineDeviceData(deviceNum))
+
+  def saveLineDevice(deviceNum: Int, data: String): Future[Unit] =
+    devicesFrontEnd.saveLineDevice(deviceNum, data)
 }
 
 object VirtualMachineService {
@@ -137,10 +147,4 @@ object VirtualMachineService {
     18 -> "Line Printer",
     20 -> "Paper Tape"
   )
-
-  def saveBlockDevice(deviceNum: Int, data: Array[Byte]): Future[Unit] =
-    VirtualMachineFrontEnd.saveBlockDevice(deviceNum, data)
-
-  def saveLineDevice(deviceNum: Int, data: String): Future[Unit] =
-    VirtualMachineFrontEnd.saveLineDevice(deviceNum, data)
 }

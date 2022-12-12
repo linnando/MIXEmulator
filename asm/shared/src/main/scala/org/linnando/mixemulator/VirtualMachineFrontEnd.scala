@@ -1,10 +1,9 @@
 package org.linnando.mixemulator
 
 import org.linnando.mixemulator.asm.{MixAssembler, MixDisassembler}
-import org.linnando.mixemulator.vm.io.{BlockDevice, Device, LineDevice}
 import org.linnando.mixemulator.vm.io.data.IOWord
-import org.linnando.mixemulator.vm.io.file.{FileBlockIODevice, FileCardPunch, FileCardReader, FileDiskUnit, FileLineInputDevice, FileLineOutputDevice, FileLinePrinter, FilePaperTape, FileTapeUnit}
-import org.linnando.mixemulator.vm.{TrackingVirtualMachine, VirtualMachine, VirtualMachineState, VirtualMachineStateJs, binary, decimal}
+import org.linnando.mixemulator.vm.io.{BlockDevice, Device, LineDevice}
+import org.linnando.mixemulator.vm._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -131,51 +130,50 @@ class VirtualMachineFrontEnd(machine: VirtualMachine,
 
 @JSExportTopLevel("VirtualMachineFrontEnd$")
 object VirtualMachineFrontEnd {
-  def createBinaryTracking(lines: Seq[String]): VirtualMachineFrontEnd = {
-    val builder = binary.createVirtualMachineBuilder()
-      .withDevices(createDevices())
+  private val goDevice = 16
+
+  def createBinaryTracking(lines: Seq[String], devicesFrontEnd: DevicesFrontEnd): VirtualMachineFrontEnd = {
+    val builder = binary.createVirtualMachineBuilder().withDevices(devicesFrontEnd.createDevices())
     val assembly = MixAssembler.translateTracking(builder, lines)
     new VirtualMachineFrontEnd(assembly._1, lines.toVector, assembly._2.toVector, new MixDisassembler(binary))
   }
 
   @JSExport("createBinaryTracking")
-  def createBinaryTrackingJs(lines: js.Array[String]): VirtualMachineFrontEnd = createBinaryTracking(lines.toSeq)
+  def createBinaryTrackingJs(lines: js.Array[String], devicesFrontEnd: DevicesFrontEnd): VirtualMachineFrontEnd =
+    createBinaryTracking(lines.toSeq, devicesFrontEnd)
 
-  def createBinaryNonTracking(lines: Seq[String]): VirtualMachineFrontEnd = {
-    val builder = binary.createVirtualMachineBuilder()
-      .withDevices(createDevices())
+  def createBinaryNonTracking(lines: Seq[String], devicesFrontEnd: DevicesFrontEnd): VirtualMachineFrontEnd = {
+    val builder = binary.createVirtualMachineBuilder().withDevices(devicesFrontEnd.createDevices())
     val assembly = MixAssembler.translateNonTracking(builder, lines)
     new VirtualMachineFrontEnd(assembly._1, lines.toVector, assembly._2.toVector, new MixDisassembler(binary))
   }
 
   @JSExport("createBinaryNonTracking")
-  def createBinaryNonTrackingJs(lines: js.Array[String]): VirtualMachineFrontEnd =
-    createBinaryNonTracking(lines.toSeq)
+  def createBinaryNonTrackingJs(lines: js.Array[String], devicesFrontEnd: DevicesFrontEnd): VirtualMachineFrontEnd =
+    createBinaryNonTracking(lines.toSeq, devicesFrontEnd)
 
-  def createDecimalTracking(lines: Seq[String]): VirtualMachineFrontEnd = {
-    val builder = decimal.createVirtualMachineBuilder()
-      .withDevices(createDevices())
+  def createDecimalTracking(lines: Seq[String], devicesFrontEnd: DevicesFrontEnd): VirtualMachineFrontEnd = {
+    val builder = decimal.createVirtualMachineBuilder().withDevices(devicesFrontEnd.createDevices())
     val assembly = MixAssembler.translateTracking(builder, lines)
     new VirtualMachineFrontEnd(assembly._1, lines.toVector, assembly._2.toVector, new MixDisassembler(decimal))
   }
 
   @JSExport("createDecimalTracking")
-  def createDecimalTrackingJs(lines: js.Array[String]): VirtualMachineFrontEnd = createDecimalTracking(lines.toSeq)
+  def createDecimalTrackingJs(lines: js.Array[String], devicesFrontEnd: DevicesFrontEnd): VirtualMachineFrontEnd =
+    createDecimalTracking(lines.toSeq, devicesFrontEnd)
 
-  def createDecimalNonTracking(lines: Seq[String]): VirtualMachineFrontEnd = {
-    val builder = decimal.createVirtualMachineBuilder()
-      .withDevices(createDevices())
+  def createDecimalNonTracking(lines: Seq[String], devicesFrontEnd: DevicesFrontEnd): VirtualMachineFrontEnd = {
+    val builder = decimal.createVirtualMachineBuilder().withDevices(devicesFrontEnd.createDevices())
     val assembly = MixAssembler.translateNonTracking(builder, lines)
     new VirtualMachineFrontEnd(assembly._1, lines.toVector, assembly._2.toVector, new MixDisassembler(decimal))
   }
 
   @JSExport("createDecimalNonTracking")
-  def createDecimalNonTrackingJs(lines: js.Array[String]): VirtualMachineFrontEnd =
-    createDecimalNonTracking(lines.toSeq)
+  def createDecimalNonTrackingJs(lines: js.Array[String], devicesFrontEnd: DevicesFrontEnd): VirtualMachineFrontEnd =
+    createDecimalNonTracking(lines.toSeq, devicesFrontEnd)
 
-  def goBinaryTracking(): Future[VirtualMachineFrontEnd] = {
-    val devices = createDevices()
-    binary.goTracking(devices, goDevice) map { machine =>
+  def goBinaryTracking(devicesFrontEnd: DevicesFrontEnd): Future[VirtualMachineFrontEnd] =
+    binary.goTracking(devicesFrontEnd.createDevices(), goDevice) map { machine =>
       new VirtualMachineFrontEnd(
         machine,
         Vector.empty,
@@ -183,14 +181,13 @@ object VirtualMachineFrontEnd {
         new MixDisassembler(binary)
       )
     }
-  }
 
   @JSExport("goBinaryTracking")
-  def goBinaryTrackingJs(): js.Promise[VirtualMachineFrontEnd] = goBinaryTracking().toJSPromise
+  def goBinaryTrackingJs(devicesFrontEnd: DevicesFrontEnd): js.Promise[VirtualMachineFrontEnd] =
+    goBinaryTracking(devicesFrontEnd).toJSPromise
 
-  def goBinaryNonTracking(): Future[VirtualMachineFrontEnd] = {
-    val devices = createDevices()
-    binary.goNonTracking(devices, goDevice) map { machine =>
+  def goBinaryNonTracking(devicesFrontEnd: DevicesFrontEnd): Future[VirtualMachineFrontEnd] =
+    binary.goNonTracking(devicesFrontEnd.createDevices(), goDevice) map { machine =>
       new VirtualMachineFrontEnd(
         machine,
         Vector.empty,
@@ -198,14 +195,13 @@ object VirtualMachineFrontEnd {
         new MixDisassembler(binary)
       )
     }
-  }
 
   @JSExport("goBinaryNonTracking")
-  def goBinaryNonTrackingJs(): js.Promise[VirtualMachineFrontEnd] = goBinaryNonTracking().toJSPromise
+  def goBinaryNonTrackingJs(devicesFrontEnd: DevicesFrontEnd): js.Promise[VirtualMachineFrontEnd] =
+    goBinaryNonTracking(devicesFrontEnd).toJSPromise
 
-  def goDecimalTracking(): Future[VirtualMachineFrontEnd] = {
-    val devices = createDevices()
-    decimal.goTracking(devices, goDevice) map { machine =>
+  def goDecimalTracking(devicesFrontEnd: DevicesFrontEnd): Future[VirtualMachineFrontEnd] =
+    decimal.goTracking(devicesFrontEnd.createDevices(), goDevice) map { machine =>
       new VirtualMachineFrontEnd(
         machine,
         Vector.empty,
@@ -213,14 +209,13 @@ object VirtualMachineFrontEnd {
         new MixDisassembler(decimal)
       )
     }
-  }
 
   @JSExport("goDecimalTracking")
-  def goDecimalTrackingJs(): js.Promise[VirtualMachineFrontEnd] = goDecimalTracking().toJSPromise
+  def goDecimalTrackingJs(devicesFrontEnd: DevicesFrontEnd): js.Promise[VirtualMachineFrontEnd] =
+    goDecimalTracking(devicesFrontEnd).toJSPromise
 
-  def goDecimalNonTracking(): Future[VirtualMachineFrontEnd] = {
-    val devices = createDevices()
-    decimal.goNonTracking(devices, goDevice) map { machine =>
+  def goDecimalNonTracking(devicesFrontEnd: DevicesFrontEnd): Future[VirtualMachineFrontEnd] =
+    decimal.goNonTracking(devicesFrontEnd.createDevices(), goDevice) map { machine =>
       new VirtualMachineFrontEnd(
         machine,
         Vector.empty,
@@ -228,80 +223,8 @@ object VirtualMachineFrontEnd {
         new MixDisassembler(decimal)
       )
     }
-  }
 
   @JSExport("goDecimalNonTracking")
-  def goDecimalNonTrackingJs(): js.Promise[VirtualMachineFrontEnd] = goDecimalNonTracking().toJSPromise
-
-  private val goDevice = 16
-
-  private def createDevices(): Map[Int, Device] = Map(
-    0 -> FileTapeUnit.create("device0"),
-    1 -> FileTapeUnit.create("device1"),
-    2 -> FileTapeUnit.create("device2"),
-    3 -> FileTapeUnit.create("device3"),
-    4 -> FileTapeUnit.create("device4"),
-    5 -> FileTapeUnit.create("device5"),
-    6 -> FileTapeUnit.create("device6"),
-    7 -> FileTapeUnit.create("device7"),
-    8 -> FileDiskUnit.create("device8"),
-    9 -> FileDiskUnit.create("device9"),
-    10 -> FileDiskUnit.create("device10"),
-    11 -> FileDiskUnit.create("device11"),
-    12 -> FileDiskUnit.create("device12"),
-    13 -> FileDiskUnit.create("device13"),
-    14 -> FileDiskUnit.create("device14"),
-    15 -> FileDiskUnit.create("device15"),
-    16 -> FileCardReader.create("device16"),
-    17 -> FileCardPunch.create("device17"),
-    18 -> FileLinePrinter.create("device18"),
-    20 -> FilePaperTape.create("device20")
-  )
-
-  def getBlockDeviceData(deviceNum: Int): Future[IndexedSeq[IOWord]] = deviceNum match {
-    case i if i >= 0 && i < 16 => FileBlockIODevice.getCurrentData(s"device$i")
-    case _ => throw new Error
-  }
-
-  @JSExport("getBlockDeviceData")
-  def getBlockDeviceDataJs(deviceNum: Int): js.Promise[js.Array[IOWord]] =
-    getBlockDeviceData(deviceNum).map(_.toJSArray).toJSPromise
-
-  def saveBlockDevice(deviceNum: Int, data: Array[Byte]): Future[Unit] = {
-    val device = deviceNum match {
-      case i if i >= 0 && i < 8 => FileTapeUnit.create(s"device$i", data)
-      case i if i >= 8 && i < 16 => FileDiskUnit.create(s"device$i", data)
-      case _ => throw new Error
-    }
-    device.task.map(_ => ())
-  }
-
-  @JSExport("saveBlockDevice")
-  def saveBlockDeviceJs(deviceNum: Int, data: js.Array[Byte]): js.Promise[Unit] =
-    saveBlockDevice(deviceNum, data.toArray).toJSPromise
-
-  def getLineDeviceData(deviceNum: Int): Future[IndexedSeq[String]] = deviceNum match {
-    case 16 => FileLineInputDevice.getCurrentData("device16")
-    case 17 => FileLineOutputDevice.getCurrentData("device17")
-    case 18 => FileLineOutputDevice.getCurrentData("device18")
-    case 20 => FileLineInputDevice.getCurrentData("device20")
-    case _ => throw new Error
-  }
-
-  @JSExport("getLineDeviceData")
-  def getLineDeviceDataJs(deviceNum: Int): js.Promise[js.Array[String]] =
-    getLineDeviceData(deviceNum).map(_.toJSArray).toJSPromise
-
-  def saveLineDevice(deviceNum: Int, data: String): Future[Unit] = {
-    val device = deviceNum match {
-      case 16 => FileCardReader.create("device16", data)
-      case 20 => FilePaperTape.create("device20", data)
-      case _ => throw new Error
-    }
-    device.task.map(_ => ())
-  }
-
-  @JSExport("saveLineDevice")
-  def saveLineDeviceJs(deviceNum: Int, data: String): js.Promise[Unit] =
-    saveLineDevice(deviceNum, data).toJSPromise
+  def goDecimalNonTrackingJs(devicesFrontEnd: DevicesFrontEnd): js.Promise[VirtualMachineFrontEnd] =
+    goDecimalNonTracking(devicesFrontEnd).toJSPromise
 }

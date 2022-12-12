@@ -8,7 +8,8 @@ import scala.concurrent.Future
 case class FileCardPunch(filename: String,
                          version: Int,
                          tasks: Future[Unit],
-                         isBusy: Boolean)
+                         isBusy: Boolean,
+                         lowLevelOps: LineAccessFileOutputOps)
   extends FileLineOutputDevice with CardPunch {
 
   override def blockSize: Int = CardPunch.BLOCK_SIZE
@@ -24,7 +25,7 @@ case class FileCardPunch(filename: String,
     if (chars.contains(';')) throw new UnsupportedPunchedCardCharacterException(';')
     if (chars.contains(':')) throw new UnsupportedPunchedCardCharacterException(':')
     if (chars.contains('\'')) throw new UnsupportedPunchedCardCharacterException('\'')
-    LineAccessFile.appendLine(filename, version, chars)
+    lowLevelOps.appendLine(filename, version, chars)
   }
 
   override def newVersion(tasks: Future[Unit]): FileCardPunch =
@@ -36,6 +37,6 @@ case class FileCardPunch(filename: String,
 }
 
 object FileCardPunch {
-  def create(filename: String): FileCardPunch =
-    FileCardPunch(filename, 0, FileLineOutputDevice.initialise(filename), isBusy = false)
+  def create(filename: String, lowLevelOps: LineAccessFileOutputOps): FileCardPunch =
+    FileCardPunch(filename, 0, lowLevelOps.initialise(filename), isBusy = false, lowLevelOps)
 }

@@ -9,7 +9,8 @@ import scala.concurrent.Future
 case class FileDiskUnit(filename: String,
                         version: Int,
                         task: Future[Option[IndexedSeq[IOWord]]],
-                        isBusy: Boolean)
+                        isBusy: Boolean,
+                        lowLevelOps: BlockAccessFileOps)
   extends DiskUnit with FileRandomAccessBlockIODevice {
 
   override def blockSize: Int = DiskUnit.BLOCK_SIZE
@@ -27,9 +28,9 @@ case class FileDiskUnit(filename: String,
 }
 
 object FileDiskUnit {
-  def create(filename: String): FileDiskUnit =
-    FileDiskUnit(filename, 0, FileBlockIODevice.initialise(filename).map(_ => None), isBusy = false)
+  def create(filename: String, lowLevelOps: BlockAccessFileOps): FileDiskUnit =
+    FileDiskUnit(filename, 0, lowLevelOps.initialiseWithCurrentVersion(filename).map(_ => None), isBusy = false, lowLevelOps)
 
-  def create(filename: String, data: Array[Byte]): FileDiskUnit =
-    FileDiskUnit(filename, 0, FileBlockIODevice.save(filename, data).map(_ => None), isBusy = false)
+  def create(filename: String, data: Array[Byte], lowLevelOps: BlockAccessFileOps): FileDiskUnit =
+    FileDiskUnit(filename, 0, lowLevelOps.save(filename, data).map(_ => None), isBusy = false, lowLevelOps)
 }

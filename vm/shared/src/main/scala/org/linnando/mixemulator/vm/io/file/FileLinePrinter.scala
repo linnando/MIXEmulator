@@ -8,7 +8,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 case class FileLinePrinter(filename: String,
                            version: Int,
                            tasks: Future[Unit],
-                           isBusy: Boolean)
+                           isBusy: Boolean,
+                           lowLevelOps: LineAccessFileOutputOps)
   extends LinePrinter with FileLineOutputDevice {
 
   override def blockSize: Int = LinePrinter.BLOCK_SIZE
@@ -23,10 +24,10 @@ case class FileLinePrinter(filename: String,
     newVersion(tasks flatMap { _ => appendNewPage() })
 
   private def appendNewPage(): Future[Unit] =
-    LineAccessFile.appendNewPage(filename, version)
+    lowLevelOps.appendNewPage(filename, version)
 }
 
 object FileLinePrinter {
-  def create(filename: String): FileLinePrinter =
-    FileLinePrinter(filename, 0, FileLineOutputDevice.initialise(filename), isBusy = false)
+  def create(filename: String, lowLevelOps: LineAccessFileOutputOps): FileLinePrinter =
+    FileLinePrinter(filename, 0, lowLevelOps.initialise(filename), isBusy = false, lowLevelOps)
 }

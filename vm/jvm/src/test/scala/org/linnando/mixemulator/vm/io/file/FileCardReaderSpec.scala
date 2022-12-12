@@ -10,6 +10,8 @@ import org.specs2.matcher.ContentMatchers
 import org.specs2.mutable.Specification
 
 class FileCardReaderSpec(implicit ee: ExecutionEnv) extends Specification with ContentMatchers {
+  private val lowLevelOps: LineAccessFileInputOps = LineAccessFileInputOps.create()
+
   val line0 = "01234567890123456789012345678901234567890123456789012345678901234567890123456789"
   val words0 = IndexedSeq(
     IOWord(Seq('0', '1', '2', '3', '4')),
@@ -53,7 +55,7 @@ class FileCardReaderSpec(implicit ee: ExecutionEnv) extends Specification with C
   "file emulator of a card reader" should {
     "create a device with correct parameters" in {
       val filename = "cardreader0"
-      val device = FileCardReader.create(filename, "")
+      val device = FileCardReader.create(filename, "", lowLevelOps)
       device.blockSize must be equalTo CardReader.BLOCK_SIZE
       device.filename must be equalTo filename
       device.isBusy must beFalse
@@ -64,7 +66,7 @@ class FileCardReaderSpec(implicit ee: ExecutionEnv) extends Specification with C
     "input data from a file" in {
       val filename = "cardreader1"
       val file = new File(filename)
-      val device = FileCardReader.create(filename, s"$line0\n$line1\n")
+      val device = FileCardReader.create(filename, s"$line0\n$line1\n", lowLevelOps)
       val busyState = device.read()
       busyState.isBusy must beTrue
       busyState.pos must be equalTo 1L
@@ -79,7 +81,7 @@ class FileCardReaderSpec(implicit ee: ExecutionEnv) extends Specification with C
     "input multiple lines from a file" in {
       val filename = "cardreader2"
       val file = new File(filename)
-      val device = FileCardReader.create(filename, s"$line0\n$line1\n")
+      val device = FileCardReader.create(filename, s"$line0\n$line1\n", lowLevelOps)
       val busyState = device.read().flush().map(_._1.read())
       busyState.map(_.isBusy) must beTrue.await
       busyState.map(_.pos) must beEqualTo(2L).await
@@ -94,7 +96,7 @@ class FileCardReaderSpec(implicit ee: ExecutionEnv) extends Specification with C
     "throw an exception when the file end is reached" in {
       val filename = "cardreader3"
       val file = new File(filename)
-      val device = FileCardReader.create(filename, "")
+      val device = FileCardReader.create(filename, "", lowLevelOps)
       val busyState = device.read()
       busyState.isBusy must beTrue
       busyState.pos must be equalTo 1L

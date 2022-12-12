@@ -1,15 +1,16 @@
-package org.linnando.mixemulator.vm.io.file
+package org.linnando.mixemulator.webapp
 
 import io.scalajs.nodejs.buffer.Buffer
 import io.scalajs.nodejs.fs.Fs
+import org.linnando.mixemulator.vm.io.file.BlockAccessFileOps
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.scalajs.js
 import scala.scalajs.js.typedarray.Uint8Array
 
-object BlockAccessFile {
-  def readBlock(filename: String, version: Int, position: Long, blockSize: Int): Future[Array[Byte]] = {
+class BlockAccessFileOpsImpl extends BlockAccessFileOps {
+  override def readBlock(filename: String, version: Int, position: Long, blockSize: Int): Future[Array[Byte]] = {
     val buffer = Buffer.alloc(blockSize)
     for {
       fd <- Fs.openFuture(s"$filename/$version", "r")
@@ -17,7 +18,7 @@ object BlockAccessFile {
     } yield buffer.asInstanceOf[Uint8Array].toArray.map(_.toByte)
   }
 
-  def writeBlock(filename: String, version: Int, position: Long, bytes: Array[Byte]): Future[Unit] = {
+  override def writeBlock(filename: String, version: Int, position: Long, bytes: Array[Byte]): Future[Unit] = {
     val oldFile = s"$filename/$version"
     val newFile = s"$filename/${version + 1}"
     for {
@@ -49,14 +50,14 @@ object BlockAccessFile {
     )
   }
 
-  def initialiseWithCurrentVersion(filename: String): Future[Unit] =
+  override def initialiseWithCurrentVersion(filename: String): Future[Unit] =
     for {
       _ <- ensureDeviceDirectoryExists(filename)
       versions <- getVersions(filename)
       _ <- saveInitialVersionOnly(filename, versions)
     } yield ()
 
-  def getVersions(filename: String): Future[Iterable[String]] =
+  override def getVersions(filename: String): Future[Iterable[String]] =
     Fs.readdirFuture(s"/$filename").map(_.toArray[String])
 
   private def ensureDeviceDirectoryExists(filename: String): Future[Unit] =
@@ -85,11 +86,11 @@ object BlockAccessFile {
     Future.fold(futures)(())((_, _) => ())
   }
 
-  def save(filename: String, data: Array[Byte]): Future[Unit] = {
+  override def save(filename: String, data: Array[Byte]): Future[Unit] = {
     val buffer = Buffer.from(new js.Array[Int](0) ++ data.map(_.toInt))
     Fs.writeFileFuture(s"/$filename/0", buffer)
   }
 
-  def getData(filename: String, version: Int): Future[Array[Byte]] =
+  override def getData(filename: String, version: Int): Future[Array[Byte]] =
     Fs.readFileFuture(s"/$filename/$version").map(_.asInstanceOf[Uint8Array].toArray.map(_.toByte))
 }

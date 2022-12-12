@@ -10,13 +10,14 @@ import scala.concurrent.Future
 case class FileCardReader(filename: String,
                           task: Future[Option[IndexedSeq[IOWord]]],
                           isBusy: Boolean,
-                          pos: Long)
+                          pos: Long,
+                          lowLevelOps: LineAccessFileInputOps)
   extends CardReader with FileLineInputDevice {
 
   override def blockSize: Int = CardReader.BLOCK_SIZE
 
   override protected def readLine(): Future[IndexedSeq[IOWord]] = {
-    val eventualChars: Future[Array[Char]] = LineAccessFile.readLine(filename, pos)
+    val eventualChars: Future[Array[Char]] = lowLevelOps.readLine(filename, pos)
     eventualChars.map(chars => {
       val sChars = chars.mkString.replaceAllLiterally("0\u00af", "\u0394")
         .replaceAllLiterally("1\u00af", "J")
@@ -53,9 +54,9 @@ case class FileCardReader(filename: String,
 }
 
 object FileCardReader {
-  def create(filename: String): FileCardReader =
-    FileCardReader(filename, FileLineInputDevice.initialise(filename).map(_ => None), isBusy = false, 0L)
+  def create(filename: String, lowLevelOps: LineAccessFileInputOps): FileCardReader =
+    FileCardReader(filename, lowLevelOps.initialise(filename).map(_ => None), isBusy = false, 0L, lowLevelOps)
 
-  def create(filename: String, data: String): FileCardReader =
-    FileCardReader(filename, FileLineInputDevice.save(filename, data).map(_ => None), isBusy = false, 0L)
+  def create(filename: String, data: String, lowLevelOps: LineAccessFileInputOps): FileCardReader =
+    FileCardReader(filename, lowLevelOps.save(filename, data).map(_ => None), isBusy = false, 0L, lowLevelOps)
 }

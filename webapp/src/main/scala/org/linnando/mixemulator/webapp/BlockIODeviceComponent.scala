@@ -56,7 +56,7 @@ class BlockIODeviceComponent(virtualMachineService: VirtualMachineService) exten
         val target = event.target.asInstanceOf[js.Dynamic]
         val buffer = target.result.asInstanceOf[ArrayBuffer]
         val fileData = Array.empty[Byte] ++ new Uint8Array(buffer).map(_.toByte)
-        VirtualMachineService.saveBlockDevice(deviceNum, fileData) onComplete {
+        virtualMachineService.saveBlockDevice(deviceNum, fileData) onComplete {
           case Success(_) => fetchDeviceData()
           case Failure(e) => ErrorPopup.show(e)
         }

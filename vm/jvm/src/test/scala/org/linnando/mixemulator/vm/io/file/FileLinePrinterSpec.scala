@@ -9,6 +9,8 @@ import org.specs2.matcher.{ContentMatchers, FileMatchers}
 import org.specs2.mutable.Specification
 
 class FileLinePrinterSpec(implicit ee: ExecutionEnv) extends Specification with FileMatchers with ContentMatchers {
+  private val lowLevelOps: LineAccessFileOutputOps = LineAccessFileOutputOps.create()
+
   val line0 = "012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789"
   val words0 = IndexedSeq(
     IOWord(Seq('0', '1', '2', '3', '4')),
@@ -68,7 +70,7 @@ class FileLinePrinterSpec(implicit ee: ExecutionEnv) extends Specification with 
   "file emulator of a card punch" should {
     "create a device with correct parameters" in {
       val filename = "printer0"
-      val device = FileLinePrinter.create(filename)
+      val device = FileLinePrinter.create(filename, lowLevelOps)
       device.blockSize must be equalTo LinePrinter.BLOCK_SIZE
       device.filename must be equalTo filename
       device.version must be equalTo 0
@@ -79,7 +81,7 @@ class FileLinePrinterSpec(implicit ee: ExecutionEnv) extends Specification with 
 
     "output data to a file" in {
       val filename = "printer1"
-      val device = FileLinePrinter.create(filename)
+      val device = FileLinePrinter.create(filename, lowLevelOps)
       val busyState = device.write(words0).write(words1)
       busyState.version must be equalTo 2
       busyState.isBusy must beTrue
@@ -101,7 +103,7 @@ class FileLinePrinterSpec(implicit ee: ExecutionEnv) extends Specification with 
 
     "insert page breaks" in {
       val filename = "printer2"
-      val device = FileLinePrinter.create(filename)
+      val device = FileLinePrinter.create(filename, lowLevelOps)
       val busyState = device.write(words0) match {
         case d: FileLinePrinter => d.newPage().write(words1)
       }

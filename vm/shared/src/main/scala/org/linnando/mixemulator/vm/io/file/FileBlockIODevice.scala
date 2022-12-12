@@ -14,38 +14,28 @@ trait FileBlockIODevice extends BlockDevice {
   def task: Future[Option[IndexedSeq[IOWord]]]
 
   protected def readBlock(pos: Long): Future[IndexedSeq[IOWord]] = {
-    val eventualBytes: Future[Array[Byte]] = BlockAccessFile.readBlock(filename, version, 5 * pos * blockSize, 5 * blockSize)
+    val eventualBytes: Future[Array[Byte]] = lowLevelOps.readBlock(filename, version, 5 * pos * blockSize, 5 * blockSize)
     eventualBytes.map((bytes: Array[Byte]) => FileBlockIODevice.bytesToIOWords(bytes))
   }
+
+  protected def lowLevelOps: BlockAccessFileOps
 
   protected def writeBlock(pos: Long, words: IndexedSeq[IOWord]): Future[Unit] = {
     val bytes = words.flatMap(word => {
       val headByte = if (word.negative) (word.bytes.head | 0x80).toByte else word.bytes.head
       headByte :: (1 until 5).map(word.bytes).toList
     }).toArray
-    BlockAccessFile.writeBlock(filename, version, 5 * pos * blockSize, bytes)
+    lowLevelOps.writeBlock(filename, version, 5 * pos * blockSize, bytes)
   }
 
   override def data: Future[IndexedSeq[IOWord]] = for {
     _ <- task
-    bytes: Array[Byte] <- BlockAccessFile.getData(filename, version)
+    bytes: Array[Byte] <- lowLevelOps.getData(filename, version)
   } yield FileBlockIODevice.bytesToIOWords(bytes)
 }
 
 object FileBlockIODevice {
-  def initialise(filename: String): Future[Unit] =
-    BlockAccessFile.initialiseWithCurrentVersion(filename)
-
-  def save(filename: String, data: Array[Byte]): Future[Unit] =
-    BlockAccessFile.save(filename, data)
-
-  def getCurrentData(filename: String): Future[IndexedSeq[IOWord]] = for {
-    versions: Iterable[String] <- BlockAccessFile.getVersions(filename)
-    versionNumbers = versions.map(_.toInt)
-    bytes: Array[Byte] <- BlockAccessFile.getData(filename, versionNumbers.max)
-  } yield bytesToIOWords(bytes)
-
-  private def bytesToIOWords(bytes: Array[Byte]): IndexedSeq[IOWord] =
+  def bytesToIOWords(bytes: Array[Byte]): IndexedSeq[IOWord] =
     (bytes.indices by 5).map(i => {
       val sign = (bytes(i) & 0x80) > 0
       val headByte = (bytes(i) & 0x7f).toByte

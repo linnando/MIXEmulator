@@ -42,7 +42,7 @@ class LineInputDeviceComponent(router: Router, virtualMachineService: VirtualMac
       reader.onload = (event: UIEvent) => {
         val target = event.target.asInstanceOf[js.Dynamic]
         val fileData = target.result.asInstanceOf[String]
-        VirtualMachineService.saveLineDevice(deviceNum, fileData) onComplete {
+        virtualMachineService.saveLineDevice(deviceNum, fileData) onComplete {
           case Success(_) => fetchDeviceData()
           case Failure(e) => ErrorPopup.show(e)
         }

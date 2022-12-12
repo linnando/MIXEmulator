@@ -10,6 +10,8 @@ import org.specs2.matcher.FileMatchers
 import org.specs2.mutable.Specification
 
 class FileTapeUnitSpec(implicit ee: ExecutionEnv) extends Specification with FileMatchers {
+  private val lowLevelOps: BlockAccessFileOps = BlockAccessFileOps.create()
+
   private val bytes0 = (0 until 500).map(i => (i % 64).toByte)
   private val words0 = IndexedSeq.tabulate(100)(i =>
     IOWord(negative = false, Seq.tabulate(5)(j => ((5 * i + j) % 64).toByte)))
@@ -21,7 +23,7 @@ class FileTapeUnitSpec(implicit ee: ExecutionEnv) extends Specification with Fil
   "file emulator of a tape unit" should {
     "create a device with correct parameters" in {
       val filename = "tape0"
-      val device = FileTapeUnit.create(filename)
+      val device = FileTapeUnit.create(filename, lowLevelOps)
       device.blockSize must be equalTo TapeUnit.BLOCK_SIZE
       device.filename must be equalTo filename
       device.version must be equalTo 0
@@ -33,7 +35,7 @@ class FileTapeUnitSpec(implicit ee: ExecutionEnv) extends Specification with Fil
 
     "output data to a file" in {
       val filename = "tape1"
-      val device = FileTapeUnit.create(filename)
+      val device = FileTapeUnit.create(filename, lowLevelOps)
       val busyState = device.write(words0).write(words1)
       busyState.version must be equalTo 2
       busyState.isBusy must beTrue
@@ -63,7 +65,7 @@ class FileTapeUnitSpec(implicit ee: ExecutionEnv) extends Specification with Fil
 
     "allow changing position in the file" in {
       val filename = "tape2"
-      val device = FileTapeUnit.create(filename)
+      val device = FileTapeUnit.create(filename, lowLevelOps)
       val busyState = device.write(words0).write(words1) match {
         case d: FileTapeUnit => d.positioned(-1L).write(words0)
       }
@@ -104,7 +106,7 @@ class FileTapeUnitSpec(implicit ee: ExecutionEnv) extends Specification with Fil
 
     "rewind to the beginning when position is zero" in {
       val filename = "tape3"
-      val device = FileTapeUnit.create(filename)
+      val device = FileTapeUnit.create(filename, lowLevelOps)
       val busyState = device.write(words0).write(words1) match {
         case d: FileTapeUnit => d.positioned(0).write(words1)
       }
@@ -145,7 +147,7 @@ class FileTapeUnitSpec(implicit ee: ExecutionEnv) extends Specification with Fil
 
     "read previously written data" in {
       val filename = "tape4"
-      val device = FileTapeUnit.create(filename)
+      val device = FileTapeUnit.create(filename, lowLevelOps)
       val busyState = device.write(words0) match {
         case d: FileTapeUnit => d.positioned(-1L).read()
       }
@@ -169,7 +171,7 @@ class FileTapeUnitSpec(implicit ee: ExecutionEnv) extends Specification with Fil
       val file = new File(s"$filename/0")
       val channel = new FileOutputStream(file).getChannel
       channel.close()
-      val device = FileTapeUnit.create(filename)
+      val device = FileTapeUnit.create(filename, lowLevelOps)
       val busyState = device.read()
       busyState.version must be equalTo 0
       busyState.isBusy must beTrue

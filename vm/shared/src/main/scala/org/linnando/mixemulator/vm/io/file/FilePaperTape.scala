@@ -9,7 +9,8 @@ import scala.concurrent.Future
 case class FilePaperTape(filename: String,
                          task: Future[Option[IndexedSeq[IOWord]]],
                          isBusy: Boolean,
-                         pos: Long)
+                         pos: Long,
+                         lowLevelOps: LineAccessFileInputOps)
   extends PaperTape with FileLineInputDevice {
 
   override def blockSize: Int = PaperTape.BLOCK_SIZE
@@ -24,9 +25,9 @@ case class FilePaperTape(filename: String,
 }
 
 object FilePaperTape {
-  def create(filename: String): FilePaperTape =
-    FilePaperTape(filename, FileLineInputDevice.initialise(filename).map(_ => None), isBusy = false, 0L)
+  def create(filename: String, lowLevelOps: LineAccessFileInputOps): FilePaperTape =
+    FilePaperTape(filename, lowLevelOps.initialise(filename).map(_ => None), isBusy = false, 0L, lowLevelOps)
 
-  def create(filename: String, data: String): FilePaperTape =
-    FilePaperTape(filename, FileLineInputDevice.save(filename, data).map(_ => None), isBusy = false, 0L)
+  def create(filename: String, data: String, lowLevelOps: LineAccessFileInputOps): FilePaperTape =
+    FilePaperTape(filename, lowLevelOps.save(filename, data).map(_ => None), isBusy = false, 0L, lowLevelOps)
 }

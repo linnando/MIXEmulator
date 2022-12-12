@@ -19,13 +19,15 @@ trait FileLineInputDevice extends LineDevice with PositionalInputDevice {
   })
 
   protected def readLine(): Future[IndexedSeq[IOWord]] = {
-    val eventualChars: Future[Array[Char]] = LineAccessFile.readLine(filename, pos)
+    val eventualChars: Future[Array[Char]] = lowLevelOps.readLine(filename, pos)
     eventualChars.map(chars =>
       (0 until blockSize).map(i =>
         IOWord((5 * i until 5 * (i + 1)).map(j => if (j < chars.length) chars(j) else ' '))
       )
     )
   }
+
+  protected def lowLevelOps: LineAccessFileInputOps
 
   def withTask(task: Future[IndexedSeq[IOWord]]): FileLineInputDevice
 
@@ -36,18 +38,6 @@ trait FileLineInputDevice extends LineDevice with PositionalInputDevice {
 
   override def data: Future[IndexedSeq[String]] = for {
     _ <- task
-    contents: String <- LineAccessFile.getData(filename)
-  } yield contents.split("\n")
-}
-
-object FileLineInputDevice {
-  def initialise(filename: String): Future[Unit] =
-    LineAccessFile.initialiseNonVersioned(filename)
-
-  def save(filename: String, data: String): Future[Unit] =
-    LineAccessFile.saveNonVersioned(filename, data)
-
-  def getCurrentData(filename: String): Future[IndexedSeq[String]] = for {
-    contents: String <- LineAccessFile.getData(filename)
+    contents: String <- lowLevelOps.getData(filename)
   } yield contents.split("\n")
 }
