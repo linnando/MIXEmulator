@@ -1,10 +1,9 @@
 package org.linnando.mixemulator.vm
 
-import org.linnando.mixemulator.vm.exceptions.{DeviceNotConnectedException, ForwardFromTerminalStateException, UnpredictableExecutionFlowException, WrongMemoryAddressException}
+import org.linnando.mixemulator.vm.exceptions.{DeviceNotConnectedException, ForwardFromTerminalStateException, UnpredictableExecutionFlowException, UnsupportedIoOperationException, WrongMemoryAddressException}
 import org.linnando.mixemulator.vm.io._
 import org.linnando.mixemulator.vm.io.data.IOWord
 
-import scala.collection.immutable.Queue
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -56,7 +55,7 @@ trait Processor {
       val deviceInProgress = device._1 match {
         case d: PositionalInputDevice => d.read()
         case d: RandomAccessIODevice => d.read(0L)
-        case _ => return Future.failed(new UnsupportedOperationException)
+        case _ => return Future.failed(new UnsupportedIoOperationException("IN", deviceNum))
       }
       deviceInProgress.flush() map {
         case (flushedDevice, Some(block)) =>
@@ -595,7 +594,7 @@ trait Processor {
           case d: PaperTape =>
             if (address.toShort == 0) d.reset()
             else throw new WrongMemoryAddressException(address.toShort)
-          case _ => throw new UnsupportedOperationException
+          case _ => throw new UnsupportedIoOperationException("IOC", deviceNum)
         }
         state.copy(
           memory = updatedMemory,
@@ -618,7 +617,7 @@ trait Processor {
         val updatedDevice = flushedDevice match {
           case d: PositionalInputDevice => d.read()
           case d: RandomAccessIODevice => d.read(state.registers.getX.toLong)
-          case _ => throw new UnsupportedOperationException
+          case _ => throw new UnsupportedIoOperationException("IN", deviceNum)
         }
         state.copy(
           memory = updatedMemory.withExclusiveLock(destination, device._1.blockSize, deviceNum),
@@ -642,7 +641,7 @@ trait Processor {
         val updatedDevice = flushedDevice match {
           case d: PositionalOutputDevice => d.write(newBlock)
           case d: RandomAccessIODevice => d.write(state.registers.getX.toLong, newBlock)
-          case _ => throw new UnsupportedOperationException
+          case _ => throw new UnsupportedIoOperationException("OUT", deviceNum)
         }
         state.copy(
           memory = updatedMemory.withSharedLock(source, device._1.blockSize, deviceNum),

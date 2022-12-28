@@ -225,6 +225,12 @@ export class UnsupportedCharacterException {
   char: string;
 }
 
+export class UnsupportedIoOperationException {
+  tag: string;
+  operation: string;
+  deviceNum: number;
+}
+
 export class UnsupportedPunchedCardCharacterException {
   tag: string;
   char: string;

@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { BackFromInitialStateException, DeviceNotConnectedException, DivisionByZeroException, DuplicateSymbolException, EndOfFileException, FixedFieldSpecException, ForwardFromTerminalStateException, InconsistentReadException, InvalidExpressionException, OverflowException, UndefinedSymbolException, UnpredictableExecutionFlowException, UnsupportedCharacterException, UnsupportedPunchedCardCharacterException, WriteConflictException, WrongAddressPartException, WrongCharacterCodeException, WrongFieldSpecException, WrongIndexSpecException, WrongLabelException, WrongLineException, WrongMemoryAddressException, WrongOperatorException } from '@mixemulator/lib';
+import { BackFromInitialStateException, DeviceNotConnectedException, DivisionByZeroException, DuplicateSymbolException, EndOfFileException, FixedFieldSpecException, ForwardFromTerminalStateException, InconsistentReadException, InvalidExpressionException, OverflowException, UndefinedSymbolException, UnpredictableExecutionFlowException, UnsupportedCharacterException, UnsupportedIoOperationException, UnsupportedPunchedCardCharacterException, WriteConflictException, WrongAddressPartException, WrongCharacterCodeException, WrongFieldSpecException, WrongIndexSpecException, WrongLabelException, WrongLineException, WrongMemoryAddressException, WrongOperatorException } from '@mixemulator/lib';
 import { BsModalRef } from 'ngx-bootstrap/modal';
 
 @Component({
@@ -46,6 +46,9 @@ export class ErrorPopupComponent {
     } else if ((exception as UnsupportedCharacterException).tag === 'UnsupportedCharacterException') {
       const e = exception as UnsupportedCharacterException;
       return `Character ${e.char} is not supported by MIX`;
+    } else if ((exception as UnsupportedIoOperationException).tag === 'UnsupportedIoOperationException') {
+      const e = exception as UnsupportedIoOperationException;
+      return `Device ${e.deviceNum} does not support operation ${e.operation}`;
     } else if ((exception as UnsupportedPunchedCardCharacterException).tag === 'UnsupportedPunchedCardCharacterException') {
       const e = exception as UnsupportedPunchedCardCharacterException;
       return `Character ${e.char} is not representable on punched cards`;
