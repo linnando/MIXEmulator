@@ -1,0 +1,70 @@
+<div class="container">
+  <div class="row">
+    <div class="col-12">
+      <p>
+        MIX Emulator is a web-based emulator of <a href="https://en.wikipedia.org/wiki/MIX">MIX</a>, the
+        mythical computer invented by Donald Knuth for his book series <a
+          href="http://www-cs-faculty.stanford.edu/~knuth/taocp.html">&quot;The Art of Computer Programming&quot;</a>.
+        The emulator supports assembling and executing programs for MIX, inspecting memory and register
+        contents, working with (virtual) peripheral devices, and traversing execution flow in forward and
+        backward direction. Programs may be executed in either the binary or the decimal mode (which differ in
+        the byte size). Working with devices includes checking correct synchronisation of input/output
+        operations: the emulator fails when the result of an operation is undetermined (e.g., on an attempt to
+        write data to the memory block that is sent to a device without ensuring that the output operation has
+        completed).
+      </p>
+      <p>
+        The terminal device and floating-point operations are not supported currently.
+      </p>
+      <p>
+        In order to use the emulator, enter the program text on the &quot;Program editor&quot; tab, choose the
+        desired mode of operation and assemble the program. The emulator will switch to the &quot;Virtual
+        machine&quot; tab. From there, you will be able to execute the program either step by step or until the
+        end/next breakpoint is reached. Breakpoints may be set by double-clicking a program line on the
+        &quot;Virtual machine&quot; tab (not in the editor currently). If you select the tracking mode, you can
+        also move backwards in the execution flow. The &quot;Devices&quot; tab allows inspecting device data,
+        downloading them as files or uploading files for using as input data. The device data are kept in the
+        browser local storage.
+      </p>
+      <p>
+        Another possible option is using an assembled program on punched cards with your own program loader (for
+        example, to do exercise 1.3.1-26). If you want to do this, load a file containing punched cards data (in
+        the character code) to device 16 and click the &quot;Go&quot; button. Please note that characters
+        &#x03a3;, &#x03a0;, =, &lt;, &gt;, @, ;, :, and ' cannot be represented on punched cards. A macron (&macr;,
+        U+0305) <em>after</em> a digit subtracts 20 from the character code (for example, if a punched card
+        contains characters 0&macr;, the corresponding byte will have value 10 instead of 30). Of course,
+        combining diacritics would be better to use, but it is not rendered well with monospace fonts:-(. A
+        sample &quot;Hello, World!&quot; program on a punched card could look like:
+      </p>
+      <div class="card">
+        <div class="card-body">
+          <pre> C Q7 A Q4   BEHELLO, W6¯RLD</pre>
+        </div>
+      </div>
+      <p>
+        The source code of the emulator is available on <a href="https://github.com/linnando/MIXEmulator">GitHub</a>. If
+        you have found a bug, please submit an
+        issue <a href="https://github.com/linnando/MIXEmulator/issues">here</a>.
+      </p>
+      <p>
+        If the emulator is useful in your research, consider please referencing the following paper:
+      </p>
+      <div class="card">
+        <div class="card-body">
+          Batdalov, R., Ņikiforova, O. Implementation of a MIX Emulator: A Case Study of the Scala Programming
+          Language Facilities. <em>Applied Computer Systems</em>, 2017, 22, pp.47-53. ISSN 2255-8683. e-ISSN
+          2255-8691. Available from: <a href="http://dx.doi.org/10.1515/acss-2017-0017">doi:10.1515/acss-2017-0017</a>
+        </div>
+      </div>
+      <p>
+        MIX Emulator is powered by <a href="http://scala-lang.org/">Scala</a>, <a
+          href="http://www.scala-js.org/">Scala.js</a>, <a href="https://angular.io/">Angular</a>, <a
+          href="http://getbootstrap.com/">Bootstrap</a>, <a
+          href="https://valor-software.com/ngx-bootstrap/#/">ngx-bootstrap</a>, <a href="https://ace.c9.io/">Ace</a>, <a
+          href="http://fontawesome.io/">Font
+          Awesome</a>, and <a href="https://etorreborre.github.io/specs2/">Specs2</a>. The author also thanks <a
+          href="https://www.jetbrains.com/">JetBrains</a> for the provided educational IntelliJ IDEA licence.
+      </p>
+    </div>
+  </div>
+</div>

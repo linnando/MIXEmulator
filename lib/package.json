@@ -1,0 +1,12 @@
+{
+  "name": "@mixemulator/lib",
+  "version": "1.0.0",
+  "description": "MIX Emulator Library",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Ruslan Batdalov",
+  "license": "GPL-3.0-or-later",
+  "types": "./main.d.ts"
+}

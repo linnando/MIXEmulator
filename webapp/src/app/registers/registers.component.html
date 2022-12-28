@@ -1,0 +1,76 @@
+<div class="registers">
+  <table>
+    <tr>
+      <td class="registerName">A:</td>
+      <td class="sign">{{registerSign("A")}}</td>
+      <td class="byte">{{registerByte("A", 0)}}</td>
+      <td class="byte">{{registerByte("A", 1)}}</td>
+      <td class="byte">{{registerByte("A", 2)}}</td>
+      <td class="byte">{{registerByte("A", 3)}}</td>
+      <td class="byte">{{registerByte("A", 4)}}</td>
+    </tr>
+    <tr>
+      <td class="registerName">X:</td>
+      <td class="sign">{{registerSign("X")}}</td>
+      <td class="byte">{{registerByte("X", 0)}}</td>
+      <td class="byte">{{registerByte("X", 1)}}</td>
+      <td class="byte">{{registerByte("X", 2)}}</td>
+      <td class="byte">{{registerByte("X", 3)}}</td>
+      <td class="byte">{{registerByte("X", 4)}}</td>
+    </tr>
+    <tr>
+      <td class="registerName">I1:</td>
+      <td class="sign">{{registerSign("I1")}}</td>
+      <td class="byte">{{registerByte("I1", 3)}}</td>
+      <td class="byte">{{registerByte("I1", 4)}}</td>
+    </tr>
+    <tr>
+      <td class="registerName">I2:</td>
+      <td class="sign">{{registerSign("I2")}}</td>
+      <td class="byte">{{registerByte("I2", 3)}}</td>
+      <td class="byte">{{registerByte("I2", 4)}}</td>
+    </tr>
+    <tr>
+      <td class="registerName">I3:</td>
+      <td class="sign">{{registerSign("I3")}}</td>
+      <td class="byte">{{registerByte("I3", 3)}}</td>
+      <td class="byte">{{registerByte("I3", 4)}}</td>
+    </tr>
+    <tr>
+      <td class="registerName">I4:</td>
+      <td class="sign">{{registerSign("I4")}}</td>
+      <td class="byte">{{registerByte("I4", 3)}}</td>
+      <td class="byte">{{registerByte("I4", 4)}}</td>
+
+    </tr>
+    <tr>
+      <td class="registerName">I5:</td>
+      <td class="sign">{{registerSign("I5")}}</td>
+      <td class="byte">{{registerByte("I5", 3)}}</td>
+      <td class="byte">{{registerByte("I5", 4)}}</td>
+    </tr>
+    <tr>
+      <td class="registerName">I6:</td>
+      <td class="sign">{{registerSign("I6")}}</td>
+      <td class="byte">{{registerByte("I6", 3)}}</td>
+      <td class="byte">{{registerByte("I6", 4)}}</td>
+    </tr>
+    <tr>
+      <td class="registerName">J:</td>
+      <td></td>
+      <td class="byte">{{registerByte("J", 3)}}</td>
+      <td class="byte">{{registerByte("J", 4)}}</td>
+    </tr>
+    <tr></tr>
+    <tr>
+      <td class="registerName">Flags:</td>
+      <td colspan="3" class="flag">{{comparison < 0 ? 'L' : comparison===0 ? 'E' : 'G' }}</td>
+      <td colspan="3" class="flag">{{overflow ? 'OV' : 'NOV'}}</td>
+    </tr>
+    <tr>
+      <td class="registerName">Time:</td>
+      <td colspan="3" class="time-elapsed">{{timeElapsed}}u</td>
+      <td colspan="3" class="is-halted">{{isHalted ? 'HALTED' : ''}}</td>
+    </tr>
+  </table>
+</div>

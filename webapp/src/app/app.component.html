@@ -1,0 +1,28 @@
+<nav class="navbar navbar-expand-sm navbar-light bg-light">
+    <div class="container">
+        <a class="navbar-brand" href="#">
+            <img alt="MIX Emulator" src="assets/brand.png" height="20">
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#main-menu"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div id="main-menu" class="collapse navbar-collapse">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item" [class.active]="router.url === '/about'">
+                    <a class="nav-link" routerLink="/about">About</a>
+                </li>
+                <li class="nav-item" [class.active]="router.url === '/editor'">
+                    <a class="nav-link" routerLink="/editor">Program editor</a>
+                </li>
+                <li class="nav-item" [class.active]="router.url === '/vm'">
+                    <a class="nav-link" routerLink="/vm">Virtual machine</a>
+                </li>
+                <li class="nav-item" [class.active]="router.url === '/devices'">
+                    <a class="nav-link" routerLink="/devices">Devices</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<router-outlet></router-outlet>

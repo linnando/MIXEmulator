@@ -1,0 +1,62 @@
+div.memory-text {
+    overflow-x: auto;
+    height: 100%;
+    font-family: monospace;
+}
+
+table {
+    position: relative;
+    left: calc(25% - 130px);
+    line-height: normal;
+    font-size: 14px;
+}
+
+tr.breakpoint-line {
+    background-color: #ef9a9a;
+}
+
+td.breakpoint {
+    width: 15px;
+    color: #f44336;
+}
+
+td.pointer {
+    width: 15px;
+}
+
+td.address {
+    width: 56px;
+    text-align: right;
+    padding-right: 5px;
+}
+
+td.sign {
+    width: 20px;
+    text-align: right;
+    border: 1px solid;
+    padding: 4px;
+}
+
+td.byte {
+    width: 30px;
+    text-align: right;
+    border: 1px solid;
+    padding: 4px;
+}
+
+td.line-number {
+    width: 20px;
+    text-align: right;
+    padding-left: 20px;
+    padding-right: 8px;
+    font-style: italic;
+}
+
+td.line {
+    line-height: 0.5;
+    white-space: pre;
+}
+
+td.modified-line {
+    color: #2196f3;
+}

@@ -1,0 +1,13 @@
+<div class="memory-data">
+  <table>
+    <tr *ngFor="let address of addresses">
+      <td class="address">{{address}}:</td>
+      <td class="sign">{{cellSign(address)}}</td>
+      <td class="byte">{{cellByte(address, 0)}}</td>
+      <td class="byte">{{cellByte(address, 1)}}</td>
+      <td class="byte">{{cellByte(address, 2)}}</td>
+      <td class="byte">{{cellByte(address, 3)}}</td>
+      <td class="byte">{{cellByte(address, 4)}}</td>
+    </tr>
+  </table>
+</div>

@@ -1,0 +1,23 @@
+.control-row {
+    height: 35px;
+}
+
+.view-row {
+    height: 280px;
+}
+
+.registers {
+    height: 100%;
+}
+
+.memory-data {
+    height: 100%;
+}
+
+.code-row {
+    height: calc(100vh - 386px);
+}
+
+.memory-text {
+    height: 100%;
+}
