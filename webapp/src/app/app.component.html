@@ -3,11 +3,12 @@
         <a class="navbar-brand" href="#">
             <img alt="MIX Emulator" src="assets/brand.png" height="20">
         </a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#main-menu"
-            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <button class="navbar-toggler" type="button" aria-controls="collapseBasic"
+            [attr.aria-expanded]="!navbarIsCollapsed" aria-label="Toggle navigation"
+            (click)="navbarIsCollapsed = !navbarIsCollapsed">
             <span class="navbar-toggler-icon"></span>
         </button>
-        <div id="main-menu" class="collapse navbar-collapse">
+        <div class="collapse navbar-collapse" [collapse]="navbarIsCollapsed">
             <ul class="navbar-nav mr-auto">
                 <li class="nav-item" [class.active]="router.url === '/about'">
                     <a class="nav-link" routerLink="/about">About</a>

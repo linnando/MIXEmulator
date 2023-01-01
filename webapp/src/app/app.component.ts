@@ -7,5 +7,7 @@ import { Router } from '@angular/router';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
+  navbarIsCollapsed = true;
+
   constructor(public router: Router) { }
 }
