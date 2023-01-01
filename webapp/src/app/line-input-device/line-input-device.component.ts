@@ -34,6 +34,14 @@ export class LineInputDeviceComponent implements OnInit {
     return !this.virtualMachineService.isActive;
   }
 
+  get uploadFileTitle(): string {
+    if (this.virtualMachineService.isActive) {
+      return 'In order to upload a file, please switch off the virtual machine';
+    } else {
+      return 'Upload device data';
+    }
+  }
+
   get canUploadFile(): boolean {
     return !this.virtualMachineService.isActive;
   }

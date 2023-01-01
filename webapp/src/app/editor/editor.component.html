@@ -6,11 +6,11 @@
           <div class="row">
             <div class="col-sm-6">
               <div class="form-inline">
-                <button class="btn btn-sm btn-primary" data-toggle="tooltip" title="Upload program text"
-                  (click)="startFileUpload()"><i class="fas fa-upload"></i></button>
+                <button class="btn btn-sm btn-primary" title="Upload program text" (click)="startFileUpload()"><i
+                    class="fas fa-upload"></i></button>
                 <input type="file" id="inputFile" (change)="uploadFile($event.target)">
-                <button class="btn btn-sm btn-primary" data-toggle="tooltip" title="Save program text"
-                  (click)="downloadFile()"><i class="fas fa-download"></i></button>
+                <button class="btn btn-sm btn-primary" title="Save program text" (click)="downloadFile()"><i
+                    class="fas fa-download"></i></button>
               </div>
             </div>
             <div class="col-sm-6">

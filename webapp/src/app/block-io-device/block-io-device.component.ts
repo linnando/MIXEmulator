@@ -36,6 +36,14 @@ export class BlockIoDeviceComponent implements OnInit, OnDestroy {
     this.stateChangeSubscription?.unsubscribe();
   }
 
+  get uploadFileTitle(): string {
+    if (this.virtualMachineService.isActive) {
+      return 'In order to upload a file, please switch off the virtual machine';
+    } else {
+      return 'Upload device data';
+    }
+  }
+
   get canUploadFile(): boolean {
     return !this.virtualMachineService.isActive;
   }
