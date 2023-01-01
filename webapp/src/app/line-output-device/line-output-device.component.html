@@ -1,7 +1,7 @@
 <div class="card">
     <div class="card-header">
         <button class="btn btn-sm btn-primary" title="Save device data" (click)="downloadFile()">
-            <i class="fas fa-download"></i></button>
+            <fa-icon [icon]="faDownload"></fa-icon></button>
     </div>
     <div class="card-body">
         <div *ngFor="let line of lines" class="line">{{line}}</div>

@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { faFastBackward, faFastForward, faHistory, faLongArrowAltRight, faPowerOff, faPuzzlePiece, faStepBackward, faStepForward } from '@fortawesome/free-solid-svg-icons';
 import { BsModalService } from 'ngx-bootstrap/modal';
 import { ErrorPopupComponent } from '../error-popup/error-popup.component';
 import { VirtualMachineService } from '../virtual-machine.service';
@@ -9,6 +10,15 @@ import { VirtualMachineService } from '../virtual-machine.service';
   styleUrls: ['./virtual-machine.component.scss']
 })
 export class VirtualMachineComponent {
+  readonly faHistory = faHistory;
+  readonly faLongArrowAltRight = faLongArrowAltRight;
+  readonly faPuzzlePiece = faPuzzlePiece;
+  readonly faPowerOff = faPowerOff;
+  readonly faFastBackward = faFastBackward;
+  readonly faStepBackward = faStepBackward;
+  readonly faStepForward = faStepForward;
+  readonly faFastForward = faFastForward;
+
   constructor(private modalService: BsModalService, private virtualMachineService: VirtualMachineService) { }
 
   get mode(): string {

@@ -4,12 +4,12 @@
       <div [ngClass]="{'col-sm-6': hasGoButton}">
         <div class="form-inline">
           <span class="d-inline-block" tabindex="0" [title]="uploadFileTitle">
-            <button class="btn btn-sm btn-primary" (click)="startFileUpload()" [disabled]="!canUploadFile"><i
-                class="fas fa-upload"></i></button>
+            <button class="btn btn-sm btn-primary" (click)="startFileUpload()" [disabled]="!canUploadFile"><fa-icon
+                [icon]="faUpload"></fa-icon></button>
           </span>
           <input type="file" id="inputFile" (change)="uploadFile($event.target)">
-          <button class="btn btn-sm btn-primary" title="Save device data" (click)="downloadFile()"><i
-              class="fas fa-download"></i></button>
+          <button class="btn btn-sm btn-primary" title="Save device data" (click)="downloadFile()"><fa-icon
+              [icon]="faDownload"></fa-icon></button>
         </div>
       </div>
       <div *ngIf="hasGoButton" class="col-sm-6">
@@ -25,16 +25,16 @@
         </div>
         <div class="btn-group" role="group" aria-label="Tracking mode">
           <button type="button" class="btn btn-sm" title="With tracking"
-            [ngClass]="{'btn-success': tracking, 'btn-outline-secondary': !tracking}" (click)="tracking = true"><i
-              class="fas fa-history"></i>
+            [ngClass]="{'btn-success': tracking, 'btn-outline-secondary': !tracking}" (click)="tracking = true"><fa-icon
+              [icon]="faHistory"></fa-icon>
           </button>
           <button type="button" class="btn btn-sm" title="Without tracking"
-            [ngClass]="{'btn-success': !tracking, 'btn-outline-secondary': tracking}" (click)="tracking = false"><i
-              class="fas fa-long-arrow-alt-right"></i>
+            [ngClass]="{'btn-success': !tracking, 'btn-outline-secondary': tracking}"
+            (click)="tracking = false"><fa-icon [icon]="faLongArrowAltRight"></fa-icon>
           </button>
         </div>
-        <button *ngIf="canGo" class="btn btn-sm btn-primary" title="Go" (click)="go()"><i
-            class="fas fa-power-off"></i></button>
+        <button *ngIf="canGo" class="btn btn-sm btn-primary" title="Go" (click)="go()"><fa-icon
+            [icon]="faPowerOff"></fa-icon></button>
       </div>
     </div>
   </div>

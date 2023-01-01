@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { CollapseModule } from 'ngx-bootstrap/collapse';
 import { ModalModule } from 'ngx-bootstrap/modal';
 import { AboutComponent } from './about/about.component';
@@ -38,6 +39,7 @@ import { VirtualMachineComponent } from './virtual-machine/virtual-machine.compo
     BrowserAnimationsModule,
     BrowserModule,
     CollapseModule.forRoot(),
+    FontAwesomeModule,
     FormsModule,
     ModalModule.forRoot(),
   ],

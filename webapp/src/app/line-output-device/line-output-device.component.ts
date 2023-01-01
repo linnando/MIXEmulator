@@ -1,4 +1,5 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { faDownload } from '@fortawesome/free-solid-svg-icons';
 import { BsModalService } from 'ngx-bootstrap/modal';
 import { Subscription } from 'rxjs';
 import { ErrorPopupComponent } from '../error-popup/error-popup.component';
@@ -13,6 +14,7 @@ export class LineOutputDeviceComponent implements OnInit, OnDestroy {
   @Input() deviceNum = 0;
   stateChangeSubscription?: Subscription;
   lines: string[] = [];
+  readonly faDownload = faDownload;
 
   constructor(private modalService: BsModalService, private virtualMachineService: VirtualMachineService) { }
 

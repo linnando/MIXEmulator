@@ -1,5 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { faDownload, faHistory, faLongArrowAltRight, faPowerOff, faUpload } from '@fortawesome/free-solid-svg-icons';
 import { BsModalService } from 'ngx-bootstrap/modal';
 import { ErrorPopupComponent } from '../error-popup/error-popup.component';
 import { VirtualMachineService } from '../virtual-machine.service';
@@ -13,6 +14,11 @@ export class LineInputDeviceComponent implements OnInit {
   @Input() deviceNum = 0;
   @Input() hasGoButton = false;
   lines: string[] = [];
+  readonly faUpload = faUpload;
+  readonly faDownload = faDownload;
+  readonly faHistory = faHistory;
+  readonly faLongArrowAltRight = faLongArrowAltRight;
+  readonly faPowerOff = faPowerOff;
 
   constructor(private modalService: BsModalService,
     private router: Router,

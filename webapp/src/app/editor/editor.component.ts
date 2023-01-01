@@ -1,5 +1,6 @@
 import { AfterViewInit, Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { faDownload, faHistory, faLongArrowAltRight, faPuzzlePiece, faUpload } from '@fortawesome/free-solid-svg-icons';
 import * as ace from 'ace-builds';
 import 'ace-builds/webpack-resolver';
 import { BsModalService } from 'ngx-bootstrap/modal';
@@ -13,6 +14,11 @@ import { VirtualMachineService } from '../virtual-machine.service';
 })
 export class EditorComponent implements AfterViewInit {
   editor?: ace.Ace.Editor;
+  readonly faUpload = faUpload;
+  readonly faDownload = faDownload;
+  readonly faHistory = faHistory;
+  readonly faLongArrowAltRight = faLongArrowAltRight;
+  readonly faPuzzlePiece = faPuzzlePiece;
 
   constructor(private modalService: BsModalService,
     private router: Router,

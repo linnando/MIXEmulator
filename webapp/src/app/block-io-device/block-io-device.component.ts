@@ -1,4 +1,5 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { faDownload, faUpload } from '@fortawesome/free-solid-svg-icons';
 import { IOWord } from '@mixemulator/lib';
 import { BsModalService } from 'ngx-bootstrap/modal';
 import { Subscription } from 'rxjs';
@@ -14,6 +15,8 @@ export class BlockIoDeviceComponent implements OnInit, OnDestroy {
   @Input() deviceNum = 0;
   stateChangeSubscription?: Subscription;
   ioWords: IOWord[] = [];
+  readonly faUpload = faUpload;
+  readonly faDownload = faDownload;
 
   constructor(private modalService: BsModalService, private virtualMachineService: VirtualMachineService) { }
 

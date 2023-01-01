@@ -2,8 +2,8 @@
   <table #table>
     <tr *ngFor="let index of indices" (dblclick)="toggleBreakpoint(index)"
       [ngClass]="{'breakpoint-line': hasBreakpointAt(index)}">
-      <td class="breakpoint"><i *ngIf="hasBreakpointAt(index)" class="fas fa-circle" aria-hidden="true"></i></td>
-      <td class="pointer"><i *ngIf="isCurrent(index)" class="fas fa-arrow-alt-circle-right" aria-hidden="true"></i></td>
+      <td class="breakpoint"><fa-icon *ngIf="hasBreakpointAt(index)" [icon]="faCircle"></fa-icon></td>
+      <td class="pointer"><fa-icon *ngIf="isCurrent(index)" [icon]="faArrowAltCircleRight"></fa-icon></td>
       <td *ngIf="hasWordAt(index)" class="address">{{cellAddressAt(index)}}:</td>
       <td *ngIf="hasWordAt(index)" class="sign">{{cellSignAt(index)}}</td>
       <td *ngIf="hasWordAt(index)" class="byte">{{cellByteAt(index, 0)}}</td>

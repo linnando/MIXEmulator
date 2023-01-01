@@ -1,4 +1,5 @@
 import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { faArrowAltCircleRight, faCircle } from '@fortawesome/free-solid-svg-icons';
 import { IOWord, IOWord$ } from '@mixemulator/lib';
 import { Subscription } from 'rxjs';
 import { VirtualMachineService } from '../virtual-machine.service';
@@ -11,6 +12,8 @@ import { VirtualMachineService } from '../virtual-machine.service';
 export class MemoryTextComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild("scrolling") scrolling!: ElementRef;
   stateChangeSubscription?: Subscription;
+  readonly faCircle = faCircle;
+  readonly faArrowAltCircleRight = faArrowAltCircleRight;
 
   constructor(private virtualMachineService: VirtualMachineService) { }
 

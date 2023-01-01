@@ -13,28 +13,29 @@
       </div>
       <div class="btn-group" role="group" aria-label="Tracking mode">
         <button type="button" class="btn btn-sm" title="With tracking"
-          [ngClass]="{'btn-success': tracking, 'btn-outline-secondary': !tracking}" (click)="tracking = true"><i
-            class="fas fa-history"></i>
+          [ngClass]="{'btn-success': tracking, 'btn-outline-secondary': !tracking}" (click)="tracking = true"><fa-icon
+            [icon]="faHistory"></fa-icon>
         </button>
         <button type="button" class="btn btn-sm" title="Without tracking"
-          [ngClass]="{'btn-success': !tracking, 'btn-outline-secondary': tracking}" (click)="tracking = false"><i
-            class="fas fa-long-arrow-alt-right"></i>
+          [ngClass]="{'btn-success': !tracking, 'btn-outline-secondary': tracking}" (click)="tracking = false"><fa-icon
+            [icon]="faLongArrowAltRight"></fa-icon>
         </button>
       </div>
-      <button class="btn btn-sm btn-primary" title="Assemble" (click)="assemble()"><i class="fas fa-puzzle-piece"></i>
+      <button class="btn btn-sm btn-primary" title="Assemble" (click)="assemble()"><fa-icon
+          [icon]="faPuzzlePiece"></fa-icon>
       </button>
-      <button *ngIf="isActive" class="btn btn-sm btn-danger" title="Switch off" (click)="switchOff()"><i
-          class="fas fa-power-off"></i></button>
+      <button *ngIf="isActive" class="btn btn-sm btn-danger" title="Switch off" (click)="switchOff()"><fa-icon
+          [icon]="faPowerOff"></fa-icon></button>
     </div>
     <div class="col-sm-4">
-      <button class="btn btn-sm btn-info" (click)="runBack()" [disabled]="!canMoveBack"><i class="fas fa-fast-backward"
-          aria-hidden="true"></i></button>
-      <button class="btn btn-sm btn-info" (click)="stepBack()" [disabled]="!canMoveBack"><i class="fas fa-step-backward"
-          aria-hidden="true"></i></button>
-      <button class="btn btn-sm btn-primary" (click)="stepForward()" [disabled]="!canMoveForward"><i
-          class="fas fa-step-forward" aria-hidden="true"></i></button>
-      <button class="btn btn-sm btn-primary" (click)="runForward()" [disabled]="!canMoveForward"><i
-          class="fas fa-fast-forward" aria-hidden="true"></i></button>
+      <button class="btn btn-sm btn-info" (click)="runBack()" [disabled]="!canMoveBack"><fa-icon
+          [icon]="faFastBackward"></fa-icon></button>
+      <button class="btn btn-sm btn-info" (click)="stepBack()" [disabled]="!canMoveBack"><fa-icon
+          [icon]="faStepBackward"></fa-icon></button>
+      <button class="btn btn-sm btn-primary" (click)="stepForward()" [disabled]="!canMoveForward"><fa-icon
+          [icon]="faStepForward"></fa-icon></button>
+      <button class="btn btn-sm btn-primary" (click)="runForward()" [disabled]="!canMoveForward"><fa-icon
+          [icon]="faFastForward"></fa-icon></button>
     </div>
   </div>
   <div *ngIf="isActive" class="row view-row">

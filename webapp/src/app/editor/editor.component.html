@@ -6,11 +6,11 @@
           <div class="row">
             <div class="col-sm-6">
               <div class="form-inline">
-                <button class="btn btn-sm btn-primary" title="Upload program text" (click)="startFileUpload()"><i
-                    class="fas fa-upload"></i></button>
+                <button class="btn btn-sm btn-primary" title="Upload program text" (click)="startFileUpload()"><fa-icon
+                    [icon]="faUpload"></fa-icon></button>
                 <input type="file" id="inputFile" (change)="uploadFile($event.target)">
-                <button class="btn btn-sm btn-primary" title="Save program text" (click)="downloadFile()"><i
-                    class="fas fa-download"></i></button>
+                <button class="btn btn-sm btn-primary" title="Save program text" (click)="downloadFile()"><fa-icon
+                    [icon]="faDownload"></fa-icon></button>
               </div>
             </div>
             <div class="col-sm-6">
@@ -26,16 +26,16 @@
               </div>
               <div class="btn-group" role="group" aria-label="Tracking mode">
                 <button type="button" class="btn btn-sm" title="With tracking"
-                  [ngClass]="{'btn-success': tracking, 'btn-outline-secondary': !tracking}" (click)="tracking = true"><i
-                    class="fas fa-history"></i>
+                  [ngClass]="{'btn-success': tracking, 'btn-outline-secondary': !tracking}"
+                  (click)="tracking = true"><fa-icon [icon]="faHistory"></fa-icon>
                 </button>
                 <button type="button" class="btn btn-sm" title="Without tracking"
                   [ngClass]="{'btn-success': !tracking, 'btn-outline-secondary': tracking}"
-                  (click)="tracking = false"><i class="fas fa-long-arrow-alt-right"></i>
+                  (click)="tracking = false"><fa-icon [icon]="faLongArrowAltRight"></fa-icon>
                 </button>
               </div>
-              <button class="btn btn-sm btn-primary" title="Assemble" (click)="assemble()"><i
-                  class="fas fa-puzzle-piece"></i></button>
+              <button class="btn btn-sm btn-primary" title="Assemble" (click)="assemble()"><fa-icon
+                  [icon]="faPuzzlePiece"></fa-icon></button>
             </div>
           </div>
         </div>
