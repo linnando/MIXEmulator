@@ -39,6 +39,6 @@ object FileBlockIODevice {
     (bytes.indices by 5).map(i => {
       val sign = (bytes(i) & 0x80) > 0
       val headByte = (bytes(i) & 0x7f).toByte
-      IOWord(sign, headByte :: (i + 1 until i + 5).map(bytes).toList)
+      IOWord(sign, headByte :: (i + 1 until i + 5).map(j => if (j < bytes.length) bytes(j) else 0.toByte).toList)
     })
 }

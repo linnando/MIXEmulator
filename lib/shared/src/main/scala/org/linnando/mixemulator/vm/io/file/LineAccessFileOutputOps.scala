@@ -20,7 +20,7 @@ trait LineAccessFileOutputOps {
     val contents = for {
       versions: Iterable[String] <- getVersions(filename)
       versionNumbers = versions.map(_.toInt)
-      contents: String <- getData(filename, versionNumbers.max)
+      contents: String <- if (versionNumbers.isEmpty) Future.successful("") else getData(filename, versionNumbers.max)
     } yield contents
     contents
   }

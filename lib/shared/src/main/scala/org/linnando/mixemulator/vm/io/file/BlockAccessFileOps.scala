@@ -23,7 +23,9 @@ class BlockAccessFileOps {
   def getCurrentData(filename: String): Future[Array[Byte]] = for {
     versions: Iterable[String] <- getVersions(filename)
     versionNumbers = versions.map(_.toInt)
-    bytes: Array[Byte] <- getData(filename, versionNumbers.max)
+    bytes: Array[Byte] <-
+      if (versionNumbers.isEmpty) Future.successful(Array.empty[Byte])
+      else getData(filename, versionNumbers.max)
   } yield bytes
 
   def getData(filename: String, version: Int): Future[Array[Byte]] = ???
