@@ -2,11 +2,22 @@
   "name": "@mixemulator/lib",
   "version": "1.0.0",
   "description": "MIX Emulator Library",
-  "main": "main.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "Ruslan Batdalov",
+  "bugs": "https://github.com/linnando/MIXEmulator/issues",
   "license": "GPL-3.0-or-later",
-  "types": "./main.d.ts"
+  "author": "Ruslan Batdalov",
+  "files": [
+    "js/target/scala-2.13/lib-fastopt/**/*"
+  ],
+  "main": "js/target/scala-2.13/lib-fastopt/main.js",
+  "types": "js/target/scala-2.13/lib-fastopt/main.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/linnando/MIXEmulator"
+  },
+  "scripts": {
+    "build": "sbt buildNpm",
+    "test": "sbt libJVM/test",
+    "prepublishOnly": "npm test",
+    "prepare": "npm run build"
+  }
 }
