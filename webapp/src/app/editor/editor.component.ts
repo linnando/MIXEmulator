@@ -54,7 +54,7 @@ export class EditorComponent implements AfterViewInit {
       if (!(typeof fileData === 'string')) {
         return;
       }
-      const programText = fileData.replace(/\t/g, '    ');
+      const programText = fileData.replace(/\t/g, '    ').replace(/\x0d?\x0a|\x0d/g, '\n');
       this.editor?.setValue(programText);
     };
     reader.readAsText(file);

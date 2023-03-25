@@ -72,7 +72,8 @@ export class LineInputDeviceComponent implements OnInit {
         return;
       }
       try {
-        await this.virtualMachineService.saveLineDevice(this.deviceNum, fileData);
+        const normalizedData = fileData.replace(/\x0d?\x0a|\x0d/g, '\n');
+        await this.virtualMachineService.saveLineDevice(this.deviceNum, normalizedData);
         this.fetchDeviceData();
       } catch (e) {
         this.modalService.show(ErrorPopupComponent, { initialState: { exception: e } });
