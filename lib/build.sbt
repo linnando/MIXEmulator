@@ -1,6 +1,6 @@
 name := "MIX Emulator Library"
 
-ThisBuild / scalaVersion := "2.13.10"
+ThisBuild / scalaVersion := "2.13.15"
 
 lazy val buildNpm = taskKey[Unit]("Build NPM package")
 
@@ -13,7 +13,11 @@ lazy val lib = crossProject(JSPlatform, JVMPlatform).in(file(".")).
   settings(
     name := "lib",
     organization := "org.linnando",
-    version := "0.1-SNAPSHOT"
+    version := "0.1-SNAPSHOT",
+    libraryDependencies ++= Seq(
+      "org.scalatest" %%% "scalatest" % "3.2.14" % "test",
+      "org.scalatest" %%% "scalatest-wordspec" % "3.2.14" % "test"
+    )
   ).
   jvmSettings(
     Test / scalacOptions ++= Seq("-Yrangepos"),
@@ -24,7 +28,8 @@ lazy val lib = crossProject(JSPlatform, JVMPlatform).in(file(".")).
   ).
   jsSettings(
     scalaJSLinkerConfig ~= {
-      _.withModuleKind(ModuleKind.ESModule)
+      import org.scalajs.linker.interface.OutputPatterns
+      _.withModuleKind(ModuleKind.ESModule).withOutputPatterns(OutputPatterns.fromJSFile("%s.mjs"))
     },
     Compile / buildNpm := {
       val srcDirectory = (Compile / sourceDirectory).value / "typescript"
