@@ -125,7 +125,7 @@ trait DataModel {
 
     def isNegative: Boolean
 
-    def unary_-(): I
+    def unary_- : I
 
     def +(other: I): I
 
@@ -161,7 +161,7 @@ trait DataModel {
 
     def updated(fieldSpec: B, value: W): W
 
-    def unary_-(): W
+    def unary_- : W
 
     def +(other: W): (Boolean, W)
 

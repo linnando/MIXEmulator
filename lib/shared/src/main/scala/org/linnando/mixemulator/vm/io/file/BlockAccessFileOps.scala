@@ -134,7 +134,7 @@ object BlockAccessFileOps {
       implementation.initialiseWithCurrentVersion(filename).toFuture
 
     override def getVersions(filename: String): Future[Iterable[String]] =
-      implementation.getVersions(filename).toFuture.map(_.toIterable)
+      implementation.getVersions(filename).toFuture.map(_.toSeq)
 
     override def save(filename: String, data: Array[Byte]): Future[Unit] =
       implementation.save(filename, data.toJSArray).toFuture

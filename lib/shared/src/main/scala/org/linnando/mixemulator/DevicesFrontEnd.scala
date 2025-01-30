@@ -4,6 +4,7 @@ import org.linnando.mixemulator.vm.io.Device
 import org.linnando.mixemulator.vm.io.data.IOWord
 import org.linnando.mixemulator.vm.io.file._
 
+import scala.collection.immutable.ArraySeq
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.scalajs.js
@@ -61,10 +62,10 @@ class DevicesFrontEnd(blockAccessFileOps: BlockAccessFileOps,
     saveBlockDevice(deviceNum, data.toArray).toJSPromise
 
   def getLineDeviceData(deviceNum: Int): Future[IndexedSeq[String]] = deviceNum match {
-    case 16 => lineAccessFileInputOps.getData("device16").map(_.split("\n"))
-    case 17 => lineAccessFileOutputOps.getCurrentData("device17").map(_.split("\n"))
-    case 18 => lineAccessFileOutputOps.getCurrentData("device18").map(_.split("\n"))
-    case 20 => lineAccessFileInputOps.getData("device20").map(_.split("\n"))
+    case 16 => lineAccessFileInputOps.getData("device16").map(s => ArraySeq.unsafeWrapArray(s.split("\n")))
+    case 17 => lineAccessFileOutputOps.getCurrentData("device17").map(s => ArraySeq.unsafeWrapArray(s.split("\n")))
+    case 18 => lineAccessFileOutputOps.getCurrentData("device18").map(s => ArraySeq.unsafeWrapArray(s.split("\n")))
+    case 20 => lineAccessFileInputOps.getData("device20").map(s => ArraySeq.unsafeWrapArray(s.split("\n")))
     case _ => throw new Error
   }
 

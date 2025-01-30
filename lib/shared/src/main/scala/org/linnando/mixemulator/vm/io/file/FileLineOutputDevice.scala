@@ -3,6 +3,7 @@ package org.linnando.mixemulator.vm.io.file
 import org.linnando.mixemulator.vm.io.{LineDevice, PositionalOutputDevice}
 import org.linnando.mixemulator.vm.io.data.IOWord
 
+import scala.collection.immutable.ArraySeq
 import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -37,11 +38,11 @@ trait FileLineOutputDevice extends LineDevice with PositionalOutputDevice {
   override def data: Future[IndexedSeq[String]] = for {
     _ <- tasks
     contents: String <- lowLevelOps.getData(filename, version)
-  } yield contents.split("\n")
+  } yield ArraySeq.unsafeWrapArray(contents.split("\n"))
 }
 
 object FileLineOutputDevice {
   def getCurrentData(filename: String, lowLevelOps: LineAccessFileOutputOps): Future[IndexedSeq[String]] = {
-    lowLevelOps.getCurrentData(filename).map(_.split("\n"))
+    lowLevelOps.getCurrentData(filename).map(s => ArraySeq.unsafeWrapArray(s.split("\n")))
   }
 }

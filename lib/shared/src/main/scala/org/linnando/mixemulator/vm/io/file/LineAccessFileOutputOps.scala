@@ -114,7 +114,7 @@ object LineAccessFileOutputOps {
       implementation.initialise(filename).toFuture
 
     override def getVersions(filename: String): Future[Iterable[String]] =
-      implementation.getVersions(filename).toFuture.map(_.toIterable)
+      implementation.getVersions(filename).toFuture.map(_.toSeq)
 
     override def getData(filename: String, version: Int): Future[String] =
       implementation.getData(filename, version).toFuture

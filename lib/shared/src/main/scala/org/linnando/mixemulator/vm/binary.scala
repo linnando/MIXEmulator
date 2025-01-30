@@ -63,7 +63,7 @@ object binary extends ProcessingModel {
       copy(literals = literals.updated(value, literals(value) :+ counter))
 
     override def withDevices(devices: Map[Int, Device]): BinaryVirtualMachineBuilder =
-      copy(state = state.copy(devices = devices.mapValues((_, None)).toMap))
+      copy(state = state.copy(devices = devices.view.mapValues((_, None)).toMap))
   }
 
   def initialState = State(
@@ -76,12 +76,12 @@ object binary extends ProcessingModel {
   )
 
   override def goNonTracking(devices: Map[Int, Device], deviceNum: Int): Future[VirtualMachine] = {
-    val state = initialState.copy(devices = devices.mapValues((_, None)).toMap)
+    val state = initialState.copy(devices = devices.view.mapValues((_, None)).toMap)
     go(state, deviceNum).map(new VirtualMachineImpl(_))
   }
 
   override def goTracking(devices: Map[Int, Device], deviceNum: Int): Future[VirtualMachine] = {
-    val state = initialState.copy(devices = devices.mapValues((_, None)).toMap)
+    val state = initialState.copy(devices = devices.view.mapValues((_, None)).toMap)
     go(state, deviceNum).map(new TrackingVirtualMachineImpl(_))
   }
 
@@ -253,7 +253,7 @@ object binary extends ProcessingModel {
 
     override def isNegative: Boolean = (contents & 0x1000) > 0
 
-    override def unary_-(): I = MixIndex((contents ^ 0x1000).toShort)
+    override def unary_- : I = MixIndex((contents ^ 0x1000).toShort)
 
     override def +(other: I): I =
       if ((contents & 0x1000) == (other.contents & 0x1000)) {
@@ -376,7 +376,7 @@ object binary extends ProcessingModel {
       MixWord(shiftedValue & mask | contents & ~mask & 0x7fffffff)
     }
 
-    override def unary_-(): W = MixWord(contents ^ 0x40000000)
+    override def unary_- : W = MixWord(contents ^ 0x40000000)
 
     override def +(other: W): (Boolean, W) =
       if ((contents & 0x40000000) == (other.contents & 0x40000000)) {
