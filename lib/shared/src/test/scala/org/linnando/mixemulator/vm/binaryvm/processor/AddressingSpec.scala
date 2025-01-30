@@ -70,42 +70,42 @@ class AddressingSpec extends AsyncWordSpec with Matchers {
     "loading to register A" should {
       "load a positive number" in {
         // A = 1, I = 0, F = 2, C = 48 ENTA
-        execute(state, MixWord(0x000400b0)) map {
+        binary.execute(state, MixWord(0x000400b0)) map {
           _.registers.getA mustEqual MixWord(0x00000001)
         }
       }
 
       "load a negative number" in {
         // A = -1, I = 0, F = 2, C = 48 ENTA
-        execute(state, MixWord(0x400400b0)) map {
+        binary.execute(state, MixWord(0x400400b0)) map {
           _.registers.getA mustEqual MixWord(0x40000001)
         }
       }
 
       "load the negative zero" in {
         // A = -0, I = 0, F = 2, C = 48 ENTA
-        execute(state, MixWord(0x400000b0)) map {
+        binary.execute(state, MixWord(0x400000b0)) map {
           _.registers.getA mustEqual MixWord(0x40000000)
         }
       }
 
       "load the contents of an index register" in {
         // A = 0, I = 2, F = 2, C = 48 ENTA
-        execute(state, MixWord(0x000020b0)) map {
+        binary.execute(state, MixWord(0x000020b0)) map {
           _.registers.getA mustEqual MixWord(0x00000100)
         }
       }
 
       "load an indexed address" in {
         // A = 3, I = 2, F = 2, C = 48 ENTA
-        execute(state, MixWord(0x000c20b0)) map {
+        binary.execute(state, MixWord(0x000c20b0)) map {
           _.registers.getA mustEqual MixWord(0x00000103)
         }
       }
 
       "preserve command sign if the indexed address is zero" in {
         // A = -0, I = 1, F = 2, C = 48 ENTA
-        execute(state, MixWord(0x400010b0)) map {
+        binary.execute(state, MixWord(0x400010b0)) map {
           _.registers.getA mustEqual MixWord(0x40000000)
         }
       }
@@ -114,42 +114,42 @@ class AddressingSpec extends AsyncWordSpec with Matchers {
     "loading to register I1" should {
       "load a positive number" in {
         // A = 1, I = 0, F = 2, C = 49 ENT1
-        execute(state, MixWord(0x000400b1)) map {
+        binary.execute(state, MixWord(0x000400b1)) map {
           _.registers.getI(1) mustEqual MixIndex(0x0001)
         }
       }
 
       "load a negative number" in {
         // A = -1, I = 0, F = 2, C = 49 ENT1
-        execute(state, MixWord(0x400400b1)) map {
+        binary.execute(state, MixWord(0x400400b1)) map {
           _.registers.getI(1) mustEqual MixIndex(0x1001)
         }
       }
 
       "load the negative zero" in {
         // A = -0, I = 0, F = 2, C = 49 ENT1
-        execute(state, MixWord(0x400000b1)) map {
+        binary.execute(state, MixWord(0x400000b1)) map {
           _.registers.getI(1) mustEqual MixIndex(0x1000)
         }
       }
 
       "load the contents of an index register" in {
         // A = 0, I = 2, F = 2, C = 49 ENT1
-        execute(state, MixWord(0x000020b1)) map {
+        binary.execute(state, MixWord(0x000020b1)) map {
           _.registers.getI(1) mustEqual MixIndex(0x0100)
         }
       }
 
       "load an indexed address" in {
         // A = 3, I = 2, F = 2, C = 49 ENT1
-        execute(state, MixWord(0x000c20b1)) map {
+        binary.execute(state, MixWord(0x000c20b1)) map {
           _.registers.getI(1) mustEqual MixIndex(0x0103)
         }
       }
 
       "preserve command sign if the indexed address is zero" in {
         // A = -0, I = 1, F = 2, C = 49 ENT1
-        execute(state, MixWord(0x400010b1)) map {
+        binary.execute(state, MixWord(0x400010b1)) map {
           _.registers.getI(1) mustEqual MixIndex(0x1000)
         }
       }
@@ -158,42 +158,42 @@ class AddressingSpec extends AsyncWordSpec with Matchers {
     "loading to register I2" should {
       "load a positive number" in {
         // A = 1, I = 0, F = 2, C = 50 ENT2
-        execute(state, MixWord(0x000400b2)) map {
+        binary.execute(state, MixWord(0x000400b2)) map {
           _.registers.getI(2) mustEqual MixIndex(0x0001)
         }
       }
 
       "load a negative number" in {
         // A = -1, I = 0, F = 2, C = 50 ENT2
-        execute(state, MixWord(0x400400b2)) map {
+        binary.execute(state, MixWord(0x400400b2)) map {
           _.registers.getI(2) mustEqual MixIndex(0x1001)
         }
       }
 
       "load the negative zero" in {
         // A = -0, I = 0, F = 2, C = 50 ENT2
-        execute(state, MixWord(0x400000b2)) map {
+        binary.execute(state, MixWord(0x400000b2)) map {
           _.registers.getI(2) mustEqual MixIndex(0x1000)
         }
       }
 
       "load the contents of an index register" in {
         // A = 0, I = 2, F = 2, C = 50 ENT2
-        execute(state, MixWord(0x000020b2)) map {
+        binary.execute(state, MixWord(0x000020b2)) map {
           _.registers.getI(2) mustEqual MixIndex(0x0100)
         }
       }
 
       "load an indexed address" in {
         // A = 3, I = 2, F = 2, C = 50 ENT2
-        execute(state, MixWord(0x000c20b2)) map {
+        binary.execute(state, MixWord(0x000c20b2)) map {
           _.registers.getI(2) mustEqual MixIndex(0x0103)
         }
       }
 
       "preserve command sign if the indexed address is zero" in {
         // A = -0, I = 1, F = 2, C = 50 ENT2
-        execute(state, MixWord(0x400010b2)) map {
+        binary.execute(state, MixWord(0x400010b2)) map {
           _.registers.getI(2) mustEqual MixIndex(0x1000)
         }
       }
@@ -202,42 +202,42 @@ class AddressingSpec extends AsyncWordSpec with Matchers {
     "loading to register I3" should {
       "load a positive number" in {
         // A = 1, I = 0, F = 2, C = 51 ENT3
-        execute(state, MixWord(0x000400b3)) map {
+        binary.execute(state, MixWord(0x000400b3)) map {
           _.registers.getI(3) mustEqual MixIndex(0x0001)
         }
       }
 
       "load a negative number" in {
         // A = -1, I = 0, F = 2, C = 51 ENT3
-        execute(state, MixWord(0x400400b3)) map {
+        binary.execute(state, MixWord(0x400400b3)) map {
           _.registers.getI(3) mustEqual MixIndex(0x1001)
         }
       }
 
       "load the negative zero" in {
         // A = -0, I = 0, F = 2, C = 51 ENT3
-        execute(state, MixWord(0x400000b3)) map {
+        binary.execute(state, MixWord(0x400000b3)) map {
           _.registers.getI(3) mustEqual MixIndex(0x1000)
         }
       }
 
       "load the contents of an index register" in {
         // A = 0, I = 2, F = 2, C = 51 ENT3
-        execute(state, MixWord(0x000020b3)) map {
+        binary.execute(state, MixWord(0x000020b3)) map {
           _.registers.getI(3) mustEqual MixIndex(0x0100)
         }
       }
 
       "load an indexed address" in {
         // A = 3, I = 2, F = 2, C = 51 ENT3
-        execute(state, MixWord(0x000c20b3)) map {
+        binary.execute(state, MixWord(0x000c20b3)) map {
           _.registers.getI(3) mustEqual MixIndex(0x0103)
         }
       }
 
       "preserve command sign if the indexed address is zero" in {
         // A = -0, I = 1, F = 2, C = 51 ENT3
-        execute(state, MixWord(0x400010b3)) map {
+        binary.execute(state, MixWord(0x400010b3)) map {
           _.registers.getI(3) mustEqual MixIndex(0x1000)
         }
       }
@@ -246,42 +246,42 @@ class AddressingSpec extends AsyncWordSpec with Matchers {
     "loading to register I4" should {
       "load a positive number" in {
         // A = 1, I = 0, F = 2, C = 52 ENT4
-        execute(state, MixWord(0x000400b4)) map {
+        binary.execute(state, MixWord(0x000400b4)) map {
           _.registers.getI(4) mustEqual MixIndex(0x0001)
         }
       }
 
       "load a negative number" in {
         // A = -1, I = 0, F = 2, C = 52 ENT4
-        execute(state, MixWord(0x400400b4)) map {
+        binary.execute(state, MixWord(0x400400b4)) map {
           _.registers.getI(4) mustEqual MixIndex(0x1001)
         }
       }
 
       "load the negative zero" in {
         // A = -0, I = 0, F = 2, C = 52 ENT4
-        execute(state, MixWord(0x400000b4)) map {
+        binary.execute(state, MixWord(0x400000b4)) map {
           _.registers.getI(4) mustEqual MixIndex(0x1000)
         }
       }
 
       "load the contents of an index register" in {
         // A = 0, I = 2, F = 2, C = 52 ENT4
-        execute(state, MixWord(0x000020b4)) map {
+        binary.execute(state, MixWord(0x000020b4)) map {
           _.registers.getI(4) mustEqual MixIndex(0x0100)
         }
       }
 
       "load an indexed address" in {
         // A = 3, I = 2, F = 2, C = 52 ENT4
-        execute(state, MixWord(0x000c20b4)) map {
+        binary.execute(state, MixWord(0x000c20b4)) map {
           _.registers.getI(4) mustEqual MixIndex(0x0103)
         }
       }
 
       "preserve command sign if the indexed address is zero" in {
         // A = -0, I = 1, F = 2, C = 52 ENT4
-        execute(state, MixWord(0x400010b4)) map {
+        binary.execute(state, MixWord(0x400010b4)) map {
           _.registers.getI(4) mustEqual MixIndex(0x1000)
         }
       }
@@ -290,42 +290,42 @@ class AddressingSpec extends AsyncWordSpec with Matchers {
     "loading to register I5" should {
       "load a positive number" in {
         // A = 1, I = 0, F = 2, C = 53 ENT5
-        execute(state, MixWord(0x000400b5)) map {
+        binary.execute(state, MixWord(0x000400b5)) map {
           _.registers.getI(5) mustEqual MixIndex(0x0001)
         }
       }
 
       "load a negative number" in {
         // A = -1, I = 0, F = 2, C = 53 ENT5
-        execute(state, MixWord(0x400400b5)) map {
+        binary.execute(state, MixWord(0x400400b5)) map {
           _.registers.getI(5) mustEqual MixIndex(0x1001)
         }
       }
 
       "load the negative zero" in {
         // A = -0, I = 0, F = 2, C = 53 ENT5
-        execute(state, MixWord(0x400000b5)) map {
+        binary.execute(state, MixWord(0x400000b5)) map {
           _.registers.getI(5) mustEqual MixIndex(0x1000)
         }
       }
 
       "load the contents of an index register" in {
         // A = 0, I = 2, F = 2, C = 53 ENT5
-        execute(state, MixWord(0x000020b5)) map {
+        binary.execute(state, MixWord(0x000020b5)) map {
           _.registers.getI(5) mustEqual MixIndex(0x0100)
         }
       }
 
       "load an indexed address" in {
         // A = 3, I = 2, F = 2, C = 53 ENT5
-        execute(state, MixWord(0x000c20b5)) map {
+        binary.execute(state, MixWord(0x000c20b5)) map {
           _.registers.getI(5) mustEqual MixIndex(0x0103)
         }
       }
 
       "preserve command sign if the indexed address is zero" in {
         // A = -0, I = 1, F = 2, C = 53 ENT5
-        execute(state, MixWord(0x400010b5)) map {
+        binary.execute(state, MixWord(0x400010b5)) map {
           _.registers.getI(5) mustEqual MixIndex(0x1000)
         }
       }
@@ -334,42 +334,42 @@ class AddressingSpec extends AsyncWordSpec with Matchers {
     "loading to register I6" should {
       "load a positive number" in {
         // A = 1, I = 0, F = 2, C = 54 ENT6
-        execute(state, MixWord(0x000400b6)) map {
+        binary.execute(state, MixWord(0x000400b6)) map {
           _.registers.getI(6) mustEqual MixIndex(0x0001)
         }
       }
 
       "load a negative number" in {
         // A = -1, I = 0, F = 2, C = 54 ENT6
-        execute(state, MixWord(0x400400b6)) map {
+        binary.execute(state, MixWord(0x400400b6)) map {
           _.registers.getI(6) mustEqual MixIndex(0x1001)
         }
       }
 
       "load the negative zero" in {
         // A = -0, I = 0, F = 2, C = 54 ENT6
-        execute(state, MixWord(0x400000b6)) map {
+        binary.execute(state, MixWord(0x400000b6)) map {
           _.registers.getI(6) mustEqual MixIndex(0x1000)
         }
       }
 
       "load the contents of an index register" in {
         // A = 0, I = 2, F = 2, C = 54 ENT6
-        execute(state, MixWord(0x000020b6)) map {
+        binary.execute(state, MixWord(0x000020b6)) map {
           _.registers.getI(6) mustEqual MixIndex(0x0100)
         }
       }
 
       "load an indexed address" in {
         // A = 3, I = 2, F = 2, C = 54 ENT6
-        execute(state, MixWord(0x000c20b6)) map {
+        binary.execute(state, MixWord(0x000c20b6)) map {
           _.registers.getI(6) mustEqual MixIndex(0x0103)
         }
       }
 
       "preserve command sign if the indexed address is zero" in {
         // A = -0, I = 1, F = 2, C = 54 ENT6
-        execute(state, MixWord(0x400010b6)) map {
+        binary.execute(state, MixWord(0x400010b6)) map {
           _.registers.getI(6) mustEqual MixIndex(0x1000)
         }
       }
@@ -378,42 +378,42 @@ class AddressingSpec extends AsyncWordSpec with Matchers {
     "loading to register X" should {
       "load a positive number" in {
         // A = 1, I = 0, F = 2, C = 55 ENTX
-        execute(state, MixWord(0x000400b7)) map {
+        binary.execute(state, MixWord(0x000400b7)) map {
           _.registers.getX mustEqual MixWord(0x00000001)
         }
       }
 
       "load a negative number" in {
         // A = -1, I = 0, F = 2, C = 55 ENTX
-        execute(state, MixWord(0x400400b7)) map {
+        binary.execute(state, MixWord(0x400400b7)) map {
           _.registers.getX mustEqual MixWord(0x40000001)
         }
       }
 
       "load the negative zero" in {
         // A = -0, I = 0, F = 2, C = 55 ENTX
-        execute(state, MixWord(0x400000b7)) map {
+        binary.execute(state, MixWord(0x400000b7)) map {
           _.registers.getX mustEqual MixWord(0x40000000)
         }
       }
 
       "load the contents of an index register" in {
         // A = 0, I = 2, F = 2, C = 55 ENTX
-        execute(state, MixWord(0x000020b7)) map {
+        binary.execute(state, MixWord(0x000020b7)) map {
           _.registers.getX mustEqual MixWord(0x00000100)
         }
       }
 
       "load an indexed address" in {
         // A = 3, I = 2, F = 2, C = 55 ENTX
-        execute(state, MixWord(0x000c20b7)) map {
+        binary.execute(state, MixWord(0x000c20b7)) map {
           _.registers.getX mustEqual MixWord(0x00000103)
         }
       }
 
       "preserve command sign if the indexed address is zero" in {
         // A = -0, I = 1, F = 2, C = 55 ENTX
-        execute(state, MixWord(0x400010b7)) map {
+        binary.execute(state, MixWord(0x400010b7)) map {
           _.registers.getX mustEqual MixWord(0x40000000)
         }
       }
@@ -424,42 +424,42 @@ class AddressingSpec extends AsyncWordSpec with Matchers {
     "loading to register A" should {
       "load the negation of a positive number" in {
         // A = 1, I = 0, F = 3, C = 48 ENNA
-        execute(state, MixWord(0x000400f0)) map {
+        binary.execute(state, MixWord(0x000400f0)) map {
           _.registers.getA mustEqual MixWord(0x40000001)
         }
       }
 
       "load the negation of a negative number (positive)" in {
         // A = -1, I = 0, F = 3, C = 48 ENNA
-        execute(state, MixWord(0x400400f0)) map {
+        binary.execute(state, MixWord(0x400400f0)) map {
           _.registers.getA mustEqual MixWord(0x00000001)
         }
       }
 
       "load the negation of the positive zero" in {
         // A = 0, I = 0, F = 3, C = 48 ENNA
-        execute(state, MixWord(0x000000f0)) map {
+        binary.execute(state, MixWord(0x000000f0)) map {
           _.registers.getA mustEqual MixWord(0x40000000)
         }
       }
 
       "load the negated contents of an index register" in {
         // A = 0, I = 2, F = 3, C = 48 ENNA
-        execute(state, MixWord(0x000020f0)) map {
+        binary.execute(state, MixWord(0x000020f0)) map {
           _.registers.getA mustEqual MixWord(0x40000100)
         }
       }
 
       "load the negation of an indexed address" in {
         // A = 3, I = 2, F = 3, C = 48 ENNA
-        execute(state, MixWord(0x000c20f0)) map {
+        binary.execute(state, MixWord(0x000c20f0)) map {
           _.registers.getA mustEqual MixWord(0x40000103)
         }
       }
 
       "invert the command sign if the indexed address is zero" in {
         // A = -0, I = 1, F = 3, C = 48 ENNA
-        execute(state, MixWord(0x400010f0)) map {
+        binary.execute(state, MixWord(0x400010f0)) map {
           _.registers.getA mustEqual MixWord(0x00000000)
         }
       }
@@ -468,42 +468,42 @@ class AddressingSpec extends AsyncWordSpec with Matchers {
     "loading to register I1" should {
       "load the negation of a positive number" in {
         // A = 1, I = 0, F = 3, C = 49 ENN1
-        execute(state, MixWord(0x000400f1)) map {
+        binary.execute(state, MixWord(0x000400f1)) map {
           _.registers.getI(1) mustEqual MixIndex(0x1001)
         }
       }
 
       "load the negation of a negative number (positive)" in {
         // A = -1, I = 0, F = 3, C = 49 ENN1
-        execute(state, MixWord(0x400400f1)) map {
+        binary.execute(state, MixWord(0x400400f1)) map {
           _.registers.getI(1) mustEqual MixIndex(0x0001)
         }
       }
 
       "load the negation of the positive zero" in {
         // A = 0, I = 0, F = 3, C = 49 ENN1
-        execute(state, MixWord(0x000000f1)) map {
+        binary.execute(state, MixWord(0x000000f1)) map {
           _.registers.getI(1) mustEqual MixIndex(0x1000)
         }
       }
 
       "load the negated contents of an index register" in {
         // A = 0, I = 2, F = 3, C = 49 ENN1
-        execute(state, MixWord(0x000020f1)) map {
+        binary.execute(state, MixWord(0x000020f1)) map {
           _.registers.getI(1) mustEqual MixIndex(0x1100)
         }
       }
 
       "load the negation of an indexed address" in {
         // A = 3, I = 2, F = 3, C = 49 ENN1
-        execute(state, MixWord(0x000c20f1)) map {
+        binary.execute(state, MixWord(0x000c20f1)) map {
           _.registers.getI(1) mustEqual MixIndex(0x1103)
         }
       }
 
       "invert the command sign if the indexed address is zero" in {
         // A = -0, I = 1, F = 3, C = 49 ENN1
-        execute(state, MixWord(0x400010f1)) map {
+        binary.execute(state, MixWord(0x400010f1)) map {
           _.registers.getI(1) mustEqual MixIndex(0x0000)
         }
       }
@@ -512,42 +512,42 @@ class AddressingSpec extends AsyncWordSpec with Matchers {
     "loading to register I2" should {
       "load the negation of a positive number" in {
         // A = 1, I = 0, F = 3, C = 50 ENN2
-        execute(state, MixWord(0x000400f2)) map {
+        binary.execute(state, MixWord(0x000400f2)) map {
           _.registers.getI(2) mustEqual MixIndex(0x1001)
         }
       }
 
       "load the negation of a negative number (positive)" in {
         // A = -1, I = 0, F = 3, C = 50 ENN2
-        execute(state, MixWord(0x400400f2)) map {
+        binary.execute(state, MixWord(0x400400f2)) map {
           _.registers.getI(2) mustEqual MixIndex(0x0001)
         }
       }
 
       "load the negation of the positive zero" in {
         // A = 0, I = 0, F = 3, C = 50 ENN2
-        execute(state, MixWord(0x000000f2)) map {
+        binary.execute(state, MixWord(0x000000f2)) map {
           _.registers.getI(2) mustEqual MixIndex(0x1000)
         }
       }
 
       "load the negated contents of an index register" in {
         // A = 0, I = 2, F = 3, C = 50 ENN2
-        execute(state, MixWord(0x000020f2)) map {
+        binary.execute(state, MixWord(0x000020f2)) map {
           _.registers.getI(2) mustEqual MixIndex(0x1100)
         }
       }
 
       "load the negation of an indexed address" in {
         // A = 3, I = 2, F = 3, C = 50 ENN2
-        execute(state, MixWord(0x000c20f2)) map {
+        binary.execute(state, MixWord(0x000c20f2)) map {
           _.registers.getI(2) mustEqual MixIndex(0x1103)
         }
       }
 
       "invert the command sign if the indexed address is zero" in {
         // A = -0, I = 1, F = 3, C = 50 ENN2
-        execute(state, MixWord(0x400010f2)) map {
+        binary.execute(state, MixWord(0x400010f2)) map {
           _.registers.getI(2) mustEqual MixIndex(0x0000)
         }
       }
@@ -556,42 +556,42 @@ class AddressingSpec extends AsyncWordSpec with Matchers {
     "loading to register I3" should {
       "load the negation of a positive number" in {
         // A = 1, I = 0, F = 3, C = 51 ENN3
-        execute(state, MixWord(0x000400f3)) map {
+        binary.execute(state, MixWord(0x000400f3)) map {
           _.registers.getI(3) mustEqual MixIndex(0x1001)
         }
       }
 
       "load the negation of a negative number (positive)" in {
         // A = -1, I = 0, F = 3, C = 51 ENN3
-        execute(state, MixWord(0x400400f3)) map {
+        binary.execute(state, MixWord(0x400400f3)) map {
           _.registers.getI(3) mustEqual MixIndex(0x0001)
         }
       }
 
       "load the negation of the positive zero" in {
         // A = 0, I = 0, F = 3, C = 51 ENN3
-        execute(state, MixWord(0x000000f3)) map {
+        binary.execute(state, MixWord(0x000000f3)) map {
           _.registers.getI(3) mustEqual MixIndex(0x1000)
         }
       }
 
       "load the negated contents of an index register" in {
         // A = 0, I = 2, F = 3, C = 51 ENN3
-        execute(state, MixWord(0x000020f3)) map {
+        binary.execute(state, MixWord(0x000020f3)) map {
           _.registers.getI(3) mustEqual MixIndex(0x1100)
         }
       }
 
       "load the negation of an indexed address" in {
         // A = 3, I = 2, F = 3, C = 51 ENN3
-        execute(state, MixWord(0x000c20f3)) map {
+        binary.execute(state, MixWord(0x000c20f3)) map {
           _.registers.getI(3) mustEqual MixIndex(0x1103)
         }
       }
 
       "invert the command sign if the indexed address is zero" in {
         // A = -0, I = 1, F = 3, C = 51 ENN3
-        execute(state, MixWord(0x400010f3)) map {
+        binary.execute(state, MixWord(0x400010f3)) map {
           _.registers.getI(3) mustEqual MixIndex(0x0000)
         }
       }
@@ -600,42 +600,42 @@ class AddressingSpec extends AsyncWordSpec with Matchers {
     "loading to register I4" should {
       "load the negation of a positive number" in {
         // A = 1, I = 0, F = 3, C = 52 ENN4
-        execute(state, MixWord(0x000400f4)) map {
+        binary.execute(state, MixWord(0x000400f4)) map {
           _.registers.getI(4) mustEqual MixIndex(0x1001)
         }
       }
 
       "load the negation of a negative number (positive)" in {
         // A = -1, I = 0, F = 3, C = 52 ENN4
-        execute(state, MixWord(0x400400f4)) map {
+        binary.execute(state, MixWord(0x400400f4)) map {
           _.registers.getI(4) mustEqual MixIndex(0x0001)
         }
       }
 
       "load the negation of the positive zero" in {
         // A = 0, I = 0, F = 3, C = 52 ENN4
-        execute(state, MixWord(0x000000f4)) map {
+        binary.execute(state, MixWord(0x000000f4)) map {
           _.registers.getI(4) mustEqual MixIndex(0x1000)
         }
       }
 
       "load the negated contents of an index register" in {
         // A = 0, I = 2, F = 3, C = 52 ENN4
-        execute(state, MixWord(0x000020f4)) map {
+        binary.execute(state, MixWord(0x000020f4)) map {
           _.registers.getI(4) mustEqual MixIndex(0x1100)
         }
       }
 
       "load the negation of an indexed address" in {
         // A = 3, I = 2, F = 3, C = 52 ENN4
-        execute(state, MixWord(0x000c20f4)) map {
+        binary.execute(state, MixWord(0x000c20f4)) map {
           _.registers.getI(4) mustEqual MixIndex(0x1103)
         }
       }
 
       "invert the command sign if the indexed address is zero" in {
         // A = -0, I = 1, F = 3, C = 52 ENN4
-        execute(state, MixWord(0x400010f4)) map {
+        binary.execute(state, MixWord(0x400010f4)) map {
           _.registers.getI(4) mustEqual MixIndex(0x0000)
         }
       }
@@ -644,42 +644,42 @@ class AddressingSpec extends AsyncWordSpec with Matchers {
     "loading to register I5" should {
       "load the negation of a positive number" in {
         // A = 1, I = 0, F = 3, C = 53 ENN5
-        execute(state, MixWord(0x000400f5)) map {
+        binary.execute(state, MixWord(0x000400f5)) map {
           _.registers.getI(5) mustEqual MixIndex(0x1001)
         }
       }
 
       "load the negation of a negative number (positive)" in {
         // A = -1, I = 0, F = 3, C = 53 ENN5
-        execute(state, MixWord(0x400400f5)) map {
+        binary.execute(state, MixWord(0x400400f5)) map {
           _.registers.getI(5) mustEqual MixIndex(0x0001)
         }
       }
 
       "load the negation of the positive zero" in {
         // A = 0, I = 0, F = 3, C = 53 ENN5
-        execute(state, MixWord(0x000000f5)) map {
+        binary.execute(state, MixWord(0x000000f5)) map {
           _.registers.getI(5) mustEqual MixIndex(0x1000)
         }
       }
 
       "load the negated contents of an index register" in {
         // A = 0, I = 2, F = 3, C = 53 ENN5
-        execute(state, MixWord(0x000020f5)) map {
+        binary.execute(state, MixWord(0x000020f5)) map {
           _.registers.getI(5) mustEqual MixIndex(0x1100)
         }
       }
 
       "load the negation of an indexed address" in {
         // A = 3, I = 2, F = 3, C = 53 ENN5
-        execute(state, MixWord(0x000c20f5)) map {
+        binary.execute(state, MixWord(0x000c20f5)) map {
           _.registers.getI(5) mustEqual MixIndex(0x1103)
         }
       }
 
       "invert the command sign if the indexed address is zero" in {
         // A = -0, I = 1, F = 3, C = 53 ENN5
-        execute(state, MixWord(0x400010f5)) map {
+        binary.execute(state, MixWord(0x400010f5)) map {
           _.registers.getI(5) mustEqual MixIndex(0x0000)
         }
       }
@@ -688,42 +688,42 @@ class AddressingSpec extends AsyncWordSpec with Matchers {
     "loading to register I6" should {
       "load the negation of a positive number" in {
         // A = 1, I = 0, F = 3, C = 54 ENN6
-        execute(state, MixWord(0x000400f6)) map {
+        binary.execute(state, MixWord(0x000400f6)) map {
           _.registers.getI(6) mustEqual MixIndex(0x1001)
         }
       }
 
       "load the negation of a negative number (positive)" in {
         // A = -1, I = 0, F = 3, C = 54 ENN6
-        execute(state, MixWord(0x400400f6)) map {
+        binary.execute(state, MixWord(0x400400f6)) map {
           _.registers.getI(6) mustEqual MixIndex(0x0001)
         }
       }
 
       "load the negation of the positive zero" in {
         // A = 0, I = 0, F = 3, C = 54 ENN6
-        execute(state, MixWord(0x000000f6)) map {
+        binary.execute(state, MixWord(0x000000f6)) map {
           _.registers.getI(6) mustEqual MixIndex(0x1000)
         }
       }
 
       "load the negated contents of an index register" in {
         // A = 0, I = 2, F = 3, C = 54 ENN6
-        execute(state, MixWord(0x000020f6)) map {
+        binary.execute(state, MixWord(0x000020f6)) map {
           _.registers.getI(6) mustEqual MixIndex(0x1100)
         }
       }
 
       "load the negation of an indexed address" in {
         // A = 3, I = 2, F = 3, C = 54 ENN6
-        execute(state, MixWord(0x000c20f6)) map {
+        binary.execute(state, MixWord(0x000c20f6)) map {
           _.registers.getI(6) mustEqual MixIndex(0x1103)
         }
       }
 
       "invert the command sign if the indexed address is zero" in {
         // A = -0, I = 1, F = 3, C = 54 ENN6
-        execute(state, MixWord(0x400010f6)) map {
+        binary.execute(state, MixWord(0x400010f6)) map {
           _.registers.getI(6) mustEqual MixIndex(0x0000)
         }
       }
@@ -732,42 +732,42 @@ class AddressingSpec extends AsyncWordSpec with Matchers {
     "loading to register X" should {
       "load the negation of a positive number" in {
         // A = 1, I = 0, F = 3, C = 55 ENNX
-        execute(state, MixWord(0x000400f7)) map {
+        binary.execute(state, MixWord(0x000400f7)) map {
           _.registers.getX mustEqual MixWord(0x40000001)
         }
       }
 
       "load the negation of a negative number (positive)" in {
         // A = -1, I = 0, F = 3, C = 55 ENNX
-        execute(state, MixWord(0x400400f7)) map {
+        binary.execute(state, MixWord(0x400400f7)) map {
           _.registers.getX mustEqual MixWord(0x00000001)
         }
       }
 
       "load the negation of the positive zero" in {
         // A = 0, I = 0, F = 3, C = 55 ENNX
-        execute(state, MixWord(0x000000f7)) map {
+        binary.execute(state, MixWord(0x000000f7)) map {
           _.registers.getX mustEqual MixWord(0x40000000)
         }
       }
 
       "load the negated contents of an index register" in {
         // A = 0, I = 2, F = 3, C = 55 ENNX
-        execute(state, MixWord(0x000020f7)) map {
+        binary.execute(state, MixWord(0x000020f7)) map {
           _.registers.getX mustEqual MixWord(0x40000100)
         }
       }
 
       "load the negation of an indexed address" in {
         // A = 3, I = 2, F = 3, C = 55 ENNX
-        execute(state, MixWord(0x000c20f7)) map {
+        binary.execute(state, MixWord(0x000c20f7)) map {
           _.registers.getX mustEqual MixWord(0x40000103)
         }
       }
 
       "invert the command sign if the indexed address is zero" in {
         // A = -0, I = 1, F = 3, C = 55 ENNX
-        execute(state, MixWord(0x400010f7)) map {
+        binary.execute(state, MixWord(0x400010f7)) map {
           _.registers.getX mustEqual MixWord(0x00000000)
         }
       }

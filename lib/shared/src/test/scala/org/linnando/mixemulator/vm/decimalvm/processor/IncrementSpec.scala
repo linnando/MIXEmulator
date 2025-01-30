@@ -29,7 +29,7 @@ class IncrementSpec extends AsyncWordSpec with Matchers {
     "incrementing register A" should {
       "increment by a fixed number" in {
         // A = 1, I = 0, F = 0, C = 48 INCA
-        execute(state, MixWord(1000048L)).map(s => {
+        decimal.execute(state, MixWord(1000048L)).map(s => {
           s.registers.getA mustEqual MixWord(9999995649L) // + 99 99 99 56 49
           s.registers.getOV mustEqual false
         })
@@ -37,7 +37,7 @@ class IncrementSpec extends AsyncWordSpec with Matchers {
 
       "increment by an indexed address" in {
         // A = 1, I = 5, F = 0, C = 48 INCA
-        execute(state, MixWord(1050048L)).map(s => {
+        decimal.execute(state, MixWord(1050048L)).map(s => {
           s.registers.getA mustEqual MixWord(9999996010L) // + 99 99 99 60 10
           s.registers.getOV mustEqual false
         })
@@ -45,7 +45,7 @@ class IncrementSpec extends AsyncWordSpec with Matchers {
 
       "increment with an overflow" in {
         // A = 4353, I = 0, F = 0, C = 48 INCA
-        execute(state, MixWord(4353000048L)).map(s => {
+        decimal.execute(state, MixWord(4353000048L)).map(s => {
           s.registers.getA mustEqual MixWord(1L) // + 0 0 0 0 1
           s.registers.getOV mustEqual true
         })
@@ -54,7 +54,7 @@ class IncrementSpec extends AsyncWordSpec with Matchers {
       "not change the overflow flag if no overflow occurs" in {
         val stateWithOV = state.copy(registers = state.registers.updatedOV(true))
         // A = 1, I = 0, F = 0, C = 48 INCA
-        execute(stateWithOV, MixWord(1000048L)) map {
+        decimal.execute(stateWithOV, MixWord(1000048L)) map {
           _.registers.getOV mustEqual true
         }
       }
@@ -64,7 +64,7 @@ class IncrementSpec extends AsyncWordSpec with Matchers {
           registers = state.registers.updatedA(MixWord(3632L))
         )
         // A = -3632, I = 0, F = 0, C = 48 INCA
-        execute(stateWithSmallA, MixWord(0x400000000L | 3632000048L)) map {
+        decimal.execute(stateWithSmallA, MixWord(0x400000000L | 3632000048L)) map {
           _.registers.getA mustEqual MixWord(0L)
         }
       }
@@ -73,7 +73,7 @@ class IncrementSpec extends AsyncWordSpec with Matchers {
     "incrementing register I1" should {
       "increment by a fixed number" in {
         // A = 1, I = 0, F = 0, C = 49 INC1
-        execute(state, MixWord(1000049L)).map(s => {
+        decimal.execute(state, MixWord(1000049L)).map(s => {
           s.registers.getI(1) mustEqual MixIndex(3104) // + 31 4
           s.registers.getOV mustEqual false
         })
@@ -81,7 +81,7 @@ class IncrementSpec extends AsyncWordSpec with Matchers {
 
       "increment by an indexed address" in {
         // A = 1, I = 5, F = 0, C = 49 INC1
-        execute(state, MixWord(1050049L)).map(s => {
+        decimal.execute(state, MixWord(1050049L)).map(s => {
           s.registers.getI(1) mustEqual MixIndex(3465) // + 34 65
           s.registers.getOV mustEqual false
         })
@@ -90,21 +90,21 @@ class IncrementSpec extends AsyncWordSpec with Matchers {
       "throw an exception on overflow" in {
         recoverToSucceededIf[OverflowException] {
           // A = 6897, I = 0, F = 0, C = 49 INC1
-          execute(state, MixWord(6897000049L))
+          decimal.execute(state, MixWord(6897000049L))
         }
       }
 
       "not change the overflow flag if no overflow occurs" in {
         val stateWithOV = state.copy(registers = state.registers.updatedOV(true))
         // A = 1, I = 0, F = 0, C = 49 INC1
-        execute(stateWithOV, MixWord(1000049L)) map {
+        decimal.execute(stateWithOV, MixWord(1000049L)) map {
           _.registers.getOV mustEqual true
         }
       }
 
       "increment by the current value's negation preserving the current sign" in {
         // A = -3103, I = 0, F = 0, C = 49 INC1
-        execute(state, MixWord(0x400000000L | 3103000049L)) map {
+        decimal.execute(state, MixWord(0x400000000L | 3103000049L)) map {
           _.registers.getI(1) mustEqual MixIndex(0)
         }
       }
@@ -113,7 +113,7 @@ class IncrementSpec extends AsyncWordSpec with Matchers {
     "incrementing register I2" should {
       "increment by a fixed number" in {
         // A = 1, I = 0, F = 0, C = 50 INC2
-        execute(state, MixWord(1000050L)).map(s => {
+        decimal.execute(state, MixWord(1000050L)).map(s => {
           s.registers.getI(2) mustEqual MixIndex(3509) // + 35 9
           s.registers.getOV mustEqual false
         })
@@ -121,7 +121,7 @@ class IncrementSpec extends AsyncWordSpec with Matchers {
 
       "increment by an indexed address" in {
         // A = 1, I = 5, F = 0, C = 50 INC2
-        execute(state, MixWord(1050050L)).map(s => {
+        decimal.execute(state, MixWord(1050050L)).map(s => {
           s.registers.getI(2) mustEqual MixIndex(3870) // + 38 70
           s.registers.getOV mustEqual false
         })
@@ -130,21 +130,21 @@ class IncrementSpec extends AsyncWordSpec with Matchers {
       "throw an exception on overflow" in {
         recoverToSucceededIf[OverflowException] {
           // A = 6492, I = 0, F = 0, C = 50 INC2
-          execute(state, MixWord(6492000050L))
+          decimal.execute(state, MixWord(6492000050L))
         }
       }
 
       "not change the overflow flag if no overflow occurs" in {
         val stateWithOV = state.copy(registers = state.registers.updatedOV(true))
         // A = 1, I = 0, F = 0, C = 50 INC2
-        execute(stateWithOV, MixWord(1000050L)) map {
+        decimal.execute(stateWithOV, MixWord(1000050L)) map {
           _.registers.getOV mustEqual true
         }
       }
 
       "increment by the current value's negation preserving the current sign" in {
         // A = -3508, I = 0, F = 0, C = 50 INC2
-        execute(state, MixWord(0x400000000L | 3508000050L)) map {
+        decimal.execute(state, MixWord(0x400000000L | 3508000050L)) map {
           _.registers.getI(2) mustEqual MixIndex(0)
         }
       }
@@ -153,7 +153,7 @@ class IncrementSpec extends AsyncWordSpec with Matchers {
     "incrementing register I3" should {
       "increment by a fixed number" in {
         // A = 1, I = 0, F = 0, C = 51 INC3
-        execute(state, MixWord(1000051L)).map(s => {
+        decimal.execute(state, MixWord(1000051L)).map(s => {
           s.registers.getI(3) mustEqual MixIndex(5242) // + 52 42
           s.registers.getOV mustEqual false
         })
@@ -161,7 +161,7 @@ class IncrementSpec extends AsyncWordSpec with Matchers {
 
       "increment by an indexed address" in {
         // A = 1, I = 5, F = 0, C = 51 INC3
-        execute(state, MixWord(1050051L)).map(s => {
+        decimal.execute(state, MixWord(1050051L)).map(s => {
           s.registers.getI(3) mustEqual MixIndex(5603) // + 56 3
           s.registers.getOV mustEqual false
         })
@@ -170,21 +170,21 @@ class IncrementSpec extends AsyncWordSpec with Matchers {
       "throw an exception on overflow" in {
         recoverToSucceededIf[OverflowException] {
           // A = 4759, I = 0, F = 0, C = 51 INC3
-          execute(state, MixWord(4759000051L))
+          decimal.execute(state, MixWord(4759000051L))
         }
       }
 
       "not change the overflow flag if no overflow occurs" in {
         val stateWithOV = state.copy(registers = state.registers.updatedOV(true))
         // A = 1, I = 0, F = 0, C = 51 INC3
-        execute(stateWithOV, MixWord(1000051L)) map {
+        decimal.execute(stateWithOV, MixWord(1000051L)) map {
           _.registers.getOV mustEqual true
         }
       }
 
       "increment by the current value's negation preserving the current sign" in {
         // A = -5241, I = 0, F = 0, C = 51 INC3
-        execute(state, MixWord(0x400000000L | 5241000051L)) map {
+        decimal.execute(state, MixWord(0x400000000L | 5241000051L)) map {
           _.registers.getI(3) mustEqual MixIndex(0)
         }
       }
@@ -193,7 +193,7 @@ class IncrementSpec extends AsyncWordSpec with Matchers {
     "incrementing register I4" should {
       "increment by a fixed number" in {
         // A = 1, I = 0, F = 0, C = 52 INC4
-        execute(state, MixWord(1000052L)).map(s => {
+        decimal.execute(state, MixWord(1000052L)).map(s => {
           s.registers.getI(4) mustEqual MixIndex(2300) // + 23 0
           s.registers.getOV mustEqual false
         })
@@ -201,7 +201,7 @@ class IncrementSpec extends AsyncWordSpec with Matchers {
 
       "increment by an indexed address" in {
         // A = 1, I = 5, F = 0, C = 52 INC4
-        execute(state, MixWord(1050052L)).map(s => {
+        decimal.execute(state, MixWord(1050052L)).map(s => {
           s.registers.getI(4) mustEqual MixIndex(2661) // + 26 61
           s.registers.getOV mustEqual false
         })
@@ -210,21 +210,21 @@ class IncrementSpec extends AsyncWordSpec with Matchers {
       "throw an exception on overflow" in {
         recoverToSucceededIf[OverflowException] {
           // A = 7701, I = 0, F = 0, C = 52 INC4
-          execute(state, MixWord(7701000052L))
+          decimal.execute(state, MixWord(7701000052L))
         }
       }
 
       "not change the overflow flag if no overflow occurs" in {
         val stateWithOV = state.copy(registers = state.registers.updatedOV(true))
         // A = 1, I = 0, F = 0, C = 52 INC4
-        execute(stateWithOV, MixWord(1000052L)) map {
+        decimal.execute(stateWithOV, MixWord(1000052L)) map {
           _.registers.getOV mustEqual true
         }
       }
 
       "increment by the current value's negation preserving the current sign" in {
         // A = -2299, I = 0, F = 0, C = 52 INC4
-        execute(state, MixWord(0x400000000L | 2299000052L)) map {
+        decimal.execute(state, MixWord(0x400000000L | 2299000052L)) map {
           _.registers.getI(4) mustEqual MixIndex(0)
         }
       }
@@ -233,7 +233,7 @@ class IncrementSpec extends AsyncWordSpec with Matchers {
     "incrementing register I5" should {
       "increment by a fixed number" in {
         // A = 1, I = 0, F = 0, C = 53 INC5
-        execute(state, MixWord(1000053L)).map(s => {
+        decimal.execute(state, MixWord(1000053L)).map(s => {
           s.registers.getI(5) mustEqual MixIndex(362) // + 3 62
           s.registers.getOV mustEqual false
         })
@@ -241,7 +241,7 @@ class IncrementSpec extends AsyncWordSpec with Matchers {
 
       "increment by an indexed address" in {
         // A = 1, I = 5, F = 0, C = 53 INC5
-        execute(state, MixWord(1050053L)).map(s => {
+        decimal.execute(state, MixWord(1050053L)).map(s => {
           s.registers.getI(5) mustEqual MixIndex(723) // + 7 23
           s.registers.getOV mustEqual false
         })
@@ -250,21 +250,21 @@ class IncrementSpec extends AsyncWordSpec with Matchers {
       "throw an exception on overflow" in {
         recoverToSucceededIf[OverflowException] {
           // A = 9639, I = 0, F = 0, C = 53 INC5
-          execute(state, MixWord(9639000053L))
+          decimal.execute(state, MixWord(9639000053L))
         }
       }
 
       "not change the overflow flag if no overflow occurs" in {
         val stateWithOV = state.copy(registers = state.registers.updatedOV(true))
         // A = 1, I = 0, F = 0, C = 53 INC5
-        execute(stateWithOV, MixWord(1000053L)) map {
+        decimal.execute(stateWithOV, MixWord(1000053L)) map {
           _.registers.getOV mustEqual true
         }
       }
 
       "increment by the current value's negation preserving the current sign" in {
         // A = -361, I = 0, F = 0, C = 53 INC5
-        execute(state, MixWord(0x400000000L | 361000053L)) map {
+        decimal.execute(state, MixWord(0x400000000L | 361000053L)) map {
           _.registers.getI(5) mustEqual MixIndex(0)
         }
       }
@@ -273,7 +273,7 @@ class IncrementSpec extends AsyncWordSpec with Matchers {
     "incrementing register I6" should {
       "increment by a fixed number" in {
         // A = 1, I = 0, F = 0, C = 54 INC6
-        execute(state, MixWord(1000054L)).map(s => {
+        decimal.execute(state, MixWord(1000054L)).map(s => {
           s.registers.getI(6) mustEqual MixIndex((0x4000 | 5534).toShort) // - 55 34
           s.registers.getOV mustEqual false
         })
@@ -281,7 +281,7 @@ class IncrementSpec extends AsyncWordSpec with Matchers {
 
       "increment by an indexed address" in {
         // A = 1, I = 5, F = 0, C = 54 INC6
-        execute(state, MixWord(1050054L)).map(s => {
+        decimal.execute(state, MixWord(1050054L)).map(s => {
           s.registers.getI(6) mustEqual MixIndex((0x4000 | 5173).toShort) // - 51 73
           s.registers.getOV mustEqual false
         })
@@ -290,21 +290,21 @@ class IncrementSpec extends AsyncWordSpec with Matchers {
       "throw an exception on overflow" in {
         recoverToSucceededIf[OverflowException] {
           // A = -4465, I = 0, F = 0, C = 54 INC6
-          execute(state, MixWord(0x400000000L | 4465000054L))
+          decimal.execute(state, MixWord(0x400000000L | 4465000054L))
         }
       }
 
       "not change the overflow flag if no overflow occurs" in {
         val stateWithOV = state.copy(registers = state.registers.updatedOV(true))
         // A = 1, I = 0, F = 0, C = 54 INC6
-        execute(stateWithOV, MixWord(1000054L)) map {
+        decimal.execute(stateWithOV, MixWord(1000054L)) map {
           _.registers.getOV mustEqual true
         }
       }
 
       "increment by the current value's negation preserving the current sign" in {
         // A = 5535, I = 0, F = 0, C = 54 INC6
-        execute(state, MixWord(5535000054L)) map {
+        decimal.execute(state, MixWord(5535000054L)) map {
           _.registers.getI(6) mustEqual MixIndex(0x4000)
         }
       }
@@ -313,7 +313,7 @@ class IncrementSpec extends AsyncWordSpec with Matchers {
     "incrementing register X" should {
       "increment by a fixed number" in {
         // A = 1, I = 0, F = 0, C = 55 INCX
-        execute(state, MixWord(1000055L)).map(s => {
+        decimal.execute(state, MixWord(1000055L)).map(s => {
           s.registers.getX mustEqual MixWord(0x400000000L | 9999992027L) // - 99 99 99 20 27
           s.registers.getOV mustEqual false
         })
@@ -321,7 +321,7 @@ class IncrementSpec extends AsyncWordSpec with Matchers {
 
       "increment by an indexed address" in {
         // A = 1, I = 5, F = 0, C = 55 INCX
-        execute(state, MixWord(1050055L)).map(s => {
+        decimal.execute(state, MixWord(1050055L)).map(s => {
           s.registers.getX mustEqual MixWord(0x400000000L | 9999991666L) // - 99 99 99 16 66
           s.registers.getOV mustEqual false
         })
@@ -329,7 +329,7 @@ class IncrementSpec extends AsyncWordSpec with Matchers {
 
       "increment with an overflow" in {
         // A = -7972, I = 0, F = 0, C = 55 INCX
-        execute(state, MixWord(0x400000000L | 7972000055L)).map(s => {
+        decimal.execute(state, MixWord(0x400000000L | 7972000055L)).map(s => {
           s.registers.getX mustEqual MixWord(0x400000000L) // - 0 0 0 0 0
           s.registers.getOV mustEqual true
         })
@@ -338,7 +338,7 @@ class IncrementSpec extends AsyncWordSpec with Matchers {
       "not change the overflow flag if no overflow occurs" in {
         val stateWithOV = state.copy(registers = state.registers.updatedOV(true))
         // A = 1, I = 0, F = 0, C = 55 INCX
-        execute(stateWithOV, MixWord(1000055L)) map {
+        decimal.execute(stateWithOV, MixWord(1000055L)) map {
           _.registers.getOV mustEqual true
         }
       }
@@ -348,7 +348,7 @@ class IncrementSpec extends AsyncWordSpec with Matchers {
           registers = state.registers.updatedX(MixWord(0x400000000L | 1308L))
         )
         // A = 1308, I = 0, F = 0, C = 55 INCX
-        execute(stateWithSmallX, MixWord(1308000055L)) map {
+        decimal.execute(stateWithSmallX, MixWord(1308000055L)) map {
           _.registers.getX mustEqual MixWord(0x400000000L)
         }
       }

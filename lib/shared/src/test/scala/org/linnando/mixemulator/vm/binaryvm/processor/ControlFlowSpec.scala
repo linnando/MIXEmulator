@@ -20,7 +20,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
   "control flow in the binary mode" should {
     "do nothing on NOP" in {
       // A = 0, I = 0, F = 0, C = 0 NOP
-      execute(state, MixWord(0x00000000)).map(s => {
+      binary.execute(state, MixWord(0x00000000)).map(s => {
         s.registers mustEqual state.registers
         s.memory mustEqual state.memory
       })
@@ -28,7 +28,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
     "stop execution on HLT" in {
       // A = 0, I = 0, F = 2, C = 5 HLT
-      execute(state, MixWord(0x00000085)).map(s => {
+      binary.execute(state, MixWord(0x00000085)).map(s => {
         s.programCounter mustEqual state.programCounter
         s.isHalted mustEqual true
       })
@@ -36,7 +36,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
     "perform unconditional jump" in {
       // A = 1000, I = 0, F = 0, C = 39 JMP
-      execute(state, MixWord(0x0fa00027)).map(s => {
+      binary.execute(state, MixWord(0x0fa00027)).map(s => {
         s.programCounter mustEqual MixIndex(1000)
         s.registers.getJ mustEqual MixIndex(3001)
       })
@@ -44,7 +44,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
     "perform unconditional jump saving J" in {
       // A = 1000, I = 0, F = 1, C = 39 JSJ
-      execute(state, MixWord(0x0fa00067)).map(s => {
+      binary.execute(state, MixWord(0x0fa00067)).map(s => {
         s.programCounter mustEqual MixIndex(1000)
         s.registers.getJ mustEqual MixIndex(0)
       })
@@ -75,7 +75,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on overflow" in {
         // A = 1000, I = 0, F = 2, C = 39 JOV
-        execute(prevState, MixWord(0x0fa000a7)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000a7)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
           s.registers.getOV mustEqual false
@@ -84,7 +84,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on no overflow" in {
         // A = 1000, I = 0, F = 3, C = 39 JNOV
-        execute(prevState, MixWord(0x0fa000e7)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000e7)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
           s.registers.getOV mustEqual true
@@ -97,7 +97,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on overflow" in {
         // A = 1000, I = 0, F = 2, C = 39 JOV
-        execute(prevState, MixWord(0x0fa000a7)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000a7)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
           s.registers.getOV mustEqual false
@@ -106,7 +106,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on no overflow" in {
         // A = 1000, I = 0, F = 3, C = 39 JNOV
-        execute(prevState, MixWord(0x0fa000e7)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000e7)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
           s.registers.getOV mustEqual false
@@ -121,7 +121,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on less" in {
         // A = 1000, I = 0, F = 4, C = 39 JL
-        execute(prevState, MixWord(0x0fa00127)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa00127)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
           s.registers.getCMP mustEqual Comparison.LESS
@@ -130,7 +130,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on equal" in {
         // A = 1000, I = 0, F = 5, C = 39 JE
-        execute(prevState, MixWord(0x0fa00167)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa00167)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
           s.registers.getCMP mustEqual Comparison.LESS
@@ -139,7 +139,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on greater" in {
         // A = 1000, I = 0, F = 6, C = 39 JG
-        execute(prevState, MixWord(0x0fa001a7)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa001a7)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
           s.registers.getCMP mustEqual Comparison.LESS
@@ -148,7 +148,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on greater or equal" in {
         // A = 1000, I = 0, F = 7, C = 39 JGE
-        execute(prevState, MixWord(0x0fa001e7)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa001e7)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
           s.registers.getCMP mustEqual Comparison.LESS
@@ -157,7 +157,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on not equal" in {
         // A = 1000, I = 0, F = 8, C = 39 JNE
-        execute(prevState, MixWord(0x0fa00227)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa00227)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
           s.registers.getCMP mustEqual Comparison.LESS
@@ -166,7 +166,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on less or equal" in {
         // A = 1000, I = 0, F = 9, C = 39 JLE
-        execute(prevState, MixWord(0x0fa00267)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa00267)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
           s.registers.getCMP mustEqual Comparison.LESS
@@ -179,7 +179,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on less" in {
         // A = 1000, I = 0, F = 4, C = 39 JL
-        execute(prevState, MixWord(0x0fa00127)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa00127)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
           s.registers.getCMP mustEqual Comparison.EQUAL
@@ -188,7 +188,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on equal" in {
         // A = 1000, I = 0, F = 5, C = 39 JE
-        execute(prevState, MixWord(0x0fa00167)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa00167)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
           s.registers.getCMP mustEqual Comparison.EQUAL
@@ -197,7 +197,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on greater" in {
         // A = 1000, I = 0, F = 6, C = 39 JG
-        execute(prevState, MixWord(0x0fa001a7)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa001a7)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
           s.registers.getCMP mustEqual Comparison.EQUAL
@@ -206,7 +206,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on greater or equal" in {
         // A = 1000, I = 0, F = 7, C = 39 JGE
-        execute(prevState, MixWord(0x0fa001e7)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa001e7)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
           s.registers.getCMP mustEqual Comparison.EQUAL
@@ -215,7 +215,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on not equal" in {
         // A = 1000, I = 0, F = 8, C = 39 JNE
-        execute(prevState, MixWord(0x0fa00227)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa00227)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
           s.registers.getCMP mustEqual Comparison.EQUAL
@@ -224,7 +224,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on less or equal" in {
         // A = 1000, I = 0, F = 9, C = 39 JLE
-        execute(prevState, MixWord(0x0fa00267)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa00267)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
           s.registers.getCMP mustEqual Comparison.EQUAL
@@ -237,7 +237,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on less" in {
         // A = 1000, I = 0, F = 4, C = 39 JL
-        execute(prevState, MixWord(0x0fa00127)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa00127)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
           s.registers.getCMP mustEqual Comparison.GREATER
@@ -246,7 +246,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on equal" in {
         // A = 1000, I = 0, F = 5, C = 39 JE
-        execute(prevState, MixWord(0x0fa00167)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa00167)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
           s.registers.getCMP mustEqual Comparison.GREATER
@@ -255,7 +255,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on greater" in {
         // A = 1000, I = 0, F = 6, C = 39 JG
-        execute(prevState, MixWord(0x0fa001a7)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa001a7)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
           s.registers.getCMP mustEqual Comparison.GREATER
@@ -264,7 +264,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on greater or equal" in {
         // A = 1000, I = 0, F = 7, C = 39 JGE
-        execute(prevState, MixWord(0x0fa001e7)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa001e7)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
           s.registers.getCMP mustEqual Comparison.GREATER
@@ -273,7 +273,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on not equal" in {
         // A = 1000, I = 0, F = 8, C = 39 JNE
-        execute(prevState, MixWord(0x0fa00227)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa00227)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
           s.registers.getCMP mustEqual Comparison.GREATER
@@ -282,7 +282,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on less or equal" in {
         // A = 1000, I = 0, F = 9, C = 39 JLE
-        execute(prevState, MixWord(0x0fa00267)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa00267)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
           s.registers.getCMP mustEqual Comparison.GREATER
@@ -297,7 +297,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on negative A" in {
         // A = 1000, I = 0, F = 0, C = 40 JAN
-        execute(prevState, MixWord(0x0fa00028)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa00028)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -305,7 +305,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on zero A" in {
         // A = 1000, I = 0, F = 1, C = 40 JAZ
-        execute(prevState, MixWord(0x0fa00068)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa00068)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -313,7 +313,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on positive A" in {
         // A = 1000, I = 0, F = 2, C = 40 JAP
-        execute(prevState, MixWord(0x0fa000a8)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000a8)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -321,7 +321,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on non-negative A" in {
         // A = 1000, I = 0, F = 3, C = 40 JANN
-        execute(prevState, MixWord(0x0fa000e8)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000e8)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -329,7 +329,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-zero A" in {
         // A = 1000, I = 0, F = 4, C = 40 JANZ
-        execute(prevState, MixWord(0x0fa00128)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa00128)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -337,7 +337,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-positive A" in {
         // A = 1000, I = 0, F = 5, C = 40 JANP
-        execute(prevState, MixWord(0x0fa00168)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa00168)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -349,7 +349,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on negative A" in {
         // A = 1000, I = 0, F = 0, C = 40 JAN
-        execute(prevState, MixWord(0x0fa00028)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa00028)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -357,7 +357,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on zero A" in {
         // A = 1000, I = 0, F = 1, C = 40 JAZ
-        execute(prevState, MixWord(0x0fa00068)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa00068)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -365,7 +365,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on positive A" in {
         // A = 1000, I = 0, F = 2, C = 40 JAP
-        execute(prevState, MixWord(0x0fa000a8)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000a8)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -373,7 +373,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-negative A" in {
         // A = 1000, I = 0, F = 3, C = 40 JANN
-        execute(prevState, MixWord(0x0fa000e8)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000e8)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -381,7 +381,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on non-zero A" in {
         // A = 1000, I = 0, F = 4, C = 40 JANZ
-        execute(prevState, MixWord(0x0fa00128)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa00128)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -389,7 +389,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-positive A" in {
         // A = 1000, I = 0, F = 5, C = 40 JANP
-        execute(prevState, MixWord(0x0fa00168)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa00168)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -401,7 +401,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on negative A" in {
         // A = 1000, I = 0, F = 0, C = 40 JAN
-        execute(prevState, MixWord(0x0fa00028)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa00028)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -409,7 +409,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on zero A" in {
         // A = 1000, I = 0, F = 1, C = 40 JAZ
-        execute(prevState, MixWord(0x0fa00068)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa00068)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -417,7 +417,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on positive A" in {
         // A = 1000, I = 0, F = 2, C = 40 JAP
-        execute(prevState, MixWord(0x0fa000a8)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000a8)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -425,7 +425,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-negative A" in {
         // A = 1000, I = 0, F = 3, C = 40 JANN
-        execute(prevState, MixWord(0x0fa000e8)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000e8)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -433,7 +433,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on non-zero A" in {
         // A = 1000, I = 0, F = 4, C = 40 JANZ
-        execute(prevState, MixWord(0x0fa00128)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa00128)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -441,7 +441,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-positive A" in {
         // A = 1000, I = 0, F = 5, C = 40 JANP
-        execute(prevState, MixWord(0x0fa00168)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa00168)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -453,7 +453,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on negative A" in {
         // A = 1000, I = 0, F = 0, C = 40 JAN
-        execute(prevState, MixWord(0x0fa00028)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa00028)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -461,7 +461,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on zero A" in {
         // A = 1000, I = 0, F = 1, C = 40 JAZ
-        execute(prevState, MixWord(0x0fa00068)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa00068)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -469,7 +469,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on positive A" in {
         // A = 1000, I = 0, F = 2, C = 40 JAP
-        execute(prevState, MixWord(0x0fa000a8)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000a8)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -477,7 +477,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-negative A" in {
         // A = 1000, I = 0, F = 3, C = 40 JANN
-        execute(prevState, MixWord(0x0fa000e8)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000e8)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -485,7 +485,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-zero A" in {
         // A = 1000, I = 0, F = 4, C = 40 JANZ
-        execute(prevState, MixWord(0x0fa00128)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa00128)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -493,7 +493,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on non-positive A" in {
         // A = 1000, I = 0, F = 5, C = 40 JANP
-        execute(prevState, MixWord(0x0fa00168)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa00168)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -507,7 +507,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on negative I1" in {
         // A = 1000, I = 0, F = 0, C = 41 J1N
-        execute(prevState, MixWord(0x0fa00029)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa00029)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -515,7 +515,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on zero I1" in {
         // A = 1000, I = 0, F = 1, C = 41 J1Z
-        execute(prevState, MixWord(0x0fa00069)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa00069)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -523,7 +523,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on positive I1" in {
         // A = 1000, I = 0, F = 2, C = 41 J1P
-        execute(prevState, MixWord(0x0fa000a9)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000a9)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -531,7 +531,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on non-negative I1" in {
         // A = 1000, I = 0, F = 3, C = 41 J1NN
-        execute(prevState, MixWord(0x0fa000e9)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000e9)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -539,7 +539,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-zero I1" in {
         // A = 1000, I = 0, F = 4, C = 41 J1NZ
-        execute(prevState, MixWord(0x0fa00129)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa00129)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -547,7 +547,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-positive I1" in {
         // A = 1000, I = 0, F = 5, C = 41 J1NP
-        execute(prevState, MixWord(0x0fa00169)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa00169)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -559,7 +559,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on negative I1" in {
         // A = 1000, I = 0, F = 0, C = 41 J1N
-        execute(prevState, MixWord(0x0fa00029)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa00029)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -567,7 +567,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on zero I1" in {
         // A = 1000, I = 0, F = 1, C = 41 J1Z
-        execute(prevState, MixWord(0x0fa00069)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa00069)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -575,7 +575,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on positive I1" in {
         // A = 1000, I = 0, F = 2, C = 41 J1P
-        execute(prevState, MixWord(0x0fa000a9)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000a9)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -583,7 +583,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-negative I1" in {
         // A = 1000, I = 0, F = 3, C = 41 J1NN
-        execute(prevState, MixWord(0x0fa000e9)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000e9)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -591,7 +591,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on non-zero I1" in {
         // A = 1000, I = 0, F = 4, C = 41 J1NZ
-        execute(prevState, MixWord(0x0fa00129)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa00129)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -599,7 +599,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-positive I1" in {
         // A = 1000, I = 0, F = 5, C = 41 J1NP
-        execute(prevState, MixWord(0x0fa00169)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa00169)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -611,7 +611,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on negative I1" in {
         // A = 1000, I = 0, F = 0, C = 41 J1N
-        execute(prevState, MixWord(0x0fa00029)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa00029)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -619,7 +619,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on zero I1" in {
         // A = 1000, I = 0, F = 1, C = 41 J1Z
-        execute(prevState, MixWord(0x0fa00069)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa00069)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -627,7 +627,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on positive I1" in {
         // A = 1000, I = 0, F = 2, C = 41 J1P
-        execute(prevState, MixWord(0x0fa000a9)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000a9)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -635,7 +635,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-negative I1" in {
         // A = 1000, I = 0, F = 3, C = 41 J1NN
-        execute(prevState, MixWord(0x0fa000e9)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000e9)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -643,7 +643,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on non-zero I1" in {
         // A = 1000, I = 0, F = 4, C = 41 J1NZ
-        execute(prevState, MixWord(0x0fa00129)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa00129)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -651,7 +651,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-positive I1" in {
         // A = 1000, I = 0, F = 5, C = 41 J1NP
-        execute(prevState, MixWord(0x0fa00169)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa00169)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -663,7 +663,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on negative I1" in {
         // A = 1000, I = 0, F = 0, C = 41 J1N
-        execute(prevState, MixWord(0x0fa00029)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa00029)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -671,7 +671,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on zero I1" in {
         // A = 1000, I = 0, F = 1, C = 41 J1Z
-        execute(prevState, MixWord(0x0fa00069)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa00069)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -679,7 +679,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on positive I1" in {
         // A = 1000, I = 0, F = 2, C = 41 J1P
-        execute(prevState, MixWord(0x0fa000a9)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000a9)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -687,7 +687,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-negative I1" in {
         // A = 1000, I = 0, F = 3, C = 41 J1NN
-        execute(prevState, MixWord(0x0fa000e9)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000e9)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -695,7 +695,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-zero I1" in {
         // A = 1000, I = 0, F = 4, C = 41 J1NZ
-        execute(prevState, MixWord(0x0fa00129)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa00129)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -703,7 +703,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on non-positive I1" in {
         // A = 1000, I = 0, F = 5, C = 41 J1NP
-        execute(prevState, MixWord(0x0fa00169)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa00169)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -717,7 +717,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on negative I2" in {
         // A = 1000, I = 0, F = 0, C = 42 J2N
-        execute(prevState, MixWord(0x0fa0002a)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0002a)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -725,7 +725,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on zero I2" in {
         // A = 1000, I = 0, F = 1, C = 42 J2Z
-        execute(prevState, MixWord(0x0fa0006a)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0006a)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -733,7 +733,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on positive I2" in {
         // A = 1000, I = 0, F = 2, C = 42 J2P
-        execute(prevState, MixWord(0x0fa000aa)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000aa)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -741,7 +741,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on non-negative I2" in {
         // A = 1000, I = 0, F = 3, C = 42 J2NN
-        execute(prevState, MixWord(0x0fa000ea)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000ea)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -749,7 +749,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-zero I2" in {
         // A = 1000, I = 0, F = 4, C = 42 J2NZ
-        execute(prevState, MixWord(0x0fa0012a)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0012a)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -757,7 +757,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-positive I2" in {
         // A = 1000, I = 0, F = 5, C = 42 J2NP
-        execute(prevState, MixWord(0x0fa0016a)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0016a)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -769,7 +769,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on negative I2" in {
         // A = 1000, I = 0, F = 0, C = 42 J2N
-        execute(prevState, MixWord(0x0fa0002a)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0002a)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -777,7 +777,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on zero I2" in {
         // A = 1000, I = 0, F = 1, C = 42 J2Z
-        execute(prevState, MixWord(0x0fa0006a)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0006a)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -785,7 +785,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on positive I2" in {
         // A = 1000, I = 0, F = 2, C = 42 J2P
-        execute(prevState, MixWord(0x0fa000aa)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000aa)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -793,7 +793,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-negative I2" in {
         // A = 1000, I = 0, F = 3, C = 42 J2NN
-        execute(prevState, MixWord(0x0fa000ea)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000ea)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -801,7 +801,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on non-zero I2" in {
         // A = 1000, I = 0, F = 4, C = 42 J2NZ
-        execute(prevState, MixWord(0x0fa0012a)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0012a)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -809,7 +809,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-positive I2" in {
         // A = 1000, I = 0, F = 5, C = 42 J2NP
-        execute(prevState, MixWord(0x0fa0016a)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0016a)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -821,7 +821,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on negative I2" in {
         // A = 1000, I = 0, F = 0, C = 42 J2N
-        execute(prevState, MixWord(0x0fa0002a)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0002a)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -829,7 +829,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on zero I2" in {
         // A = 1000, I = 0, F = 1, C = 42 J2Z
-        execute(prevState, MixWord(0x0fa0006a)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0006a)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -837,7 +837,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on positive I2" in {
         // A = 1000, I = 0, F = 2, C = 42 J2P
-        execute(prevState, MixWord(0x0fa000aa)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000aa)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -845,7 +845,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-negative I2" in {
         // A = 1000, I = 0, F = 3, C = 42 J2NN
-        execute(prevState, MixWord(0x0fa000ea)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000ea)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -853,7 +853,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on non-zero I2" in {
         // A = 1000, I = 0, F = 4, C = 42 J2NZ
-        execute(prevState, MixWord(0x0fa0012a)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0012a)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -861,7 +861,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-positive I2" in {
         // A = 1000, I = 0, F = 5, C = 42 J2NP
-        execute(prevState, MixWord(0x0fa0016a)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0016a)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -873,7 +873,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on negative I2" in {
         // A = 1000, I = 0, F = 0, C = 42 J2N
-        execute(prevState, MixWord(0x0fa0002a)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0002a)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -881,7 +881,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on zero I2" in {
         // A = 1000, I = 0, F = 1, C = 42 J2Z
-        execute(prevState, MixWord(0x0fa0006a)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0006a)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -889,7 +889,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on positive I2" in {
         // A = 1000, I = 0, F = 2, C = 42 J2P
-        execute(prevState, MixWord(0x0fa000aa)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000aa)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -897,7 +897,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-negative I2" in {
         // A = 1000, I = 0, F = 3, C = 42 J2NN
-        execute(prevState, MixWord(0x0fa000ea)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000ea)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -905,7 +905,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-zero I2" in {
         // A = 1000, I = 0, F = 4, C = 42 J2NZ
-        execute(prevState, MixWord(0x0fa0012a)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0012a)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -913,7 +913,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on non-positive I2" in {
         // A = 1000, I = 0, F = 5, C = 42 J2NP
-        execute(prevState, MixWord(0x0fa0016a)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0016a)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -927,7 +927,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on negative I3" in {
         // A = 1000, I = 0, F = 0, C = 43 J3N
-        execute(prevState, MixWord(0x0fa0002b)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0002b)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -935,7 +935,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on zero I3" in {
         // A = 1000, I = 0, F = 1, C = 43 J3Z
-        execute(prevState, MixWord(0x0fa0006b)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0006b)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -943,7 +943,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on positive I3" in {
         // A = 1000, I = 0, F = 2, C = 43 J3P
-        execute(prevState, MixWord(0x0fa000ab)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000ab)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -951,7 +951,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on non-negative I3" in {
         // A = 1000, I = 0, F = 3, C = 43 J3NN
-        execute(prevState, MixWord(0x0fa000eb)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000eb)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -959,7 +959,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-zero I3" in {
         // A = 1000, I = 0, F = 4, C = 43 J3NZ
-        execute(prevState, MixWord(0x0fa0012b)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0012b)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -967,7 +967,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-positive I3" in {
         // A = 1000, I = 0, F = 5, C = 43 J3NP
-        execute(prevState, MixWord(0x0fa0016b)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0016b)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -979,7 +979,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on negative I3" in {
         // A = 1000, I = 0, F = 0, C = 43 J3N
-        execute(prevState, MixWord(0x0fa0002b)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0002b)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -987,7 +987,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on zero I3" in {
         // A = 1000, I = 0, F = 1, C = 43 J3Z
-        execute(prevState, MixWord(0x0fa0006b)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0006b)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -995,7 +995,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on positive I3" in {
         // A = 1000, I = 0, F = 2, C = 43 J3P
-        execute(prevState, MixWord(0x0fa000ab)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000ab)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -1003,7 +1003,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-negative I3" in {
         // A = 1000, I = 0, F = 3, C = 43 J3NN
-        execute(prevState, MixWord(0x0fa000eb)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000eb)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -1011,7 +1011,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on non-negative I3" in {
         // A = 1000, I = 0, F = 4, C = 43 J3NZ
-        execute(prevState, MixWord(0x0fa0012b)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0012b)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -1019,7 +1019,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-positive I3" in {
         // A = 1000, I = 0, F = 5, C = 43 J3NP
-        execute(prevState, MixWord(0x0fa0016b)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0016b)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -1031,7 +1031,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on negative I3" in {
         // A = 1000, I = 0, F = 0, C = 43 J3N
-        execute(prevState, MixWord(0x0fa0002b)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0002b)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -1039,7 +1039,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on zero I3" in {
         // A = 1000, I = 0, F = 1, C = 43 J3Z
-        execute(prevState, MixWord(0x0fa0006b)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0006b)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -1047,7 +1047,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on positive I3" in {
         // A = 1000, I = 0, F = 2, C = 43 J3P
-        execute(prevState, MixWord(0x0fa000ab)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000ab)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -1055,7 +1055,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-negative I3" in {
         // A = 1000, I = 0, F = 3, C = 43 J3NN
-        execute(prevState, MixWord(0x0fa000eb)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000eb)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -1063,7 +1063,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on non-zero I3" in {
         // A = 1000, I = 0, F = 4, C = 43 J3NZ
-        execute(prevState, MixWord(0x0fa0012b)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0012b)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -1071,7 +1071,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-positive I3" in {
         // A = 1000, I = 0, F = 5, C = 43 J3NP
-        execute(prevState, MixWord(0x0fa0016b)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0016b)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -1083,7 +1083,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on negative I3" in {
         // A = 1000, I = 0, F = 0, C = 43 J3N
-        execute(prevState, MixWord(0x0fa0002b)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0002b)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -1091,7 +1091,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on zero I3" in {
         // A = 1000, I = 0, F = 1, C = 43 J3Z
-        execute(prevState, MixWord(0x0fa0006b)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0006b)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -1099,7 +1099,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on positive I3" in {
         // A = 1000, I = 0, F = 2, C = 43 J3P
-        execute(prevState, MixWord(0x0fa000ab)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000ab)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -1107,7 +1107,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-negative I3" in {
         // A = 1000, I = 0, F = 3, C = 43 J3NN
-        execute(prevState, MixWord(0x0fa000eb)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000eb)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -1115,7 +1115,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-zero I3" in {
         // A = 1000, I = 0, F = 4, C = 43 J3NZ
-        execute(prevState, MixWord(0x0fa0012b)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0012b)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -1123,7 +1123,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on non-positive I3" in {
         // A = 1000, I = 0, F = 5, C = 43 J3NP
-        execute(prevState, MixWord(0x0fa0016b)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0016b)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -1137,7 +1137,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on negative I4" in {
         // A = 1000, I = 0, F = 0, C = 44 J4N
-        execute(prevState, MixWord(0x0fa0002c)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0002c)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -1145,7 +1145,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on zero I4" in {
         // A = 1000, I = 0, F = 1, C = 44 J4Z
-        execute(prevState, MixWord(0x0fa0006c)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0006c)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -1153,7 +1153,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on positive I4" in {
         // A = 1000, I = 0, F = 2, C = 44 J4P
-        execute(prevState, MixWord(0x0fa000ac)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000ac)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -1161,7 +1161,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on non-negative I4" in {
         // A = 1000, I = 0, F = 3, C = 44 J4NN
-        execute(prevState, MixWord(0x0fa000ec)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000ec)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -1169,7 +1169,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-zero I4" in {
         // A = 1000, I = 0, F = 4, C = 44 J4NZ
-        execute(prevState, MixWord(0x0fa0012c)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0012c)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -1177,7 +1177,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-positive I4" in {
         // A = 1000, I = 0, F = 5, C = 44 J4NP
-        execute(prevState, MixWord(0x0fa0016c)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0016c)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -1189,7 +1189,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on negative I4" in {
         // A = 1000, I = 0, F = 0, C = 44 J4N
-        execute(prevState, MixWord(0x0fa0002c)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0002c)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -1197,7 +1197,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on zero I4" in {
         // A = 1000, I = 0, F = 1, C = 44 J4Z
-        execute(prevState, MixWord(0x0fa0006c)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0006c)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -1205,7 +1205,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on positive I4" in {
         // A = 1000, I = 0, F = 2, C = 44 J4P
-        execute(prevState, MixWord(0x0fa000ac)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000ac)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -1213,7 +1213,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-negative I4" in {
         // A = 1000, I = 0, F = 3, C = 44 J4NN
-        execute(prevState, MixWord(0x0fa000ec)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000ec)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -1221,7 +1221,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on non-zero I4" in {
         // A = 1000, I = 0, F = 4, C = 44 J4NZ
-        execute(prevState, MixWord(0x0fa0012c)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0012c)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -1229,7 +1229,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-positive I4" in {
         // A = 1000, I = 0, F = 5, C = 44 J4NP
-        execute(prevState, MixWord(0x0fa0016c)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0016c)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -1241,7 +1241,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on negative I4" in {
         // A = 1000, I = 0, F = 0, C = 44 J4N
-        execute(prevState, MixWord(0x0fa0002c)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0002c)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -1249,7 +1249,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on zero I4" in {
         // A = 1000, I = 0, F = 1, C = 44 J4Z
-        execute(prevState, MixWord(0x0fa0006c)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0006c)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -1257,7 +1257,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on positive I4" in {
         // A = 1000, I = 0, F = 2, C = 44 J4P
-        execute(prevState, MixWord(0x0fa000ac)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000ac)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -1265,7 +1265,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-negative I4" in {
         // A = 1000, I = 0, F = 3, C = 44 J4NN
-        execute(prevState, MixWord(0x0fa000ec)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000ec)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -1273,7 +1273,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on non-zero I4" in {
         // A = 1000, I = 0, F = 4, C = 44 J4NZ
-        execute(prevState, MixWord(0x0fa0012c)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0012c)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -1281,7 +1281,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-positive I4" in {
         // A = 1000, I = 0, F = 5, C = 44 J4NP
-        execute(prevState, MixWord(0x0fa0016c)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0016c)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -1293,7 +1293,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on negative I4" in {
         // A = 1000, I = 0, F = 0, C = 44 J4N
-        execute(prevState, MixWord(0x0fa0002c)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0002c)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -1301,7 +1301,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on zero I4" in {
         // A = 1000, I = 0, F = 1, C = 44 J4Z
-        execute(prevState, MixWord(0x0fa0006c)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0006c)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -1309,7 +1309,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on positive I4" in {
         // A = 1000, I = 0, F = 2, C = 44 J4P
-        execute(prevState, MixWord(0x0fa000ac)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000ac)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -1317,7 +1317,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-negative I4" in {
         // A = 1000, I = 0, F = 3, C = 44 J4NN
-        execute(prevState, MixWord(0x0fa000ec)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000ec)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -1325,7 +1325,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-zero I4" in {
         // A = 1000, I = 0, F = 4, C = 44 J4NZ
-        execute(prevState, MixWord(0x0fa0012c)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0012c)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -1333,7 +1333,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on non-positive I4" in {
         // A = 1000, I = 0, F = 5, C = 44 J4NP
-        execute(prevState, MixWord(0x0fa0016c)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0016c)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -1347,7 +1347,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on negative I5" in {
         // A = 1000, I = 0, F = 0, C = 45 J5N
-        execute(prevState, MixWord(0x0fa0002d)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0002d)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -1355,7 +1355,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on zero I5" in {
         // A = 1000, I = 0, F = 1, C = 45 J5Z
-        execute(prevState, MixWord(0x0fa0006d)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0006d)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -1363,7 +1363,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on positive I5" in {
         // A = 1000, I = 0, F = 2, C = 45 J5P
-        execute(prevState, MixWord(0x0fa000ad)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000ad)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -1371,7 +1371,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on non-negative I5" in {
         // A = 1000, I = 0, F = 3, C = 45 J5NN
-        execute(prevState, MixWord(0x0fa000ed)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000ed)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -1379,7 +1379,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-zero I5" in {
         // A = 1000, I = 0, F = 4, C = 45 J5NZ
-        execute(prevState, MixWord(0x0fa0012d)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0012d)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -1387,7 +1387,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-positive I5" in {
         // A = 1000, I = 0, F = 5, C = 45 J5NP
-        execute(prevState, MixWord(0x0fa0016d)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0016d)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -1399,7 +1399,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on negative I5" in {
         // A = 1000, I = 0, F = 0, C = 45 J5N
-        execute(prevState, MixWord(0x0fa0002d)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0002d)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -1407,7 +1407,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on zero I5" in {
         // A = 1000, I = 0, F = 1, C = 45 J5Z
-        execute(prevState, MixWord(0x0fa0006d)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0006d)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -1415,7 +1415,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on positive I5" in {
         // A = 1000, I = 0, F = 2, C = 45 J5P
-        execute(prevState, MixWord(0x0fa000ad)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000ad)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -1423,7 +1423,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-negative I5" in {
         // A = 1000, I = 0, F = 3, C = 45 J5NN
-        execute(prevState, MixWord(0x0fa000ed)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000ed)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -1431,7 +1431,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on non-zero I5" in {
         // A = 1000, I = 0, F = 4, C = 45 J5NZ
-        execute(prevState, MixWord(0x0fa0012d)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0012d)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -1439,7 +1439,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-positive I5" in {
         // A = 1000, I = 0, F = 5, C = 45 J5NP
-        execute(prevState, MixWord(0x0fa0016d)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0016d)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -1451,7 +1451,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on negative I5" in {
         // A = 1000, I = 0, F = 0, C = 45 J5N
-        execute(prevState, MixWord(0x0fa0002d)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0002d)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -1459,7 +1459,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on zero I5" in {
         // A = 1000, I = 0, F = 1, C = 45 J5Z
-        execute(prevState, MixWord(0x0fa0006d)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0006d)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -1467,7 +1467,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on positive I5" in {
         // A = 1000, I = 0, F = 2, C = 45 J5P
-        execute(prevState, MixWord(0x0fa000ad)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000ad)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -1475,7 +1475,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-negative I5" in {
         // A = 1000, I = 0, F = 3, C = 45 J5NN
-        execute(prevState, MixWord(0x0fa000ed)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000ed)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -1483,7 +1483,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on non-zero I5" in {
         // A = 1000, I = 0, F = 4, C = 45 J5NZ
-        execute(prevState, MixWord(0x0fa0012d)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0012d)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -1491,7 +1491,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-positive I5" in {
         // A = 1000, I = 0, F = 5, C = 45 J5NP
-        execute(prevState, MixWord(0x0fa0016d)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0016d)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -1503,7 +1503,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on negative I5" in {
         // A = 1000, I = 0, F = 0, C = 45 J5N
-        execute(prevState, MixWord(0x0fa0002d)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0002d)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -1511,7 +1511,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on zero I5" in {
         // A = 1000, I = 0, F = 1, C = 45 J5Z
-        execute(prevState, MixWord(0x0fa0006d)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0006d)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -1519,7 +1519,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on positive I5" in {
         // A = 1000, I = 0, F = 2, C = 45 J5P
-        execute(prevState, MixWord(0x0fa000ad)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000ad)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -1527,7 +1527,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-negative I5" in {
         // A = 1000, I = 0, F = 3, C = 45 J5NN
-        execute(prevState, MixWord(0x0fa000ed)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000ed)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -1535,7 +1535,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-zero I5" in {
         // A = 1000, I = 0, F = 4, C = 45 J5NZ
-        execute(prevState, MixWord(0x0fa0012d)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0012d)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -1543,7 +1543,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on non-positive I5" in {
         // A = 1000, I = 0, F = 5, C = 45 J5NP
-        execute(prevState, MixWord(0x0fa0016d)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0016d)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -1557,7 +1557,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on negative I6" in {
         // A = 1000, I = 0, F = 0, C = 46 J6N
-        execute(prevState, MixWord(0x0fa0002e)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0002e)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -1565,7 +1565,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on zero I6" in {
         // A = 1000, I = 0, F = 1, C = 46 J6Z
-        execute(prevState, MixWord(0x0fa0006e)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0006e)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -1573,7 +1573,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on positive I6" in {
         // A = 1000, I = 0, F = 2, C = 46 J6P
-        execute(prevState, MixWord(0x0fa000ae)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000ae)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -1581,7 +1581,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on non-negative I6" in {
         // A = 1000, I = 0, F = 3, C = 46 J6NN
-        execute(prevState, MixWord(0x0fa000ee)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000ee)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -1589,7 +1589,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-zero I6" in {
         // A = 1000, I = 0, F = 4, C = 46 J6NZ
-        execute(prevState, MixWord(0x0fa0012e)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0012e)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -1597,7 +1597,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-positive I6" in {
         // A = 1000, I = 0, F = 5, C = 46 J6NP
-        execute(prevState, MixWord(0x0fa0016e)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0016e)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -1609,7 +1609,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on negative I6" in {
         // A = 1000, I = 0, F = 0, C = 46 J6N
-        execute(prevState, MixWord(0x0fa0002e)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0002e)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -1617,7 +1617,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on zero I6" in {
         // A = 1000, I = 0, F = 1, C = 46 J6Z
-        execute(prevState, MixWord(0x0fa0006e)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0006e)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -1625,7 +1625,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on positive I6" in {
         // A = 1000, I = 0, F = 2, C = 46 J6P
-        execute(prevState, MixWord(0x0fa000ae)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000ae)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -1633,7 +1633,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-negative I6" in {
         // A = 1000, I = 0, F = 3, C = 46 J6NN
-        execute(prevState, MixWord(0x0fa000ee)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000ee)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -1641,7 +1641,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on non-zero I6" in {
         // A = 1000, I = 0, F = 4, C = 46 J6NZ
-        execute(prevState, MixWord(0x0fa0012e)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0012e)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -1649,7 +1649,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-positive I6" in {
         // A = 1000, I = 0, F = 5, C = 46 J6NP
-        execute(prevState, MixWord(0x0fa0016e)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0016e)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -1661,7 +1661,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on negative I6" in {
         // A = 1000, I = 0, F = 0, C = 46 J6N
-        execute(prevState, MixWord(0x0fa0002e)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0002e)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -1669,7 +1669,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on zero I6" in {
         // A = 1000, I = 0, F = 1, C = 46 J6Z
-        execute(prevState, MixWord(0x0fa0006e)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0006e)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -1677,7 +1677,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on positive I6" in {
         // A = 1000, I = 0, F = 2, C = 46 J6P
-        execute(prevState, MixWord(0x0fa000ae)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000ae)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -1685,7 +1685,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-negative I6" in {
         // A = 1000, I = 0, F = 3, C = 46 J6NN
-        execute(prevState, MixWord(0x0fa000ee)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000ee)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -1693,7 +1693,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on non-zero I6" in {
         // A = 1000, I = 0, F = 4, C = 46 J6NZ
-        execute(prevState, MixWord(0x0fa0012e)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0012e)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -1701,7 +1701,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-positive I6" in {
         // A = 1000, I = 0, F = 5, C = 46 J6NP
-        execute(prevState, MixWord(0x0fa0016e)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0016e)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -1713,7 +1713,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on negative I6" in {
         // A = 1000, I = 0, F = 0, C = 46 J6N
-        execute(prevState, MixWord(0x0fa0002e)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0002e)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -1721,7 +1721,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on zero I6" in {
         // A = 1000, I = 0, F = 1, C = 46 J6Z
-        execute(prevState, MixWord(0x0fa0006e)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0006e)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -1729,7 +1729,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on positive I6" in {
         // A = 1000, I = 0, F = 2, C = 46 J6P
-        execute(prevState, MixWord(0x0fa000ae)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000ae)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -1737,7 +1737,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-negative I6" in {
         // A = 1000, I = 0, F = 3, C = 46 J6NN
-        execute(prevState, MixWord(0x0fa000ee)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000ee)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -1745,7 +1745,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-zero I6" in {
         // A = 1000, I = 0, F = 4, C = 46 J6NZ
-        execute(prevState, MixWord(0x0fa0012e)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0012e)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -1753,7 +1753,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on non-positive I6" in {
         // A = 1000, I = 0, F = 5, C = 46 J6NP
-        execute(prevState, MixWord(0x0fa0016e)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0016e)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -1767,7 +1767,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on negative X" in {
         // A = 1000, I = 0, F = 0, C = 47 JXN
-        execute(prevState, MixWord(0x0fa0002f)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0002f)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -1775,7 +1775,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on zero X" in {
         // A = 1000, I = 0, F = 1, C = 47 JXZ
-        execute(prevState, MixWord(0x0fa0006f)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0006f)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -1783,7 +1783,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on positive X" in {
         // A = 1000, I = 0, F = 2, C = 47 JXP
-        execute(prevState, MixWord(0x0fa000af)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000af)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -1791,7 +1791,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on non-negative X" in {
         // A = 1000, I = 0, F = 3, C = 47 JXNN
-        execute(prevState, MixWord(0x0fa000ef)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000ef)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -1799,7 +1799,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-zero X" in {
         // A = 1000, I = 0, F = 4, C = 47 JXNZ
-        execute(prevState, MixWord(0x0fa0012f)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0012f)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -1807,7 +1807,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-positive X" in {
         // A = 1000, I = 0, F = 5, C = 47 JXNP
-        execute(prevState, MixWord(0x0fa0016f)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0016f)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -1819,7 +1819,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on negative X" in {
         // A = 1000, I = 0, F = 0, C = 47 JXN
-        execute(prevState, MixWord(0x0fa0002f)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0002f)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -1827,7 +1827,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on zero X" in {
         // A = 1000, I = 0, F = 1, C = 47 JXZ
-        execute(prevState, MixWord(0x0fa0006f)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0006f)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -1835,7 +1835,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on positive X" in {
         // A = 1000, I = 0, F = 2, C = 47 JXP
-        execute(prevState, MixWord(0x0fa000af)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000af)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -1843,7 +1843,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-negative X" in {
         // A = 1000, I = 0, F = 3, C = 47 JXNN
-        execute(prevState, MixWord(0x0fa000ef)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000ef)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -1851,7 +1851,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on non-zero X" in {
         // A = 1000, I = 0, F = 4, C = 47 JXNZ
-        execute(prevState, MixWord(0x0fa0012f)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0012f)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -1859,7 +1859,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-positive X" in {
         // A = 1000, I = 0, F = 5, C = 47 JXNP
-        execute(prevState, MixWord(0x0fa0016f)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0016f)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -1871,7 +1871,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on negative X" in {
         // A = 1000, I = 0, F = 0, C = 47 JXN
-        execute(prevState, MixWord(0x0fa0002f)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0002f)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -1879,7 +1879,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on zero X" in {
         // A = 1000, I = 0, F = 1, C = 47 JXZ
-        execute(prevState, MixWord(0x0fa0006f)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0006f)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -1887,7 +1887,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on positive X" in {
         // A = 1000, I = 0, F = 2, C = 47 JXP
-        execute(prevState, MixWord(0x0fa000af)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000af)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -1895,7 +1895,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-negative X" in {
         // A = 1000, I = 0, F = 3, C = 47 JXNN
-        execute(prevState, MixWord(0x0fa000ef)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000ef)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -1903,7 +1903,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on non-zero X" in {
         // A = 1000, I = 0, F = 4, C = 47 JXNZ
-        execute(prevState, MixWord(0x0fa0012f)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0012f)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -1911,7 +1911,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-positive X" in {
         // A = 1000, I = 0, F = 5, C = 47 JXNP
-        execute(prevState, MixWord(0x0fa0016f)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0016f)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -1923,7 +1923,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on negative X" in {
         // A = 1000, I = 0, F = 0, C = 47 JXN
-        execute(prevState, MixWord(0x0fa0002f)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0002f)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -1931,7 +1931,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on zero X" in {
         // A = 1000, I = 0, F = 1, C = 47 JXZ
-        execute(prevState, MixWord(0x0fa0006f)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0006f)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })
@@ -1939,7 +1939,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on positive X" in {
         // A = 1000, I = 0, F = 2, C = 47 JXP
-        execute(prevState, MixWord(0x0fa000af)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000af)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -1947,7 +1947,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-negative X" in {
         // A = 1000, I = 0, F = 3, C = 47 JXNN
-        execute(prevState, MixWord(0x0fa000ef)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa000ef)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -1955,7 +1955,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "trigger conditional jump on non-zero X" in {
         // A = 1000, I = 0, F = 4, C = 47 JXNZ
-        execute(prevState, MixWord(0x0fa0012f)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0012f)).map(s => {
           s.programCounter mustEqual MixIndex(1000)
           s.registers.getJ mustEqual MixIndex(3001)
         })
@@ -1963,7 +1963,7 @@ class ControlFlowSpec extends AsyncWordSpec with Matchers {
 
       "not trigger conditional jump on non-positive X" in {
         // A = 1000, I = 0, F = 5, C = 47 JXNP
-        execute(prevState, MixWord(0x0fa0016f)).map(s => {
+        binary.execute(prevState, MixWord(0x0fa0016f)).map(s => {
           s.programCounter mustEqual MixIndex(3001)
           s.registers.getJ mustEqual MixIndex(0)
         })

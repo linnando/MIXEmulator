@@ -31,7 +31,7 @@ class IOSpec extends AsyncWordSpec with Matchers with Inside with Inspectors wit
   "generic positional input device in the binary mode" should {
     "input data" in {
       // A = 1000, I = 0, F = 0, C = 36 IN
-      execute(state, MixWord(0x0fa00024)).map(s => {
+      binary.execute(state, MixWord(0x0fa00024)).map(s => {
         s.memory.exclusiveLocks must contain((MixIndex(1000), MockPositionalInputDevice.blockSize, 0))
         inside(s.devices(0)) { case (device: MockPositionalInputDevice, destination: Option[MixIndex]) =>
           device.counter must be > 0
@@ -43,20 +43,20 @@ class IOSpec extends AsyncWordSpec with Matchers with Inside with Inspectors wit
     "throw an exception on an attempt to output data" in {
       recoverToSucceededIf[UnsupportedIoOperationException] {
         // A = 1000, I = 0, F = 0, C = 37 OUT
-        execute(state, MixWord(0x0fa00025))
+        binary.execute(state, MixWord(0x0fa00025))
       }
     }
 
     "throw an exception on input/output control command" in {
       recoverToSucceededIf[UnsupportedIoOperationException] {
         // A = 0, I = 0, F = 0, C = 35 IOC
-        execute(state, MixWord(0x00000023))
+        binary.execute(state, MixWord(0x00000023))
       }
     }
 
     "trigger jump ready when device is not busy" in {
       // A = 1000, I = 0, F = 0, C = 38 JRED
-      execute(state, MixWord(0x0fa00026)).map(s => {
+      binary.execute(state, MixWord(0x0fa00026)).map(s => {
         s.programCounter mustEqual MixIndex(1000)
         s.registers.getJ mustEqual MixIndex(1)
       })
@@ -64,7 +64,7 @@ class IOSpec extends AsyncWordSpec with Matchers with Inside with Inspectors wit
 
     "not trigger jump busy when device is not busy" in {
       // A = 1000, I = 0, F = 0, C = 34 JBUS
-      execute(state, MixWord(0x0fa00022)).map(s => {
+      binary.execute(state, MixWord(0x0fa00022)).map(s => {
         s.programCounter mustEqual MixIndex(1)
         s.registers.getJ mustEqual MixIndex(0)
       })
@@ -72,27 +72,27 @@ class IOSpec extends AsyncWordSpec with Matchers with Inside with Inspectors wit
 
     "throw an exception on jump ready when device is busy" in {
       // A = 1000, I = 0, F = 0, C = 36 IN
-      val prevState = execute(state, MixWord(0x0fa00024))
+      val prevState = binary.execute(state, MixWord(0x0fa00024))
       recoverToSucceededIf[UnpredictableExecutionFlowException] {
         // A = 1000, I = 0, F = 0, C = 38 JRED
-        prevState.flatMap(execute(_, MixWord(0x0fa00026)))
+        prevState.flatMap(binary.execute(_, MixWord(0x0fa00026)))
       }
     }
 
     "throw an exception on jump busy when device is busy and the address is not the same as the program counter" in {
       // A = 1000, I = 0, F = 0, C = 36 IN
-      val prevState = execute(state, MixWord(0x0fa00024))
+      val prevState = binary.execute(state, MixWord(0x0fa00024))
       recoverToSucceededIf[UnpredictableExecutionFlowException] {
         // A = 1000, I = 0, F = 0, C = 34 JBUS
-        prevState.flatMap(execute(_, MixWord(0x0fa00022)))
+        prevState.flatMap(binary.execute(_, MixWord(0x0fa00022)))
       }
     }
 
     "flush device input on jump busy when device is reading and the address is the same as the program counter" in {
       // A = 1000, I = 0, F = 0, C = 36 IN
-      val prevState = execute(state, MixWord(0x0fa00024))
+      val prevState = binary.execute(state, MixWord(0x0fa00024))
       // A = 1, I = 0, F = 0, C = 34 JBUS
-      prevState.flatMap(execute(_, MixWord(0x00040022))).map(s => {
+      prevState.flatMap(binary.execute(_, MixWord(0x00040022))).map(s => {
         s.memory.exclusiveLocks must not contain ((MixIndex(1000), MockPositionalInputDevice.blockSize, 0))
         s.programCounter mustEqual MixIndex(2)
         forAll(0 until MockPositionalInputDevice.blockSize) { i =>
@@ -107,13 +107,13 @@ class IOSpec extends AsyncWordSpec with Matchers with Inside with Inspectors wit
     "throw an exception on an attempt to input data" in {
       recoverToSucceededIf[UnsupportedIoOperationException] {
         // A = 1000, I = 0, F = 1, C = 36 IN
-        execute(state, MixWord(0x0fa00064))
+        binary.execute(state, MixWord(0x0fa00064))
       }
     }
 
     "output data" in {
       // A = 1000, I = 0, F = 1, C = 37 OUT
-      execute(state, MixWord(0x0fa00065)).map(s => {
+      binary.execute(state, MixWord(0x0fa00065)).map(s => {
         s.memory.sharedLocks must contain((MixIndex(1000), MockPositionalOutputDevice.blockSize, 1))
         inside(s.devices(1)) { case (device: MockPositionalOutputDevice, destination: Option[MixIndex]) =>
           device.counter must be > 0
@@ -126,7 +126,7 @@ class IOSpec extends AsyncWordSpec with Matchers with Inside with Inspectors wit
     "throw an exception on input/output control command" in {
       recoverToSucceededIf[UnsupportedIoOperationException] {
         // A = 0, I = 0, F = 1, C = 35 IOC
-        execute(state, MixWord(0x00000063))
+        binary.execute(state, MixWord(0x00000063))
       }
     }
   }
@@ -134,7 +134,7 @@ class IOSpec extends AsyncWordSpec with Matchers with Inside with Inspectors wit
   "generic random access device in the binary mode" should {
     "input data" in {
       // A = 1000, I = 0, F = 2, C = 36 IN
-      execute(state, MixWord(0x0fa000a4)).map(s => {
+      binary.execute(state, MixWord(0x0fa000a4)).map(s => {
         s.memory.exclusiveLocks must contain((MixIndex(1000), MockRandomAccessIODevice.blockSize, 2))
         inside(s.devices(2)) { case (device: MockRandomAccessIODevice, destination: Option[MixIndex]) =>
           device.position mustEqual 2000
@@ -145,7 +145,7 @@ class IOSpec extends AsyncWordSpec with Matchers with Inside with Inspectors wit
 
     "output data" in {
       // A = 1000, I = 0, F = 2, C = 37 OUT
-      execute(state, MixWord(0x0fa000a5)).map(s => {
+      binary.execute(state, MixWord(0x0fa000a5)).map(s => {
         s.memory.sharedLocks must contain((MixIndex(1000), MockRandomAccessIODevice.blockSize, 2))
         inside(s.devices(2)) { case (device: MockRandomAccessIODevice, destination: Option[MixIndex]) =>
           device.position mustEqual 2000
@@ -158,7 +158,7 @@ class IOSpec extends AsyncWordSpec with Matchers with Inside with Inspectors wit
     "throw an exception on input/output control command" in {
       recoverToSucceededIf[UnsupportedIoOperationException] {
         // A = 0, I = 0, F = 2, C = 35 IOC
-        execute(state, MixWord(0x000000a3))
+        binary.execute(state, MixWord(0x000000a3))
       }
     }
   }
@@ -166,7 +166,7 @@ class IOSpec extends AsyncWordSpec with Matchers with Inside with Inspectors wit
   "tape unit in the binary mode" should {
     "position the tape" in {
       // A = 10, I = 0, F = 3, C = 35 IOC
-      execute(state, MixWord(0x002800e3)).map(s => {
+      binary.execute(state, MixWord(0x002800e3)).map(s => {
         inside(s.devices(3)) { case (device: MockTapeUnit, destination: Option[MixIndex]) =>
           device.position mustEqual 10
           destination mustBe empty
@@ -178,7 +178,7 @@ class IOSpec extends AsyncWordSpec with Matchers with Inside with Inspectors wit
   "disk unit in the binary mode" should {
     "position the disk" in {
       // A = 0, I = 0, F = 4, C = 35 IOC
-      execute(state, MixWord(0x00000123)).map(s => {
+      binary.execute(state, MixWord(0x00000123)).map(s => {
         inside(s.devices(4)) { case (device: MockDiskUnit, destination: Option[MixIndex]) =>
           device.position mustEqual 2000
           destination mustBe empty
@@ -189,7 +189,7 @@ class IOSpec extends AsyncWordSpec with Matchers with Inside with Inspectors wit
     "throw an exception on input/output control command if M != 0" in {
       recoverToSucceededIf[WrongMemoryAddressException] {
         // A = 1, I = 0, F = 4, C = 35 IOC
-        execute(state, MixWord(0x00040123))
+        binary.execute(state, MixWord(0x00040123))
       }
     }
   }
@@ -197,7 +197,7 @@ class IOSpec extends AsyncWordSpec with Matchers with Inside with Inspectors wit
   "line printer in the binary mode" should {
     "switch page" in {
       // A = 0, I = 0, F = 5, C = 35 IOC
-      execute(state, MixWord(0x00000163)).map(s => {
+      binary.execute(state, MixWord(0x00000163)).map(s => {
         inside(s.devices(5)) { case (device: MockLinePrinter, destination: Option[MixIndex]) =>
           device.page must be > 0
           destination mustBe empty
@@ -208,7 +208,7 @@ class IOSpec extends AsyncWordSpec with Matchers with Inside with Inspectors wit
     "throw an exception on input/output control command if M != 0" in {
       recoverToSucceededIf[WrongMemoryAddressException] {
         // A = 1, I = 0, F = 5, C = 35 IOC
-        execute(state, MixWord(0x00040163))
+        binary.execute(state, MixWord(0x00040163))
       }
     }
   }
@@ -216,7 +216,7 @@ class IOSpec extends AsyncWordSpec with Matchers with Inside with Inspectors wit
   "paper tape in the binary mode" should {
     "reset the tape" in {
       // A = 0, I = 0, F = 6, C = 35 IOC
-      execute(state, MixWord(0x000001a3)).map(s => {
+      binary.execute(state, MixWord(0x000001a3)).map(s => {
         inside(s.devices(6)) { case (d: MockPaperTape, destination: Option[MixIndex]) =>
           d.counter must be > 0
           destination mustBe empty
@@ -227,7 +227,7 @@ class IOSpec extends AsyncWordSpec with Matchers with Inside with Inspectors wit
     "throw an exception on input/output control command if M != 0" in {
       recoverToSucceededIf[WrongMemoryAddressException] {
         // A = 1, I = 0, F = 6, C = 35 IOC
-        execute(state, MixWord(0x000401a3))
+        binary.execute(state, MixWord(0x000401a3))
       }
     }
   }
@@ -236,7 +236,7 @@ class IOSpec extends AsyncWordSpec with Matchers with Inside with Inspectors wit
     "throw an exception on an attempt to input data" in {
       recoverToExceptionIf[DeviceNotConnectedException] {
         // A = 1000, I = 0, F = 7, C = 36 IN
-        execute(state, MixWord(0x0fa001e4))
+        binary.execute(state, MixWord(0x0fa001e4))
       } map {
         _.deviceNum mustEqual 7
       }
@@ -245,7 +245,7 @@ class IOSpec extends AsyncWordSpec with Matchers with Inside with Inspectors wit
     "throw an exception on an attempt to output data" in {
       recoverToExceptionIf[DeviceNotConnectedException] {
         // A = 1000, I = 0, F = 7, C = 37 OUT
-        execute(state, MixWord(0x0fa001e5))
+        binary.execute(state, MixWord(0x0fa001e5))
       } map {
         _.deviceNum mustEqual 7
       }
@@ -254,7 +254,7 @@ class IOSpec extends AsyncWordSpec with Matchers with Inside with Inspectors wit
     "throw an exception on input/output control command" in {
       recoverToExceptionIf[DeviceNotConnectedException] {
         // A = 0, I = 0, F = 7, C = 35 IOC
-        execute(state, MixWord(0x000001e3))
+        binary.execute(state, MixWord(0x000001e3))
       } map {
         _.deviceNum mustEqual 7
       }
@@ -263,7 +263,7 @@ class IOSpec extends AsyncWordSpec with Matchers with Inside with Inspectors wit
     "throw an exception on jump busy" in {
       recoverToExceptionIf[DeviceNotConnectedException] {
         // A = 1000, I = 0, F = 7, C = 34 JBUS
-        execute(state, MixWord(0x0fa001e2))
+        binary.execute(state, MixWord(0x0fa001e2))
       } map {
         _.deviceNum mustEqual 7
       }
@@ -272,7 +272,7 @@ class IOSpec extends AsyncWordSpec with Matchers with Inside with Inspectors wit
     "throw an exception on jump ready" in {
       recoverToExceptionIf[DeviceNotConnectedException] {
         // A = 1000, I = 0, F = 7, C = 38 JRED
-        execute(state, MixWord(0x0fa001e6))
+        binary.execute(state, MixWord(0x0fa001e6))
       } map {
         _.deviceNum mustEqual 7
       }

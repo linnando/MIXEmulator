@@ -2,10 +2,8 @@ package org.linnando.mixemulator.vm.binaryvm.processor
 
 import org.linnando.mixemulator.vm.binary
 import org.linnando.mixemulator.vm.exceptions.{DivisionByZeroException, OverflowException}
-import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AsyncWordSpec
-import org.scalatest.RecoverMethods
 
 import scala.concurrent.ExecutionContext
 
@@ -23,7 +21,7 @@ class ArithmeticSpec extends AsyncWordSpec with Matchers {
         memory = initialState.memory.updated(MixIndex(1000), MixWord(0x01905032)) // + 1 36 5 0 50
       )
       // A = 1000, I = 0, F = 0:5, C = 1 ADD
-      execute(state, MixWord(0x0fa00141)).map(s => {
+      binary.execute(state, MixWord(0x0fa00141)).map(s => {
         s.registers.getA mustEqual MixWord(0x14d860c8) // + 20 54 6 3 8
         s.registers.getOV mustEqual false
       })
@@ -35,7 +33,7 @@ class ArithmeticSpec extends AsyncWordSpec with Matchers {
         memory = initialState.memory.updated(MixIndex(1000), MixWord(0x20000001)) // + 32 0 0 0 1
       )
       // A = 1000, I = 0, F = 0:5, C = 1 ADD
-      execute(state, MixWord(0x0fa00141)).map(s => {
+      binary.execute(state, MixWord(0x0fa00141)).map(s => {
         s.registers.getA mustEqual MixWord(0x00000001) // + 0 0 0 0 1
         s.registers.getOV mustEqual true
       })
@@ -49,7 +47,7 @@ class ArithmeticSpec extends AsyncWordSpec with Matchers {
         memory = initialState.memory.updated(MixIndex(1000), MixWord(0x00000002)) // + 0 0 0 0 2
       )
       // A = 1000, I = 0, F = 0:5, C = 1 ADD
-      execute(state, MixWord(0x0fa00141)) map {
+      binary.execute(state, MixWord(0x0fa00141)) map {
         _.registers.getOV mustEqual true
       }
     }
@@ -60,7 +58,7 @@ class ArithmeticSpec extends AsyncWordSpec with Matchers {
         memory = initialState.memory.updated(MixIndex(1000), MixWord(0x40000001)) // - 0 0 0 0 1
       )
       // A = 1000, I = 0, F = 0:5, C = 1 ADD
-      execute(state, MixWord(0x0fa00141)) map {
+      binary.execute(state, MixWord(0x0fa00141)) map {
         _.registers.getA mustEqual MixWord(0x00000000) // + 0 0 0 0 0
       }
     }
@@ -71,7 +69,7 @@ class ArithmeticSpec extends AsyncWordSpec with Matchers {
         memory = initialState.memory.updated(MixIndex(1000), MixWord(0x00000001)) // + 0 0 0 0 1
       )
       // A = 1000, I = 0, F = 0:5, C = 1 ADD
-      execute(state, MixWord(0x0fa00141)) map {
+      binary.execute(state, MixWord(0x0fa00141)) map {
         _.registers.getA mustEqual MixWord(0x40000000) // - 0 0 0 0 0
       }
     }
@@ -84,7 +82,7 @@ class ArithmeticSpec extends AsyncWordSpec with Matchers {
         memory = initialState.memory.updated(MixIndex(1000), MixWord(0x5f402580)) // - 31 16 2 22 0
       )
       // A = 1000, I = 0, F = 0:5, C = 2 SUB
-      execute(state, MixWord(0x0fa00142)).map(s => {
+      binary.execute(state, MixWord(0x0fa00142)).map(s => {
         s.registers.getA mustEqual MixWord(0x0bf82577) // + 11 62 2 21 55
         s.registers.getOV mustEqual false
       })
@@ -96,7 +94,7 @@ class ArithmeticSpec extends AsyncWordSpec with Matchers {
         memory = initialState.memory.updated(MixIndex(1000), MixWord(0x60000001)) // - 32 0 0 0 1
       )
       // A = 1000, I = 0, F = 0:5, C = 2 SUB
-      execute(state, MixWord(0x0fa00142)).map(s => {
+      binary.execute(state, MixWord(0x0fa00142)).map(s => {
         s.registers.getA mustEqual MixWord(0x00000001) // + 0 0 0 0 1
         s.registers.getOV mustEqual true
       })
@@ -110,7 +108,7 @@ class ArithmeticSpec extends AsyncWordSpec with Matchers {
         memory = initialState.memory.updated(MixIndex(1000), MixWord(0x00000002)) // + 0 0 0 0 2
       )
       // A = 1000, I = 0, F = 0:5, C = 2 SUB
-      execute(state, MixWord(0x0fa00142)).map(s => {
+      binary.execute(state, MixWord(0x0fa00142)).map(s => {
         s.registers.getA mustEqual MixWord(0x40000001) // - 0 0 0 0 1
         s.registers.getOV mustEqual true
       })
@@ -122,7 +120,7 @@ class ArithmeticSpec extends AsyncWordSpec with Matchers {
         memory = initialState.memory.updated(MixIndex(1000), MixWord(0x00000001)) // + 0 0 0 0 1
       )
       // A = 1000, I = 0, F = 0:5, C = 2 SUB
-      execute(state, MixWord(0x0fa00142)) map {
+      binary.execute(state, MixWord(0x0fa00142)) map {
         _.registers.getA mustEqual MixWord(0x00000000) // + 0 0 0 0 0
       }
     }
@@ -133,7 +131,7 @@ class ArithmeticSpec extends AsyncWordSpec with Matchers {
         memory = initialState.memory.updated(MixIndex(1000), MixWord(0x40000001)) // - 0 0 0 0 1
       )
       // A = 1000, I = 0, F = 0:5, C = 2 SUB
-      execute(state, MixWord(0x0fa00142)) map {
+      binary.execute(state, MixWord(0x0fa00142)) map {
         _.registers.getA mustEqual MixWord(0x40000000) // - 0 0 0 0 0
       }
     }
@@ -146,7 +144,7 @@ class ArithmeticSpec extends AsyncWordSpec with Matchers {
         memory = initialState.memory.updated(MixIndex(1000), MixWord(0x01041041)) // + 1 1 1 1 1
       )
       // A = 1000, I = 0, F = 0:5, C = 3 MUL
-      execute(state, MixWord(0x0fa00143)).map(s => {
+      binary.execute(state, MixWord(0x0fa00143)).map(s => {
         s.registers.getA mustEqual MixWord(0x000420c4) // + 0 1 2 3 4
         s.registers.getX mustEqual MixWord(0x05103081) // + 5 4 3 2 1
       })
@@ -158,7 +156,7 @@ class ArithmeticSpec extends AsyncWordSpec with Matchers {
         memory = initialState.memory.updated(MixIndex(1000), MixWord(0x42000000)) // - 2 0 0 0 0
       )
       // A = 1000, I = 0, F = 0:5, C = 3 MUL
-      execute(state, MixWord(0x0fa00143)).map(s => {
+      binary.execute(state, MixWord(0x0fa00143)).map(s => {
         s.registers.getA mustEqual MixWord(0x019000e0) // + 1 36 0 3 32
         s.registers.getX mustEqual MixWord(0x08000000) // + 8 0 0 0 0
       })
@@ -170,7 +168,7 @@ class ArithmeticSpec extends AsyncWordSpec with Matchers {
         memory = initialState.memory.updated(MixIndex(1000), MixWord(0x02000000)) // + 2 0 0 0 0
       )
       // A = 1000, I = 0, F = 1:1, C = 3 MUL
-      execute(state, MixWord(0x0fa00243)).map(s => {
+      binary.execute(state, MixWord(0x0fa00243)).map(s => {
         s.registers.getA mustEqual MixWord(0x40000000) // - 0 0 0 0 0
         s.registers.getX mustEqual MixWord(0x400000e0) // - 0 0 0 3 32
       })
@@ -186,7 +184,7 @@ class ArithmeticSpec extends AsyncWordSpec with Matchers {
         memory = initialState.memory.updated(MixIndex(1000), MixWord(0x00000003)) // + 0 0 0 0 3
       )
       // A = 1000, I = 0, F = 0:5, C = 4 DIV
-      execute(state, MixWord(0x0fa00144)).map(s => {
+      binary.execute(state, MixWord(0x0fa00144)).map(s => {
         s.registers.getA mustEqual MixWord(0x00000005) // + 0 0 0 0 5
         s.registers.getX mustEqual MixWord(0x00000002) // + 0 0 0 0 2
       })
@@ -200,7 +198,7 @@ class ArithmeticSpec extends AsyncWordSpec with Matchers {
         memory = initialState.memory.updated(MixIndex(1000), MixWord(0x40000080)) // - 0 0 0 2 0
       )
       // A = 1000, I = 0, F = 0:5, C = 4 DIV
-      execute(state, MixWord(0x0fa00144)).map(s => {
+      binary.execute(state, MixWord(0x0fa00144)).map(s => {
         s.registers.getA mustEqual MixWord(0x00269801) // + 0 9 41 32 1
         s.registers.getX mustEqual MixWord(0x40000041) // - 0 0 0 1 1
       })
@@ -214,7 +212,7 @@ class ArithmeticSpec extends AsyncWordSpec with Matchers {
         memory = initialState.memory.updated(MixIndex(1000), MixWord(0x00000080)) // + 0 0 0 2 0
       )
       // A = 1000, I = 0, F = 0:5, C = 4 DIV
-      execute(state, MixWord(0x0fa00144)).map(s => {
+      binary.execute(state, MixWord(0x0fa00144)).map(s => {
         s.registers.getA mustEqual MixWord(0x40269801) // - 0 9 41 32 1
         s.registers.getX mustEqual MixWord(0x40000041) // - 0 0 0 1 1
       })
@@ -229,7 +227,7 @@ class ArithmeticSpec extends AsyncWordSpec with Matchers {
       )
       recoverToSucceededIf[DivisionByZeroException] {
         // A = 1000, I = 0, F = 0:5, C = 4 DIV
-        execute(state, MixWord(0x0fa00144))
+        binary.execute(state, MixWord(0x0fa00144))
       }
     }
 
@@ -242,7 +240,7 @@ class ArithmeticSpec extends AsyncWordSpec with Matchers {
       )
       recoverToSucceededIf[OverflowException] {
         // A = 1000, I = 0, F = 0:5, C = 4 DIV
-        execute(state, MixWord(0x0fa00144))
+        binary.execute(state, MixWord(0x0fa00144))
       }
     }
   }

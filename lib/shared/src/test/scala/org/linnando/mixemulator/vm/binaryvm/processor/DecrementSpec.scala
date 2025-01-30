@@ -29,7 +29,7 @@ class DecrementSpec extends AsyncWordSpec with Matchers {
     "decrementing register A" should {
       "decrement by a fixed number" in {
         // A = 1, I = 0, F = 1, C = 48 DECA
-        execute(state, MixWord(0x00040070)).map(s => {
+        binary.execute(state, MixWord(0x00040070)).map(s => {
           s.registers.getA mustEqual MixWord(0x3ffffe2f) // + 63 63 63 56 47
           s.registers.getOV mustEqual false
         })
@@ -37,7 +37,7 @@ class DecrementSpec extends AsyncWordSpec with Matchers {
 
       "decrement by an indexed address" in {
         // A = 1, I = 5, F = 1, C = 48 DECA
-        execute(state, MixWord(0x00045070)).map(s => {
+        binary.execute(state, MixWord(0x00045070)).map(s => {
           s.registers.getA mustEqual MixWord(0x3ffffd32) // + 63 63 63 52 50
           s.registers.getOV mustEqual false
         })
@@ -45,7 +45,7 @@ class DecrementSpec extends AsyncWordSpec with Matchers {
 
       "decrement with an overflow" in {
         // A = -0x1d1, I = 0, F = 1, C = 48 DECA
-        execute(state, MixWord(0x47440070)).map(s => {
+        binary.execute(state, MixWord(0x47440070)).map(s => {
           s.registers.getA mustEqual MixWord(0x00000001) // + 0 0 0 0 1
           s.registers.getOV mustEqual true
         })
@@ -54,7 +54,7 @@ class DecrementSpec extends AsyncWordSpec with Matchers {
       "not change the overflow flag if no overflow occurs" in {
         val stateWithOV = state.copy(registers = state.registers.updatedOV(true))
         // A = 1, I = 0, F = 1, C = 48 DECA
-        execute(stateWithOV, MixWord(0x00040070)) map {
+        binary.execute(stateWithOV, MixWord(0x00040070)) map {
           _.registers.getOV mustEqual true
         }
       }
@@ -64,7 +64,7 @@ class DecrementSpec extends AsyncWordSpec with Matchers {
           registers = state.registers.updatedA(MixWord(0x00000e30))
         )
         // A = 0xe30, I = 0, F = 1, C = 48 DECA
-        execute(stateWithSmallA, MixWord(0x38c00070)) map {
+        binary.execute(stateWithSmallA, MixWord(0x38c00070)) map {
           _.registers.getA mustEqual MixWord(0x00000000)
         }
       }
@@ -73,7 +73,7 @@ class DecrementSpec extends AsyncWordSpec with Matchers {
     "decrementing register I1" should {
       "decrement by a fixed number" in {
         // A = 1, I = 0, F = 1, C = 49 DEC1
-        execute(state, MixWord(0x00040071)).map(s => {
+        binary.execute(state, MixWord(0x00040071)).map(s => {
           s.registers.getI(1) mustEqual MixIndex(0x07c2) // + 31 2
           s.registers.getOV mustEqual false
         })
@@ -81,7 +81,7 @@ class DecrementSpec extends AsyncWordSpec with Matchers {
 
       "decrement by an indexed address" in {
         // A = 1, I = 5, F = 1, C = 49 DEC1
-        execute(state, MixWord(0x00045071)).map(s => {
+        binary.execute(state, MixWord(0x00045071)).map(s => {
           s.registers.getI(1) mustEqual MixIndex(0x06c5) // + 27 5
           s.registers.getOV mustEqual false
         })
@@ -90,21 +90,21 @@ class DecrementSpec extends AsyncWordSpec with Matchers {
       "throw an exception on overflow" in {
         recoverToSucceededIf[OverflowException] {
           // A = -0x83d, I = 0, F = 1, C = 49 DEC1
-          execute(state, MixWord(0x60f40071))
+          binary.execute(state, MixWord(0x60f40071))
         }
       }
 
       "not change the overflow flag if no overflow occurs" in {
         val stateWithOV = state.copy(registers = state.registers.updatedOV(true))
         // A = 1, I = 0, F = 1, C = 49 DEC1
-        execute(stateWithOV, MixWord(0x00040071)) map {
+        binary.execute(stateWithOV, MixWord(0x00040071)) map {
           _.registers.getOV mustEqual true
         }
       }
 
       "decrement by the current value preserving the sign" in {
         // A = 0x7c3, I = 0, F = 1, C = 49 DEC1
-        execute(state, MixWord(0x1f0c0071)) map {
+        binary.execute(state, MixWord(0x1f0c0071)) map {
           _.registers.getI(1) mustEqual MixIndex(0x0000)
         }
       }
@@ -113,7 +113,7 @@ class DecrementSpec extends AsyncWordSpec with Matchers {
     "decrementing register I2" should {
       "decrement by a fixed number" in {
         // A = 1, I = 0, F = 1, C = 50 DEC2
-        execute(state, MixWord(0x00040072)).map(s => {
+        binary.execute(state, MixWord(0x00040072)).map(s => {
           s.registers.getI(2) mustEqual MixIndex(0x08c7) // + 35 7
           s.registers.getOV mustEqual false
         })
@@ -121,7 +121,7 @@ class DecrementSpec extends AsyncWordSpec with Matchers {
 
       "decrement by an indexed address" in {
         // A = 1, I = 5, F = 1, C = 50 DEC2
-        execute(state, MixWord(0x00045072)).map(s => {
+        binary.execute(state, MixWord(0x00045072)).map(s => {
           s.registers.getI(2) mustEqual MixIndex(0x07ca) // + 31 10
           s.registers.getOV mustEqual false
         })
@@ -130,21 +130,21 @@ class DecrementSpec extends AsyncWordSpec with Matchers {
       "throw an exception on overflow" in {
         recoverToSucceededIf[OverflowException] {
           // A = -0x738, I = 0, F = 1, C = 50 DEC2
-          execute(state, MixWord(0x5ce00072))
+          binary.execute(state, MixWord(0x5ce00072))
         }
       }
 
       "not change the overflow flag if no overflow occurs" in {
         val stateWithOV = state.copy(registers = state.registers.updatedOV(true))
         // A = 1, I = 0, F = 1, C = 50 DEC2
-        execute(stateWithOV, MixWord(0x00040072)) map {
+        binary.execute(stateWithOV, MixWord(0x00040072)) map {
           _.registers.getOV mustEqual true
         }
       }
 
       "decrement by the current value preserving the sign" in {
         // A = 0x8c8, I = 0, F = 1, C = 50 DEC2
-        execute(state, MixWord(0x23200072)) map {
+        binary.execute(state, MixWord(0x23200072)) map {
           _.registers.getI(2) mustEqual MixIndex(0x0000)
         }
       }
@@ -153,7 +153,7 @@ class DecrementSpec extends AsyncWordSpec with Matchers {
     "decrementing register I3" should {
       "decrement by a fixed number" in {
         // A = 1, I = 0, F = 1, C = 51 DEC3
-        execute(state, MixWord(0x00040073)).map(s => {
+        binary.execute(state, MixWord(0x00040073)).map(s => {
           s.registers.getI(3) mustEqual MixIndex(0x0d28) // + 52 40
           s.registers.getOV mustEqual false
         })
@@ -161,7 +161,7 @@ class DecrementSpec extends AsyncWordSpec with Matchers {
 
       "decrement by an indexed address" in {
         // A = 1, I = 5, F = 1, C = 51 DEC3
-        execute(state, MixWord(0x00045073)).map(s => {
+        binary.execute(state, MixWord(0x00045073)).map(s => {
           s.registers.getI(3) mustEqual MixIndex(0x0c2b) // + 48 43
           s.registers.getOV mustEqual false
         })
@@ -170,21 +170,21 @@ class DecrementSpec extends AsyncWordSpec with Matchers {
       "throw an exception on overflow" in {
         recoverToSucceededIf[OverflowException] {
           // A = -0x2d7, I = 0, F = 1, C = 51 DEC3
-          execute(state, MixWord(0x4b5c0073))
+          binary.execute(state, MixWord(0x4b5c0073))
         }
       }
 
       "not change the overflow flag if no overflow occurs" in {
         val stateWithOV = state.copy(registers = state.registers.updatedOV(true))
         // A = 1, I = 0, F = 1, C = 51 DEC3
-        execute(stateWithOV, MixWord(0x00040073)) map {
+        binary.execute(stateWithOV, MixWord(0x00040073)) map {
           _.registers.getOV mustEqual true
         }
       }
 
       "decrement by the current value preserving the sign" in {
         // A = 0xd29, I = 0, F = 1, C = 51 DEC3
-        execute(state, MixWord(0x34a40073)) map {
+        binary.execute(state, MixWord(0x34a40073)) map {
           _.registers.getI(3) mustEqual MixIndex(0x0000)
         }
       }
@@ -193,7 +193,7 @@ class DecrementSpec extends AsyncWordSpec with Matchers {
     "decrementing register I4" should {
       "decrement by a fixed number" in {
         // A = 1, I = 0, F = 1, C = 52 DEC4
-        execute(state, MixWord(0x00040074)).map(s => {
+        binary.execute(state, MixWord(0x00040074)).map(s => {
           s.registers.getI(4) mustEqual MixIndex(0x05be) // + 22 62
           s.registers.getOV mustEqual false
         })
@@ -201,7 +201,7 @@ class DecrementSpec extends AsyncWordSpec with Matchers {
 
       "decrement by an indexed address" in {
         // A = 1, I = 5, F = 1, C = 52 DEC4
-        execute(state, MixWord(0x00045074)).map(s => {
+        binary.execute(state, MixWord(0x00045074)).map(s => {
           s.registers.getI(4) mustEqual MixIndex(0x04c1) // + 19 1
           s.registers.getOV mustEqual false
         })
@@ -210,21 +210,21 @@ class DecrementSpec extends AsyncWordSpec with Matchers {
       "throw an exception on overflow" in {
         recoverToSucceededIf[OverflowException] {
           // A = -0xa41, I = 0, F = 1, C = 52 DEC4
-          execute(state, MixWord(0x79040074))
+          binary.execute(state, MixWord(0x79040074))
         }
       }
 
       "not change the overflow flag if no overflow occurs" in {
         val stateWithOV = state.copy(registers = state.registers.updatedOV(true))
         // A = 1, I = 0, F = 1, C = 52 DEC4
-        execute(stateWithOV, MixWord(0x00040074)) map {
+        binary.execute(stateWithOV, MixWord(0x00040074)) map {
           _.registers.getOV mustEqual true
         }
       }
 
       "decrement by the current value preserving the sign" in {
         // A = 0x5bf, I = 0, F = 1, C = 52 DEC4
-        execute(state, MixWord(0x16fc0074)) map {
+        binary.execute(state, MixWord(0x16fc0074)) map {
           _.registers.getI(4) mustEqual MixIndex(0x0000)
         }
       }
@@ -233,7 +233,7 @@ class DecrementSpec extends AsyncWordSpec with Matchers {
     "decrementing register I5" should {
       "decrement by a fixed number" in {
         // A = 1, I = 0, F = 1, C = 53 DEC5
-        execute(state, MixWord(0x00040075)).map(s => {
+        binary.execute(state, MixWord(0x00040075)).map(s => {
           s.registers.getI(5) mustEqual MixIndex(0x00fc) // + 3 60
           s.registers.getOV mustEqual false
         })
@@ -241,7 +241,7 @@ class DecrementSpec extends AsyncWordSpec with Matchers {
 
       "decrement by an indexed address" in {
         // A = 1, I = 5, F = 1, C = 53 DEC5
-        execute(state, MixWord(0x00045075)).map(s => {
+        binary.execute(state, MixWord(0x00045075)).map(s => {
           s.registers.getI(5) mustEqual MixIndex(0x1001) // - 0 1
           s.registers.getOV mustEqual false
         })
@@ -250,21 +250,21 @@ class DecrementSpec extends AsyncWordSpec with Matchers {
       "throw an exception on overflow" in {
         recoverToSucceededIf[OverflowException] {
           // A = -0xf03, I = 0, F = 1, C = 53 DEC5
-          execute(state, MixWord(0x7c0c0075))
+          binary.execute(state, MixWord(0x7c0c0075))
         }
       }
 
       "not change the overflow flag if no overflow occurs" in {
         val stateWithOV = state.copy(registers = state.registers.updatedOV(true))
         // A = 1, I = 0, F = 1, C = 53 DEC5
-        execute(stateWithOV, MixWord(0x00040075)) map {
+        binary.execute(stateWithOV, MixWord(0x00040075)) map {
           _.registers.getOV mustEqual true
         }
       }
 
       "decrement by the current value preserving the sign" in {
         // A = 0x0fd, I = 0, F = 1, C = 53 DEC5
-        execute(state, MixWord(0x03f40075)) map {
+        binary.execute(state, MixWord(0x03f40075)) map {
           _.registers.getI(5) mustEqual MixIndex(0x0000)
         }
       }
@@ -273,7 +273,7 @@ class DecrementSpec extends AsyncWordSpec with Matchers {
     "decrementing register I6" should {
       "decrement by a fixed number" in {
         // A = 1, I = 0, F = 1, C = 54 DEC6
-        execute(state, MixWord(0x00040076)).map(s => {
+        binary.execute(state, MixWord(0x00040076)).map(s => {
           s.registers.getI(6) mustEqual MixIndex(0x1de4) // - 55 36
           s.registers.getOV mustEqual false
         })
@@ -281,7 +281,7 @@ class DecrementSpec extends AsyncWordSpec with Matchers {
 
       "decrement by an indexed address" in {
         // A = 1, I = 5, F = 1, C = 54 DEC6
-        execute(state, MixWord(0x00045076)).map(s => {
+        binary.execute(state, MixWord(0x00045076)).map(s => {
           s.registers.getI(6) mustEqual MixIndex(0x1ee1) // - 59 33
           s.registers.getOV mustEqual false
         })
@@ -290,21 +290,21 @@ class DecrementSpec extends AsyncWordSpec with Matchers {
       "throw an exception on overflow" in {
         recoverToSucceededIf[OverflowException] {
           // A = 0x21d, I = 0, F = 1, C = 54 DEC6
-          execute(state, MixWord(0x08740076))
+          binary.execute(state, MixWord(0x08740076))
         }
       }
 
       "not change the overflow flag if no overflow occurs" in {
         val stateWithOV = state.copy(registers = state.registers.updatedOV(true))
         // A = 1, I = 0, F = 1, C = 54 DEC6
-        execute(stateWithOV, MixWord(0x00040076)) map {
+        binary.execute(stateWithOV, MixWord(0x00040076)) map {
           _.registers.getOV mustEqual true
         }
       }
 
       "decrement by the current value preserving the sign" in {
         // A = -0xde3, I = 0, F = 1, C = 54 DEC6
-        execute(state, MixWord(0x778c0076)) map {
+        binary.execute(state, MixWord(0x778c0076)) map {
           _.registers.getI(6) mustEqual MixIndex(0x1000)
         }
       }
@@ -313,7 +313,7 @@ class DecrementSpec extends AsyncWordSpec with Matchers {
     "decrementing register X" should {
       "decrement by a fixed number" in {
         // A = 1, I = 0, F = 1, C = 55 DECX
-        execute(state, MixWord(0x00040077)).map(s => {
+        binary.execute(state, MixWord(0x00040077)).map(s => {
           s.registers.getX mustEqual MixWord(0x7ffff51d) // - 63 63 63 20 29
           s.registers.getOV mustEqual false
         })
@@ -321,7 +321,7 @@ class DecrementSpec extends AsyncWordSpec with Matchers {
 
       "decrement an indexed address" in {
         // A = 1, I = 5, F = 1, C = 55 DECX
-        execute(state, MixWord(0x00045077)).map(s => {
+        binary.execute(state, MixWord(0x00045077)).map(s => {
           s.registers.getX mustEqual MixWord(0x7ffff61a) // - 63 63 63 24 26
           s.registers.getOV mustEqual false
         })
@@ -329,7 +329,7 @@ class DecrementSpec extends AsyncWordSpec with Matchers {
 
       "decrement with an overflow" in {
         // A = 0xae4, I = 0, F = 1, C = 55 DECX
-        execute(state, MixWord(0x2b900077)).map(s => {
+        binary.execute(state, MixWord(0x2b900077)).map(s => {
           s.registers.getX mustEqual MixWord(0x40000000) // - 0 0 0 0 0
           s.registers.getOV mustEqual true
         })
@@ -338,7 +338,7 @@ class DecrementSpec extends AsyncWordSpec with Matchers {
       "not change the overflow flag if no overflow occurs" in {
         val stateWithOV = state.copy(registers = state.registers.updatedOV(true))
         // A = 1, I = 0, F = 1, C = 55 DECX
-        execute(stateWithOV, MixWord(0x00040077)) map {
+        binary.execute(stateWithOV, MixWord(0x00040077)) map {
           _.registers.getOV mustEqual true
         }
       }
@@ -348,7 +348,7 @@ class DecrementSpec extends AsyncWordSpec with Matchers {
           registers = state.registers.updatedX(MixWord(0x4000051c))
         )
         // A = -0x51c, I = 0, F = 1, C = 55 DECX
-        execute(stateWithSmallX, MixWord(0x54700077)) map {
+        binary.execute(stateWithSmallX, MixWord(0x54700077)) map {
           _.registers.getX mustEqual MixWord(0x40000000)
         }
       }

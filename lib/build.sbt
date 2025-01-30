@@ -4,12 +4,7 @@ ThisBuild / scalaVersion := "2.13.15"
 
 lazy val buildNpm = taskKey[Unit]("Build NPM package")
 
-lazy val root = project.in(file(".")).
-  aggregate(lib.js, lib.jvm).
-  settings()
-
 lazy val lib = crossProject(JSPlatform, JVMPlatform).in(file(".")).
-  enablePlugins(ScalaJSPlugin).
   settings(
     name := "lib",
     organization := "org.linnando",
@@ -22,6 +17,7 @@ lazy val lib = crossProject(JSPlatform, JVMPlatform).in(file(".")).
   jvmSettings(
     Test / scalacOptions ++= Seq("-Yrangepos"),
     libraryDependencies ++= Seq(
+      "org.scala-js" %% "scalajs-library" % "1.17.0",
       "org.specs2" %% "specs2-core" % "4.19.0" % "test",
       "org.specs2" %% "specs2-matcher-extra" % "4.19.0" % "test"
     )
