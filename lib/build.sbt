@@ -18,8 +18,6 @@ lazy val lib = crossProject(JSPlatform, JVMPlatform).in(file(".")).
     Test / scalacOptions ++= Seq("-Yrangepos"),
     libraryDependencies ++= Seq(
       "org.scala-js" %% "scalajs-library" % "1.17.0",
-      "org.specs2" %% "specs2-core" % "4.19.0" % "test",
-      "org.specs2" %% "specs2-matcher-extra" % "4.19.0" % "test"
     )
   ).
   jsSettings(

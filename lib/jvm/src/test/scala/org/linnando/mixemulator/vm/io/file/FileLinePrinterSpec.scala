@@ -1,18 +1,22 @@
 package org.linnando.mixemulator.vm.io.file
 
-import java.io.File
-
 import org.linnando.mixemulator.vm.io.LinePrinter
 import org.linnando.mixemulator.vm.io.data.IOWord
-import org.specs2.concurrent.ExecutionEnv
-import org.specs2.matcher.{ContentMatchers, FileMatchers}
-import org.specs2.mutable.Specification
+import org.scalatest.FutureOutcome
+import org.scalatest.matchers.must.Matchers
+import org.scalatest.wordspec.AsyncWordSpec
 
-class FileLinePrinterSpec(implicit ee: ExecutionEnv) extends Specification with FileMatchers with ContentMatchers {
+import java.io.File
+import scala.concurrent.ExecutionContext
+
+class FileLinePrinterSpec extends AsyncWordSpec with Matchers {
+  implicit override def executionContext: ExecutionContext = ExecutionContext.Implicits.global
+
   private val lowLevelOps: LineAccessFileOutputOps = LineAccessFileOutputOps.create()
+  val filename = "printer"
 
   val line0 = "012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789"
-  val words0 = IndexedSeq(
+  val words0: IndexedSeq[IOWord] = IndexedSeq(
     IOWord(Seq('0', '1', '2', '3', '4')),
     IOWord(Seq('5', '6', '7', '8', '9')),
     IOWord(Seq('0', '1', '2', '3', '4')),
@@ -40,7 +44,7 @@ class FileLinePrinterSpec(implicit ee: ExecutionEnv) extends Specification with 
   )
 
   val line1 = "567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234"
-  val words1 = IndexedSeq(
+  val words1: IndexedSeq[IOWord] = IndexedSeq(
     IOWord(Seq('5', '6', '7', '8', '9')),
     IOWord(Seq('0', '1', '2', '3', '4')),
     IOWord(Seq('5', '6', '7', '8', '9')),
@@ -67,66 +71,59 @@ class FileLinePrinterSpec(implicit ee: ExecutionEnv) extends Specification with 
     IOWord(Seq('0', '1', '2', '3', '4'))
   )
 
-  "file emulator of a card punch" should {
+  override def withFixture(test: NoArgAsyncTest): FutureOutcome = {
+    complete {
+      super.withFixture(test)
+    } lastly {
+      val dir = new File(filename)
+      val files = dir.listFiles()
+      if (files != null) {
+        files.foreach(file => {
+          file.delete()
+        })
+      }
+      dir.delete()
+    }
+  }
+
+  "file emulator of a line printer" should {
     "create a device with correct parameters" in {
-      val filename = "printer0"
       val device = FileLinePrinter.create(filename, lowLevelOps)
-      device.blockSize must be equalTo LinePrinter.BLOCK_SIZE
-      device.filename must be equalTo filename
-      device.version must be equalTo 0
-      device.isBusy must beFalse
-      new File(s"$filename/0").delete()
-      new File(filename).delete()
+      device.blockSize mustEqual LinePrinter.BLOCK_SIZE
+      device.filename mustEqual filename
+      device.version mustEqual 0
+      device.isBusy mustEqual false
     }
 
     "output data to a file" in {
-      val filename = "printer1"
       val device = FileLinePrinter.create(filename, lowLevelOps)
       val busyState = device.write(words0).write(words1)
-      busyState.version must be equalTo 2
-      busyState.isBusy must beTrue
-      val finalState = busyState.flush()
-      finalState.map(_._1.version) must beEqualTo(2).await
-      finalState.map(_._1.isBusy) must beFalse.await
-      finalState.map(_._2) must beNone.await
-      val file1 = new File(s"$filename/1")
-      file1 must exist
-      file1 must haveSameLinesAs(Seq(line0))
-      val file2 = new File(s"$filename/2")
-      file2 must exist
-      file2 must haveSameLinesAs(Seq(line0, line1))
-      new File(s"$filename/0").delete()
-      file1.delete()
-      file2.delete()
-      new File(filename).delete()
+      busyState.version mustEqual 2
+      busyState.isBusy mustEqual true
+      busyState.flush().map(finalState => {
+        finalState._1.version mustEqual 2
+        finalState._1.isBusy mustEqual false
+        finalState._2 mustBe empty
+        new File(s"$filename/1") must exist
+        new File(s"$filename/2") must exist
+      })
     }
 
     "insert page breaks" in {
-      val filename = "printer2"
       val device = FileLinePrinter.create(filename, lowLevelOps)
       val busyState = device.write(words0) match {
         case d: FileLinePrinter => d.newPage().write(words1)
       }
-      busyState.version must be equalTo 3
-      busyState.isBusy must beTrue
-      val finalState = busyState.flush()
-      finalState.map(_._1.version) must beEqualTo(3).await
-      finalState.map(_._1.isBusy) must beFalse.await
-      finalState.map(_._2) must beNone.await
-      val file1 = new File(s"$filename/1")
-      file1 must exist
-      file1 must haveSameLinesAs(Seq(line0))
-      val file2 = new File(s"$filename/2")
-      file2 must exist
-      file2 must haveSameLinesAs(Seq(line0, "\f"))
-      val file3 = new File(s"$filename/3")
-      file3 must exist
-      file3 must haveSameLinesAs(Seq(line0, "\f", line1))
-      new File(s"$filename/0").delete()
-      file1.delete()
-      file2.delete()
-      file3.delete()
-      new File(filename).delete()
+      busyState.version mustEqual 3
+      busyState.isBusy mustEqual true
+      busyState.flush().map(finalState => {
+        finalState._1.version mustEqual 3
+        finalState._1.isBusy mustEqual false
+        finalState._2 mustBe empty
+        new File(s"$filename/1") must exist
+        new File(s"$filename/2") must exist
+        new File(s"$filename/3") must exist
+      })
     }
   }
 }

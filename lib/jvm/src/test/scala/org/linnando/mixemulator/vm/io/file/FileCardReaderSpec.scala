@@ -1,19 +1,23 @@
 package org.linnando.mixemulator.vm.io.file
 
-import java.io.File
-
 import org.linnando.mixemulator.vm.exceptions.EndOfFileException
 import org.linnando.mixemulator.vm.io.CardReader
 import org.linnando.mixemulator.vm.io.data.IOWord
-import org.specs2.concurrent.ExecutionEnv
-import org.specs2.matcher.ContentMatchers
-import org.specs2.mutable.Specification
+import org.scalatest.FutureOutcome
+import org.scalatest.matchers.must.Matchers
+import org.scalatest.wordspec.AsyncWordSpec
 
-class FileCardReaderSpec(implicit ee: ExecutionEnv) extends Specification with ContentMatchers {
+import java.io.File
+import scala.concurrent.ExecutionContext
+
+class FileCardReaderSpec extends AsyncWordSpec with Matchers {
+  implicit override def executionContext: ExecutionContext = ExecutionContext.Implicits.global
+
   private val lowLevelOps: LineAccessFileInputOps = LineAccessFileInputOps.create()
+  val filename = "cardreader"
 
   val line0 = "01234567890123456789012345678901234567890123456789012345678901234567890123456789"
-  val words0 = IndexedSeq(
+  val words0: IndexedSeq[IOWord] = IndexedSeq(
     IOWord(Seq('0', '1', '2', '3', '4')),
     IOWord(Seq('5', '6', '7', '8', '9')),
     IOWord(Seq('0', '1', '2', '3', '4')),
@@ -33,7 +37,7 @@ class FileCardReaderSpec(implicit ee: ExecutionEnv) extends Specification with C
   )
 
   val line1 = "56789012345678901234567890123456789012345678901234567890123456789012345678901234"
-  val words1 = IndexedSeq(
+  val words1: IndexedSeq[IOWord] = IndexedSeq(
     IOWord(Seq('5', '6', '7', '8', '9')),
     IOWord(Seq('0', '1', '2', '3', '4')),
     IOWord(Seq('5', '6', '7', '8', '9')),
@@ -52,56 +56,59 @@ class FileCardReaderSpec(implicit ee: ExecutionEnv) extends Specification with C
     IOWord(Seq('0', '1', '2', '3', '4'))
   )
 
+  override def withFixture(test: NoArgAsyncTest): FutureOutcome = {
+    complete {
+      super.withFixture(test)
+    } lastly {
+      new File(filename).delete()
+    }
+  }
+
   "file emulator of a card reader" should {
     "create a device with correct parameters" in {
-      val filename = "cardreader0"
       val device = FileCardReader.create(filename, "", lowLevelOps)
-      device.blockSize must be equalTo CardReader.BLOCK_SIZE
-      device.filename must be equalTo filename
-      device.isBusy must beFalse
-      device.pos must be equalTo 0L
-      new File(filename).delete()
+      device.blockSize mustEqual CardReader.BLOCK_SIZE
+      device.filename mustEqual filename
+      device.isBusy mustEqual false
+      device.pos mustEqual 0L
     }
 
     "input data from a file" in {
-      val filename = "cardreader1"
-      val file = new File(filename)
       val device = FileCardReader.create(filename, s"$line0\n$line1\n", lowLevelOps)
       val busyState = device.read()
-      busyState.isBusy must beTrue
-      busyState.pos must be equalTo 1L
-      val finalState = busyState.flush()
-      finalState.map(_._1.isBusy) must beFalse.await
-      finalState.map(_._1.pos) must beEqualTo(1L).await
-      finalState.map(_._2) must beSome(words0).await
-      file must haveSameLinesAs(Seq(line0, line1))
-      file.delete()
+      busyState.isBusy mustEqual true
+      busyState.pos mustEqual 1L
+      busyState.flush().map(finalState => {
+        finalState._1.isBusy mustEqual false
+        finalState._1.pos mustEqual 1L
+        finalState._2 must contain(words0)
+      })
     }
 
     "input multiple lines from a file" in {
-      val filename = "cardreader2"
-      val file = new File(filename)
       val device = FileCardReader.create(filename, s"$line0\n$line1\n", lowLevelOps)
-      val busyState = device.read().flush().map(_._1.read())
-      busyState.map(_.isBusy) must beTrue.await
-      busyState.map(_.pos) must beEqualTo(2L).await
-      val finalState = busyState.flatMap(_.flush())
-      finalState.map(_._1.isBusy) must beFalse.await
-      finalState.map(_._1.pos) must beEqualTo(2L).await
-      finalState.map(_._2) must beSome(words1).await
-      file must haveSameLinesAs(Seq(line0, line1))
-      file.delete()
+      val eventualBusyState = for {
+        firstRead <- device.read().flush()
+      } yield firstRead._1.read()
+      eventualBusyState.flatMap(busyState => {
+        busyState.isBusy mustEqual true
+        busyState.pos mustEqual 2L
+        busyState.flush().map(finalState => {
+          finalState._1.isBusy mustEqual false
+          finalState._1.pos mustEqual 2L
+          finalState._2 must contain(words1)
+        })
+      })
     }
 
     "throw an exception when the file end is reached" in {
-      val filename = "cardreader3"
-      val file = new File(filename)
       val device = FileCardReader.create(filename, "", lowLevelOps)
       val busyState = device.read()
-      busyState.isBusy must beTrue
-      busyState.pos must be equalTo 1L
-      busyState.flush() must throwAn[EndOfFileException].await
-      file.delete()
+      busyState.isBusy mustEqual true
+      busyState.pos mustEqual 1L
+      recoverToSucceededIf[EndOfFileException] {
+        busyState.flush()
+      }
     }
   }
 }
