@@ -1,22 +1,50 @@
 <div class="memory-text" #scrolling>
   <table #table>
-    <tr *ngFor="let index of indices" (dblclick)="toggleBreakpoint(index)"
-      [ngClass]="{'breakpoint-line': hasBreakpointAt(index)}">
-      <td class="breakpoint"><fa-icon *ngIf="hasBreakpointAt(index)" [icon]="faCircle"></fa-icon></td>
-      <td class="pointer"><fa-icon *ngIf="isCurrent(index)" [icon]="faArrowAltCircleRight"></fa-icon></td>
-      <td *ngIf="hasWordAt(index)" class="address">{{cellAddressAt(index)}}:</td>
-      <td *ngIf="hasWordAt(index)" class="sign">{{cellSignAt(index)}}</td>
-      <td *ngIf="hasWordAt(index)" class="byte">{{cellByteAt(index, 0)}}</td>
-      <td *ngIf="hasWordAt(index)" class="byte">{{cellByteAt(index, 1)}}</td>
-      <td *ngIf="hasWordAt(index)" class="byte">{{cellByteAt(index, 2)}}</td>
-      <td *ngIf="hasWordAt(index)" class="byte">{{cellByteAt(index, 3)}}</td>
-      <td *ngIf="hasWordAt(index)" class="byte">{{cellByteAt(index, 4)}}</td>
-      <td *ngIf="!hasWordAt(index)" colspan="7"></td>
-      <td *ngIf="hasLineAt(index)" class="line-number">{{lineNumberAt(index)}}</td>
-      <td *ngIf="hasLineAt(index)" class="line" [ngClass]="{'modified-line': lineIsModifiedAt(index)}">
-        {{lineAt(index)}}
-      </td>
-      <td *ngIf="!hasLineAt(index)" colspan="2"></td>
-    </tr>
+    @for (index of indices; track index) {
+      <tr (dblclick)="toggleBreakpoint(index)"
+        [ngClass]="{'breakpoint-line': hasBreakpointAt(index)}">
+        <td class="breakpoint">@if (hasBreakpointAt(index)) {
+          <fa-icon [icon]="faCircle"></fa-icon>
+        }</td>
+        <td class="pointer">@if (isCurrent(index)) {
+          <fa-icon [icon]="faArrowAltCircleRight"></fa-icon>
+        }</td>
+        @if (hasWordAt(index)) {
+          <td class="address">{{cellAddressAt(index)}}:</td>
+        }
+        @if (hasWordAt(index)) {
+          <td class="sign">{{cellSignAt(index)}}</td>
+        }
+        @if (hasWordAt(index)) {
+          <td class="byte">{{cellByteAt(index, 0)}}</td>
+        }
+        @if (hasWordAt(index)) {
+          <td class="byte">{{cellByteAt(index, 1)}}</td>
+        }
+        @if (hasWordAt(index)) {
+          <td class="byte">{{cellByteAt(index, 2)}}</td>
+        }
+        @if (hasWordAt(index)) {
+          <td class="byte">{{cellByteAt(index, 3)}}</td>
+        }
+        @if (hasWordAt(index)) {
+          <td class="byte">{{cellByteAt(index, 4)}}</td>
+        }
+        @if (!hasWordAt(index)) {
+          <td colspan="7"></td>
+        }
+        @if (hasLineAt(index)) {
+          <td class="line-number">{{lineNumberAt(index)}}</td>
+        }
+        @if (hasLineAt(index)) {
+          <td class="line" [ngClass]="{'modified-line': lineIsModifiedAt(index)}">
+            {{lineAt(index)}}
+          </td>
+        }
+        @if (!hasLineAt(index)) {
+          <td colspan="2"></td>
+        }
+      </tr>
+    }
   </table>
 </div>
