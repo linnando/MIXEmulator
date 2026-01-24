@@ -2,9 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { VirtualMachineService } from '../virtual-machine.service';
 
 @Component({
-  selector: 'mix-devices',
-  templateUrl: './devices.component.html',
-  styleUrls: ['./devices.component.scss']
+    selector: 'mix-devices',
+    templateUrl: './devices.component.html',
+    styleUrls: ['./devices.component.scss'],
+    standalone: false
 })
 export class DevicesComponent implements OnInit {
   deviceNumbers: number[] = [];

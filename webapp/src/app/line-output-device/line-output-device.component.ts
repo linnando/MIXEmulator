@@ -6,9 +6,10 @@ import { ErrorPopupComponent } from '../error-popup/error-popup.component';
 import { VirtualMachineService } from '../virtual-machine.service';
 
 @Component({
-  selector: 'mix-line-output-device',
-  templateUrl: './line-output-device.component.html',
-  styleUrls: ['./line-output-device.component.scss']
+    selector: 'mix-line-output-device',
+    templateUrl: './line-output-device.component.html',
+    styleUrls: ['./line-output-device.component.scss'],
+    standalone: false
 })
 export class LineOutputDeviceComponent implements OnInit, OnDestroy {
   @Input() deviceNum = 0;

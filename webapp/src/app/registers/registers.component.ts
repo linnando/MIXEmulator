@@ -3,9 +3,10 @@ import { IOWord, IOWord$ } from '@mixemulator/lib';
 import { VirtualMachineService } from '../virtual-machine.service';
 
 @Component({
-  selector: 'mix-registers',
-  templateUrl: './registers.component.html',
-  styleUrls: ['./registers.component.scss']
+    selector: 'mix-registers',
+    templateUrl: './registers.component.html',
+    styleUrls: ['./registers.component.scss'],
+    standalone: false
 })
 export class RegistersComponent {
   constructor(private virtualMachineService: VirtualMachineService) { }

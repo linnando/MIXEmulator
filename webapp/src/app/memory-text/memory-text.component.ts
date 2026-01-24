@@ -5,9 +5,10 @@ import { Subscription } from 'rxjs';
 import { VirtualMachineService } from '../virtual-machine.service';
 
 @Component({
-  selector: 'mix-memory-text',
-  templateUrl: './memory-text.component.html',
-  styleUrls: ['./memory-text.component.scss']
+    selector: 'mix-memory-text',
+    templateUrl: './memory-text.component.html',
+    styleUrls: ['./memory-text.component.scss'],
+    standalone: false
 })
 export class MemoryTextComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild("scrolling") scrolling!: ElementRef;

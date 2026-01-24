@@ -8,9 +8,10 @@ import { ErrorPopupComponent } from '../error-popup/error-popup.component';
 import { VirtualMachineService } from '../virtual-machine.service';
 
 @Component({
-  selector: 'mix-editor',
-  templateUrl: './editor.component.html',
-  styleUrls: ['./editor.component.scss']
+    selector: 'mix-editor',
+    templateUrl: './editor.component.html',
+    styleUrls: ['./editor.component.scss'],
+    standalone: false
 })
 export class EditorComponent implements AfterViewInit {
   editor?: ace.Ace.Editor;

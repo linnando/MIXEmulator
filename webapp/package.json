@@ -10,30 +10,30 @@
     "test": "ng test"
   },
   "dependencies": {
-    "@angular/animations": "^18.2.14",
-    "@angular/common": "^18.2.14",
-    "@angular/compiler": "^18.2.14",
-    "@angular/core": "^18.2.14",
-    "@angular/forms": "^18.2.14",
-    "@angular/platform-browser": "^18.2.14",
-    "@angular/platform-browser-dynamic": "^18.2.14",
-    "@angular/router": "^18.2.14",
-    "@fortawesome/angular-fontawesome": "^0.15.0",
+    "@angular/animations": "^19.2.18",
+    "@angular/common": "^19.2.18",
+    "@angular/compiler": "^19.2.18",
+    "@angular/core": "^19.2.18",
+    "@angular/forms": "^19.2.18",
+    "@angular/platform-browser": "^19.2.18",
+    "@angular/platform-browser-dynamic": "^19.2.18",
+    "@angular/router": "^19.2.18",
+    "@fortawesome/angular-fontawesome": "^1.0.0",
     "@fortawesome/fontawesome-svg-core": "^6.2.0",
     "@fortawesome/free-solid-svg-icons": "^6.2.0",
     "@mixemulator/lib": "^1.0.1",
     "ace-builds": "^1.16.0",
     "buffer": "^6.0.3",
     "file-loader": "^6.2.0",
-    "ngx-bootstrap": "^18.1.3",
+    "ngx-bootstrap": "^19.0.2",
     "rxjs": "^7.8.0",
     "tslib": "^2.3.0",
-    "zone.js": "~0.14.10"
+    "zone.js": "~0.15.1"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "^18.2.21",
-    "@angular/cli": "~18.2.21",
-    "@angular/compiler-cli": "^18.2.14",
+    "@angular-devkit/build-angular": "^19.2.19",
+    "@angular/cli": "~19.2.19",
+    "@angular/compiler-cli": "^19.2.18",
     "@types/jasmine": "~4.0.0",
     "jasmine-core": "~4.3.0",
     "karma": "~6.4.0",
@@ -41,7 +41,7 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.0.0",
-    "typescript": "~5.4.5"
+    "typescript": "~5.8.3"
   },
   "private": true
 }

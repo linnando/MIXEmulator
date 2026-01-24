@@ -7,9 +7,10 @@ import { ErrorPopupComponent } from '../error-popup/error-popup.component';
 import { VirtualMachineService } from '../virtual-machine.service';
 
 @Component({
-  selector: 'mix-block-io-device',
-  templateUrl: './block-io-device.component.html',
-  styleUrls: ['./block-io-device.component.scss']
+    selector: 'mix-block-io-device',
+    templateUrl: './block-io-device.component.html',
+    styleUrls: ['./block-io-device.component.scss'],
+    standalone: false
 })
 export class BlockIoDeviceComponent implements OnInit, OnDestroy {
   @Input() deviceNum = 0;

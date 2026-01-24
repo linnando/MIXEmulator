@@ -6,9 +6,10 @@ import { ErrorPopupComponent } from '../error-popup/error-popup.component';
 import { VirtualMachineService } from '../virtual-machine.service';
 
 @Component({
-  selector: 'mix-line-input-device',
-  templateUrl: './line-input-device.component.html',
-  styleUrls: ['./line-input-device.component.scss']
+    selector: 'mix-line-input-device',
+    templateUrl: './line-input-device.component.html',
+    styleUrls: ['./line-input-device.component.scss'],
+    standalone: false
 })
 export class LineInputDeviceComponent implements OnInit {
   @Input() deviceNum = 0;

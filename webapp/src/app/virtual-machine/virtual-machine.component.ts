@@ -5,9 +5,10 @@ import { ErrorPopupComponent } from '../error-popup/error-popup.component';
 import { VirtualMachineService } from '../virtual-machine.service';
 
 @Component({
-  selector: 'mix-virtual-machine',
-  templateUrl: './virtual-machine.component.html',
-  styleUrls: ['./virtual-machine.component.scss']
+    selector: 'mix-virtual-machine',
+    templateUrl: './virtual-machine.component.html',
+    styleUrls: ['./virtual-machine.component.scss'],
+    standalone: false
 })
 export class VirtualMachineComponent {
   readonly faHistory = faHistory;

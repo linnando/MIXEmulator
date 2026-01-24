@@ -3,9 +3,10 @@ import { BackFromInitialStateException, DeviceNotConnectedException, DivisionByZ
 import { BsModalRef } from 'ngx-bootstrap/modal';
 
 @Component({
-  selector: 'mix-error-popup',
-  templateUrl: './error-popup.component.html',
-  styleUrls: ['./error-popup.component.scss']
+    selector: 'mix-error-popup',
+    templateUrl: './error-popup.component.html',
+    styleUrls: ['./error-popup.component.scss'],
+    standalone: false
 })
 export class ErrorPopupComponent {
   exception: unknown;

@@ -3,9 +3,10 @@ import { IOWord, IOWord$, MEMORY_SIZE, VirtualMachineState } from '@mixemulator/
 import { VirtualMachineService } from '../virtual-machine.service';
 
 @Component({
-  selector: 'mix-memory-data',
-  templateUrl: './memory-data.component.html',
-  styleUrls: ['./memory-data.component.scss']
+    selector: 'mix-memory-data',
+    templateUrl: './memory-data.component.html',
+    styleUrls: ['./memory-data.component.scss'],
+    standalone: false
 })
 export class MemoryDataComponent {
   readonly addresses: number[] = [...Array(MEMORY_SIZE).keys()];
